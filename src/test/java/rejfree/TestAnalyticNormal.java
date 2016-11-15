@@ -104,7 +104,7 @@ public class TestAnalyticNormal
     checkAgainsAnalytic(sampler.getTrajectory());
   }
   
-  private static class NormalModel
+  public static class NormalModel
   {
     RealVariable 
       v1 = RealVariable.real(),

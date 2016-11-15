@@ -68,7 +68,7 @@ public class StaticUtils
   /**
    * 
    * @param oldVelocity Row vector of velocities before collision
-   * @param gradient Row vector of the gradient of the log density at collision
+   * @param gradient Row vector of the gradient of the energy at collision
    * @return Row vector of updated velocities
    */
   public static DoubleMatrix bounce(DoubleMatrix oldVelocity, DoubleMatrix gradient)

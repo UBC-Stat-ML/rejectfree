@@ -24,11 +24,43 @@ public class TestMassMatrix
       DoubleMatrix velocity = DoubleMatrix.randn(dim);
       DoubleMatrix massMatrix = randomPosDef(rand, dim);
       
+//      Assert.assertEquals(
+//          + dot(gradient, bounce(velocity, gradient, massMatrix), massMatrix),
+//          - dot(gradient, velocity, massMatrix),
+//          NumericalUtils.THRESHOLD);
+      
       Assert.assertEquals(
-          + dot(gradient, bounce(velocity, gradient, massMatrix), massMatrix),
-          - dot(gradient, velocity, massMatrix),
+          + gradient.dot(bounce(velocity, gradient, massMatrix)),
+          - gradient.dot(velocity),
           NumericalUtils.THRESHOLD);
+      
+      
     }
+  }
+  
+  public static void main(String [] args) 
+  {
+    DoubleMatrix gradient = new DoubleMatrix(new double[]{1.0, 1.0});
+    DoubleMatrix velocity = new DoubleMatrix(new double[]{0.0, 1.0});
+    DoubleMatrix massMatrix = new DoubleMatrix(new double [][]{
+      {1.0, 0.0},
+      {0.0, 2.0}
+    });
+    System.out.println(bounce(velocity, gradient, massMatrix));
+    System.out.println(gradient.dot(bounce(velocity, gradient, massMatrix)));
+    System.out.println(gradient.dot(velocity));
+    
+    System.out.println("---");
+    
+    System.out.println(R(gradient,massMatrix).mmul(gradient));
+    System.out.println(gradient);
+  }
+  
+  private static DoubleMatrix R(DoubleMatrix gradient, DoubleMatrix massMatrix) 
+  {
+    DoubleMatrix id = DoubleMatrix.eye(gradient.length);
+    double denom = gradient.transpose().mmul(massMatrix).mmul(gradient).scalar();
+    return id.sub(massMatrix.mmul(gradient).mmul(gradient.transpose()).mul(2.0/denom));
   }
   
   @Test

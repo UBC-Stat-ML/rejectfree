@@ -34,10 +34,25 @@ public class GlobalRFSampler
   private List<DoubleMatrix> trajectory = Lists.newArrayList();
   private List<DoubleMatrix> samples = Lists.newArrayList();
   
+  // Indexed as the xs and vs in the paper
+  public List<DoubleMatrix> eventPositions = Lists.newArrayList();
+  public List<DoubleMatrix> eventVelocities = Lists.newArrayList();
+  
+  // Indicates whether event i is a collision (else, a refreshment)
+  // Index 0 is considered as a refreshment
+  public List<Boolean>      eventIsCollision = Lists.newArrayList();
+  
   private DoubleMatrix currentPosition, currentVelocity;
 
   private SummaryStatistics collisionToRefreshmentRatio = new SummaryStatistics();
   private SummaryStatistics collectedPerEvent = new SummaryStatistics();
+  
+  private void updateEvent(DoubleMatrix position, DoubleMatrix velocity, boolean isCollision)
+  {
+    eventPositions.add(position);
+    eventVelocities.add(velocity);
+    eventIsCollision.add(isCollision);
+  }
   
   /**
    * 
@@ -93,7 +108,7 @@ public class GlobalRFSampler
   {
     return variance;
   }
-
+  
   public void iterate(Random rand, int numberOfIterations)
   {
     if (currentVelocity == null)
@@ -103,6 +118,9 @@ public class GlobalRFSampler
     double totalTime = 0.0;
     mean = new DoubleMatrix(dimensionality());
     variance = new DoubleMatrix(dimensionality(),dimensionality());
+    
+    updateEvent(currentPosition, currentVelocity, false);
+    
     for (int iter = 0; iter < numberOfIterations; iter++)
     {
       // simulate event
@@ -123,7 +141,8 @@ public class GlobalRFSampler
       if (collisionOccurs)
         currentVelocity = StaticUtils.bounce(currentVelocity, gradient(currentPosition));
       else
-        currentVelocity = refreshVelocity(currentPosition, currentVelocity, rand); 
+        currentVelocity = refreshVelocity(currentPosition, currentVelocity, rand);
+      updateEvent(currentPosition, currentVelocity, collisionOccurs);  
     }
     mean.divi(totalTime);
     variance.divi(totalTime);
