@@ -22,7 +22,7 @@ import rejfree.local.LocalRFRunner;
 public class LogisticModel
 {
   @Option
-  public int nDatapoints = 1_000;
+  public int nDatapoints = 100;
   
   @Option
   public int nDimensions = 5;
@@ -43,10 +43,11 @@ public class LogisticModel
   
   private void generateData()
   {
-    if (trueParams != null)
-      throw new RuntimeException();
+    if (trueParams == null)
+      org.jblas.util.Random.seed(dataGenRandom.nextLong());
     
-    org.jblas.util.Random.seed(dataGenRandom.nextLong());
+    labels = new ArrayList<>();
+    covariates = new ArrayList<>();
     
     // generate params
     trueParams = DoubleMatrix.randn(nDimensions);
@@ -62,9 +63,9 @@ public class LogisticModel
   }
   
   // generated data
-  DoubleMatrix trueParams = null;
-  List<Integer> labels = new ArrayList<>();
-  List<DoubleMatrix> covariates = new ArrayList<>();
+  public DoubleMatrix trueParams = null;
+  public List<Integer> labels;
+  public List<DoubleMatrix> covariates;
   
   private DoubleMatrix nextRandomCovariate()
   {
@@ -93,6 +94,11 @@ public class LogisticModel
         factors.add(new LogisticFactor(covariates.get(r), labels.get(r), variables));
     }
   }
+  
+//  public class FastLogisticFactor implements CollisionFactor
+//  {
+//    
+//  }
   
   public static class LogisticFactor implements CollisionFactor
   {
