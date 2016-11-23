@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import rejfree.local.LocalRFSampler;
+import rejfree.local.Trajectory;
 import rejfree.local.TrajectoryRay;
 import blang.variables.RealVariable;
 import briefj.BriefCollections;
@@ -21,7 +22,7 @@ import briefj.CSV;
 public class SaveRaysProcessor implements RayProcessor
 {
   public final Map<RealVariable, List<TrajectoryRay>> samples;
-  public double totalLength = 0.0;
+  public double time = 0.0;
   
   public SaveRaysProcessor(Collection<RealVariable> variables)
   {
@@ -33,6 +34,11 @@ public class SaveRaysProcessor implements RayProcessor
       for (RealVariable key : variables)
         samples.put(key, new ArrayList<>());
     }
+  }
+  
+  public Trajectory getTrajectory(RealVariable variable)
+  {
+    return new Trajectory(samples.get(variable), time);
   }
   
   public void toCSV(File f)
@@ -56,12 +62,12 @@ public class SaveRaysProcessor implements RayProcessor
   
   public double totalLength()
   {
-    return totalLength;
+    return time;
   }
   
   public List<Double> convertToSample(RealVariable var, double delta)
   {
-    return convertToSamples(samples.get(var), delta, totalLength);
+    return convertToSamples(samples.get(var), delta, time);
   }
   
   private static List<Double> convertToSamples(List<TrajectoryRay> rays, double delta, double totalLength)
@@ -92,7 +98,7 @@ public class SaveRaysProcessor implements RayProcessor
     List<TrajectoryRay> list = samples.get(var);
     if (list != null)
       list.add(ray);
-    this.totalLength = time;
+    this.time = time;
   }
   
 }

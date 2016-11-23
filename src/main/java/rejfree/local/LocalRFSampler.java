@@ -277,7 +277,7 @@ public class LocalRFSampler
    * Perform one collision and the associated updates to the queue
    * @param rand
    */
-  private <CollisionType> void doCollision(Random rand)
+  private void doCollision(Random rand)
   {
     // 0 - pop a collision factor
     final Entry<Double,CollisionFactor> collision = _collisionQueue.pollEvent();

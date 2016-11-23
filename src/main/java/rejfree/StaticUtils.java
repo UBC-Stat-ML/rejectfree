@@ -1,11 +1,14 @@
 package rejfree;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.jblas.DoubleMatrix;
 
 import bayonet.distributions.Beta;
 import bayonet.math.NumericalUtils;
+import rejfree.local.TrajectoryRay;
 
 
 

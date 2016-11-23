@@ -180,9 +180,9 @@ public class CompareStanRFOnNormalModel implements Runnable
       TrajectoryRay 
         curRay = rays.get(i),
         nxtRay = i == rays.size() - 1 ? null : rays.get(i+1);
-      double endTimeForRay = (nxtRay == null ? saveRaysProcessor.totalLength : nxtRay.t);
+      double endTimeForRay = (nxtRay == null ? saveRaysProcessor.time : nxtRay.t);
       double rayLen = endTimeForRay - curRay.t;
-      sumSq += MomentRayProcessor.indefIntegralForVar (curRay.position_t, curRay.velocity_t, rayLen);
+      sumSq += MomentRayProcessor.indefIntegralForSecondMoment (curRay.position_t, curRay.velocity_t, rayLen);
       sum +=   MomentRayProcessor.indefIntegralForMean(curRay.position_t, curRay.velocity_t, rayLen);
 
       if (i > 0 && i % interval == 0)

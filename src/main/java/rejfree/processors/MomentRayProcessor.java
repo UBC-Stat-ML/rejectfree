@@ -41,7 +41,7 @@ public class MomentRayProcessor implements RayProcessor
         indefIntegralForMean(ray.position_t, ray.velocity_t, time - ray.t));
     
     sumSq.incrementCount(var, 
-        indefIntegralForVar(ray.position_t, ray.velocity_t, time - ray.t));
+        indefIntegralForSecondMoment(ray.position_t, ray.velocity_t, time - ray.t));
     currentTime = time;
   }
   
@@ -50,7 +50,7 @@ public class MomentRayProcessor implements RayProcessor
     return x0 * t + v * t*t / 2.0;
   }
   
-  public static double indefIntegralForVar(double x0, double v, double t)
+  public static double indefIntegralForSecondMoment(double x0, double v, double t)
   {
     return x0*x0 * t + x0 * v * t*t + v*v * t*t*t / 3.0;
   }
