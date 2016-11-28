@@ -9,6 +9,7 @@ import org.jblas.DoubleMatrix;
 
 import bayonet.distributions.Bernoulli;
 import bayonet.distributions.Exponential;
+import bayonet.distributions.Multinomial;
 import bayonet.math.SpecialFunctions;
 import blang.annotations.DefineFactor;
 import blang.annotations.FactorComponent;
@@ -95,10 +96,114 @@ public class LogisticModel
     }
   }
   
-//  public class FastLogisticFactor implements CollisionFactor
-//  {
-//    
-//  }
+  public class FastLogisticFactor implements CollisionFactor
+  {
+    @FactorComponent
+    public final FactorList<RealVariable> variables;
+    
+    public FastLogisticFactor(List<RealVariable> variables)
+    {
+      this.variables = FactorList.ofArguments(variables, true);
+      mus = null;
+      iotaSums = null;
+//      setupCache(); 
+    }
+
+    @Override
+    public double logDensity()
+    {
+      throw new RuntimeException();
+    }
+    
+    private final double [][] iotaSums;  // {0,1} -> dim
+    private final DiscreteProbabilityDistribution [][] mus; // {0, 1} -> dim
+    
+    private double [] ratesByDim(DoubleMatrix velocity)
+    {
+      double [] ratesByDim = new double[velocity.length];
+      
+      for (int dim = 0; dim < nDimensions; dim++)
+      {
+        final double v = velocity.get(dim);
+        ratesByDim[dim] = Math.abs(v) * iotaSums[v < 0 ? 1 : 0][dim];
+      }
+      
+      return ratesByDim;
+    }
+    
+    private DoubleMatrix currentParam()
+    {
+      DoubleMatrix result = new DoubleMatrix(nVariables());
+      for (int d = 0; d < nVariables(); d++)
+        result.put(d, variables.list.get(d).getValue());
+      return result;
+    }
+    
+    DoubleMatrix nextGradient = null;
+
+    @Override
+    public Pair<Double, Boolean> getLowerBoundForCollisionDeltaTime(CollisionContext context)
+    {
+      DoubleMatrix v = context.velocity;
+      
+      final double [] ratesByDim = ratesByDim(v);
+      final double boundingRate = Multinomial.normalize(ratesByDim);
+      final double proposedColDelta = Exponential.generate(context.random, boundingRate);
+
+      // sample data point
+      final int proposedDim = Multinomial.sampleMultinomial(context.random, ratesByDim);
+      final int proposedDatum = mus[v.get(proposedDim) < 0 ? 1 : 0][proposedDim].sample(context.random);
+      
+      // accept-reject for that point
+      final double bound = proposalRateForOneDatum(proposedDatum, v);
+      DoubleMatrix xPrime = currentParam().add(v.mul(proposedColDelta));
+      nextGradient = gradient(xPrime, proposedDatum);
+      double targetRate = Math.max(0.0, -nextGradient.dot(v));
+      if (bound < targetRate)
+        throw new RuntimeException();
+      boolean accept = Bernoulli.generate(context.random, targetRate / bound);
+      
+      return Pair.of(proposedColDelta, accept);
+    }
+
+    private double proposalRateForOneDatum(int proposedDatum, DoubleMatrix v)
+    {
+      double sum = 0.0;
+      
+      for (int dim = 0; dim < nDimensions; dim++)
+        sum += (v.get(dim) * Math.pow(-1, labels.get(proposedDatum)) >= 0 ? 1 : 0) 
+          * covariates.get(proposedDatum).get(dim)
+          * Math.abs(v.get(dim));
+      
+      return sum;
+    }
+
+    @Override
+    public DoubleMatrix gradient()
+    {
+      return nextGradient;
+    }
+    
+    public DoubleMatrix gradient(DoubleMatrix x, int dataIndex)
+    {
+      DoubleMatrix covariateVector = covariates.get(dataIndex);
+      double dotProd = covariateVector.dot(x);
+      return covariateVector.mul(((double) labels.get(dataIndex)) - SpecialFunctions.logistic(dotProd));
+    }
+
+    @Override
+    public RealVariable getVariable(int gradientCoordinate)
+    {
+      return variables.list.get(gradientCoordinate);
+    }
+
+    @Override
+    public int nVariables()
+    {
+      return variables.list.size();
+    }
+    
+  }
   
   public static class LogisticFactor implements CollisionFactor
   {
