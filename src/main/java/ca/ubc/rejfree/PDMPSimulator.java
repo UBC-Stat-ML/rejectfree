@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jgrapht.UndirectedGraph;
 
+import com.google.common.collect.FluentIterable;
+
 import bayonet.graphs.GraphUtils;
 import briefj.BriefMaps;
 import briefj.collections.UnorderedPair;
@@ -39,51 +41,19 @@ public class PDMPSimulator
   
   // IDEA: can use generator adjoint to verify invariance automatically
   
-
-//  /**
-//   * A coordinate of a PDMP. We assume that one such coordinate can 
-//   * undergo deterministic behavior on its own. Main example is 
-//   * a position-velocity pair.
-//   * 
-//   * @author bouchard
-//   * 
-//   * @param <V> Type of the variable. The two main examples are (1) a PositionVelocity, 
-//   *   which is just a pair of real numbers; and (2), a discrete variable
-//   *   undergoing piecewise constant behavior. 
-//   *   In both cases, they are modelled as objects being modified in place.
-//   */
-//  public static class Coordinate<V>
-//  {
-//    private final V variable;
-//    private final DeterministicDynamics<V> dynamics;
-//    public V getVariable()
-//    {
-//      return variable;
-//    }
-//    public DeterministicDynamics<V> getDynamics()
-//    {
-//      return dynamics;
-//    }
-//    public Coordinate(V variable, DeterministicDynamics<V> dynamics)
-//    {
-//      super();
-//      this.variable = variable;
-//      this.dynamics = dynamics;
-//    }
-//  }
-  
-  
   public static interface Coordinate
   {
     void extrapolate(double deltaTime);
   }
   
-  
   // not needed by PDMPSimulator
   public static abstract class ContinuouslyEvolving implements Coordinate
   {
     public final MutableDouble position;
+    
+    // since it is continuously evolving, it necessarily has a velocity
     public final MutableDouble velocity;
+    
     public ContinuouslyEvolving(MutableDouble position, MutableDouble velocity)
     {
       super();
@@ -91,6 +61,21 @@ public class PDMPSimulator
       this.velocity = velocity;
     }
   }
+  
+  public static class PiecewiseLinear extends ContinuouslyEvolving
+  {
+    public PiecewiseLinear(MutableDouble position, MutableDouble velocity)
+    {
+      super(position, velocity);
+    }
+    @Override
+    public void extrapolate(double deltaTime)
+    {
+      position.set(position.get() + deltaTime * velocity.get());
+    } 
+  }
+  
+  // TODO: HMC
   
   public static class PiecewiseConstant<T> implements Coordinate
   {
@@ -176,8 +161,13 @@ public class PDMPSimulator
   
   public static class JumpProcess
   {
-    private final EventTimer timer;
-    private final JumpKernel kernel;
+    public final EventTimer timer;
+    public final JumpKernel kernel;
+    public JumpProcess(EventTimer timer, JumpKernel kernel)
+    {
+      this.timer = timer;
+      this.kernel = kernel;
+    }
   }
   
   // add 
@@ -191,71 +181,85 @@ public class PDMPSimulator
     }
   }
   
-  // NB: gradient is something orthogonal, based on some gradient calculator
   public static abstract class ContinuousStateDependent extends StateDependentBase
   {
+    private final List<ContinuouslyEvolving> continuousCoordinates;
+    private final boolean isPiecewiseLinear;
+    
     public ContinuousStateDependent(List<Coordinate> requiredVariables)
     {
       super(requiredVariables);
+      this.continuousCoordinates = FluentIterable.from(requiredVariables).filter(ContinuouslyEvolving.class).toList();
+      isPiecewiseLinear = isPiecewiseLinear();
+    }
+
+    private void extrapolate(double deltaTime)
+    {
+      for (ContinuouslyEvolving coordinate : continuousCoordinates)
+        coordinate.extrapolate(deltaTime);
     }
     
-    /*
-     * TODO:
-     * 1- find subset of indices that are evolving (and hence have a velocity)
-     * 2- find out if they are all piecewise linear
-     * 3- 
-     * 
-     */
+    private boolean isPiecewiseLinear()
+    {
+      for (ContinuouslyEvolving coordinate : continuousCoordinates)
+        if (!(coordinate instanceof PiecewiseLinear))
+          return false;
+      return true;
+    }
 
-//    private Boolean isPiecewiseLinear = null;
-//    private void extrapolate(double deltaTime)
-//    {
-//      for (int i = 0; i < requiredVariables.size(); i++)
-//        dynamics.get(i).update(requiredVariables.get(i), deltaTime);
-//      if (isPiecewiseLinear == null)
-//        isPiecewiseLinear = checkIfPiecewiseLinear();
-//    }
-// 
-//    private boolean checkIfPiecewiseLinear()
-//    {
-//      for (DeterministicDynamics<?> dyn : dynamics)
-//        if (!(dyn instanceof PiecewiseLinearDynamics))
-//          return false;
-//      return true;
-//    }
-//
-//    private double [] extrapolateVector(double deltaTime, boolean forPosition)
-//    {
-//      double [] result = new double[requiredVariables.size()];
-//      extrapolate(deltaTime);
-//      for (int i = 0; i < requiredVariables.size(); i++)
-//      {
-//        final PositionVelocity z = requiredVariables.get(i);
-//        result[i] = forPosition ? z.position() : z.velocity();
-//      }
-//      extrapolate( - deltaTime);
-//      return result;
-//    }
-//    
-//    public double [] currentVelocity()
-//    {
-//      return extrapolateVector(0.0, false);
-//    }
-//    
-//    public double [] extrapolateVelocity(double deltaTime)
-//    {
-//      return isPiecewiseLinear ? currentVelocity() : extrapolateVector(deltaTime, false);
-//    }
-//    
-//    public double [] currentPosition()
-//    {
-//      return extrapolateVector(0.0, true);
-//    }
-//    
-//    public double [] extrapolatePosition(double deltaTime)
-//    {
-//      return extrapolateVector(deltaTime, true);
-//    }
+    private double [] extrapolateVector(double deltaTime, boolean forPosition)
+    {
+      double [] result = new double[continuousCoordinates.size()];
+      extrapolate(deltaTime);
+      for (int i = 0; i < continuousCoordinates.size(); i++)
+      {
+        final ContinuouslyEvolving z = continuousCoordinates.get(i);
+        result[i] = forPosition ? z.position.get() : z.velocity.get();
+      }
+      extrapolate( - deltaTime);
+      return result;
+    }
+    
+    public double [] currentVelocity()
+    {
+      return extrapolateVector(0.0, false);
+    }
+    
+    public double [] extrapolateVelocity(double deltaTime)
+    {
+      return isPiecewiseLinear ? currentVelocity() : extrapolateVector(deltaTime, false);
+    }
+    
+    public double [] currentPosition()
+    {
+      return extrapolateVector(0.0, true);
+    }
+    
+    public double [] extrapolatePosition(double deltaTime)
+    {
+      return extrapolateVector(deltaTime, true);
+    }
+    
+    private void set(double [] vector, boolean forPosition)
+    {
+      if (vector.length != continuousCoordinates.size())
+        throw new RuntimeException();
+      for (int i = 0; i < vector.length; i++)
+      {
+        ContinuouslyEvolving coordinate = continuousCoordinates.get(i);
+        (forPosition ? coordinate.position : coordinate.velocity).set(vector[i]);
+      }
+    }
+    
+    public void setPosition(double [] position)
+    {
+      set(position, true);
+    }
+    
+    public void setVelocity(double [] velocity)
+    {
+      set(velocity, false);
+    }
   }
   
 //  public static class Bounce extends ContinuousStateDependent implements JumpKernel<PositionVelocity>
@@ -443,7 +447,6 @@ public class PDMPSimulator
           result.add(GraphUtils.pickOther(edge, node));
       return result;
     }
-    
   }
   
   private PDMPSimulator(PDMP pdmp) 
@@ -495,7 +498,6 @@ public class PDMPSimulator
   {
     return set.stream().map(p -> p.getKey()).collect(Collectors.toList());
   }
-
 
   private int[] set2Array(Collection<Integer> set)
   {
