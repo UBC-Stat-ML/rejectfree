@@ -450,6 +450,8 @@ public class PDMPSimulator
   
   private Random random;
   private StoppingCriterion stoppingRule;
+  private long startTimeMilliSeconds;
+  private int numberOfQueuePolls;
   
   private void init(Random random, StoppingCriterion stoppingRule)
   {
@@ -459,6 +461,8 @@ public class PDMPSimulator
     this.isBoundIndicators = new boolean[numberOfVariables];
     this.stoppingRule = stoppingRule;
     this.random = random;
+    this.startTimeMilliSeconds = System.currentTimeMillis();
+    this.numberOfQueuePolls = 0;
   }
   
   // TODO: unify notation for factor, jumpProcess, eventSource, et
@@ -475,7 +479,8 @@ public class PDMPSimulator
     while (moreSamplesNeeded())
     {
       // retrieve info about event
-      Entry<Double, Integer> event = queue.pollEvent(); 
+      Entry<Double, Integer> event = queue.pollEvent();
+      numberOfQueuePolls++;
       time = event.getKey();
       final int eventSourceIndex = event.getValue();
         
@@ -511,6 +516,25 @@ public class PDMPSimulator
     updateAllVariables(); 
   }
   
+  private boolean moreSamplesNeeded()
+  {
+    // Do not need the following, since this is checked in simulateNextEventDeltaTime
+    // if (time > stoppingRule.processTime)
+    //  return false;
+    // instead:
+    if (queue.isEmpty())
+      return false;
+    
+    if (System.currentTimeMillis() - startTimeMilliSeconds 
+        > stoppingRule.wallClockTimeMilliseconds)
+      return false;
+    
+    if (numberOfQueuePolls > stoppingRule.numberOfEvents)
+      return false;
+    
+    return true;
+  }
+
   private void updateAllVariables()
   {
     for (int varIdx = 0; varIdx < numberOfVariables; varIdx++)

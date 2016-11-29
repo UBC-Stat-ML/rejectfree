@@ -22,6 +22,16 @@ public class EventQueue<S>
     return sortedEvents.firstEntry();
   }
   
+  public int size()
+  {
+    return eventTimes.size();
+  }
+  
+  public boolean isEmpty()
+  {
+    return size() == 0;
+  }
+  
   public void remove(S event)
   {
     Double time = eventTimes.get(event);
