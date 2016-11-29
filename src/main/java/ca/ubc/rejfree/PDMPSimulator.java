@@ -24,6 +24,19 @@ import briefj.collections.UnorderedPair;
 import rejfree.StaticUtils;
 import rejfree.local.EventQueue;
 
+/**
+ * A simulator for Piecewise Deterministic Poisson Processes (DPDMP. 
+ * 
+ * See Davis 1993, Markov models and optimization for background on PDMPs.
+ * 
+ * This implementation is tailored to situations where the rates and jumps 
+ * act on sparse subsets of variables, as in the local BPS algorithm.
+ * 
+ * See Bouchard et al. 2015, The Bouncy particle sampler.
+ * 
+ * @author bouchard
+ *
+ */
 public class PDMPSimulator
 {
   // IDEA: revisit HMC dynamics
@@ -31,17 +44,61 @@ public class PDMPSimulator
   // IDEA: can use generator adjoint to verify invariance automatically
   
 
-  
+  /**
+   * A coordinate of a PDMP. We assume that one such coordinate can 
+   * undergo deterministic behavior on its own. Main example is 
+   * a position-velocity pair.
+   * 
+   * @author bouchard
+   * 
+   * @param <V> Type of the variable. The two main examples are (1) a PositionVelocity, 
+   *   which is just a pair of real numbers; and (2), a discrete variable
+   *   undergoing piecewise constant behavior. 
+   *   In both cases, they are modelled as objects being modified in place.
+   */
   public static class Coordinate<V>
   {
-    V variable;
-    DeterministicDynamics<V> dynamics;
+    private final V variable;
+    private final DeterministicDynamics<V> dynamics;
+    public V getVariable()
+    {
+      return variable;
+    }
+    public DeterministicDynamics<V> getDynamics()
+    {
+      return dynamics;
+    }
+    public Coordinate(V variable, DeterministicDynamics<V> dynamics)
+    {
+      super();
+      this.variable = variable;
+      this.dynamics = dynamics;
+    }
   }
   
+  /**
+   * A function, distribution or kernel that depends on the current state of the
+   * PDMP. In some cases it may need to be informed on the type of behaviour 
+   * these states are undergoing. To do so, setDynamics(..) is automatically called
+   * by the PDMPSimulator with the liast of 
+   * 
+   * @author bouchard
+   *
+   * @param <V> See Coordinate
+   */
   public static interface StateDependent<V>
   {
-    List<V>                requiredVariables();
-    void                   setDynamics(List<DeterministicDynamics<V>> dynamics);
+    /**
+     * 
+     * @return The variables n
+     */
+    List<V> requiredVariables();
+    
+    /**
+     * 
+     * @param dynamics
+     */
+    void setDynamics(List<DeterministicDynamics<V>> dynamics);
   }
   
   
@@ -55,17 +112,37 @@ public class PDMPSimulator
   
   // NB: PoissonProcess will extend EventTimer but only needed outside of this
   
+  /**
+   * A simulator for the time of the next event. The two main uses are:
+   * (1) A Poisson process.
+   * (2) A deterministic time to hit a boundary.
+   * 
+   * @author bouchard
+   *
+   * @param <V> See Coordinate.
+   */
   public static interface EventTimer<V> extends StateDependent<V>
   {
-    DeltaTime           next(Random random);
+    /**
+     * 
+     * @param random
+     * @return
+     */
+    DeltaTime next(Random random);
   }
   
+  /**
+   * 
+   * @author bouchard
+   *
+   * @param <V>
+   */
   public static interface JumpKernel<V> extends StateDependent<V>
   {
     void                simulate(Random random);
   }
   
-  public static class JumpProcess<V> // jump process?
+  public static class JumpProcess<V> 
   {
     private final EventTimer<V> timer;
     private final JumpKernel<V> kernel;
