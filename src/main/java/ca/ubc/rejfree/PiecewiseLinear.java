@@ -1,13 +1,9 @@
 package ca.ubc.rejfree;
 
-public class PiecewiseLinear extends ContinuouslyEvolving
+public class PiecewiseLinear implements Dynamics
 {
-  public PiecewiseLinear(MutableDouble position, MutableDouble velocity)
-  {
-    super(position, velocity);
-  }
   @Override
-  public void extrapolate(double deltaTime)
+  public void extrapolateInPlace(double deltaTime, MutableDouble position, MutableDouble velocity)
   {
     position.set(position.get() + deltaTime * velocity.get());
   } 

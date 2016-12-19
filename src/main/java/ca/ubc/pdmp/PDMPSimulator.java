@@ -21,7 +21,7 @@ import rejfree.local.EventQueue;
  * This implementation is tailored to situations where the rates and jumps 
  * act on sparse subsets of variables, as in the local BPS algorithm.
  * 
- * See Bouchard et al. 2015, The Bouncy particle sampler.
+ * See Bouchard, Vollmer, Doucet 2015, The Bouncy particle sampler.
  * 
  * @author bouchard
  *
@@ -48,6 +48,22 @@ public class PDMPSimulator
 
   private final int numberOfJumpProcesses;
   private final int numberOfVariables;
+  
+  /*
+   * Conventions for variables with pattern {n,N}{d,k}:
+   * 
+   * prefix n : neighbors (obtained via StateDependent.requiredVariables())
+   *            takes as input factor indices
+   * prefix N : inverse neighbors (i.e. set of timers/kernels that depend on given variable index)
+   *            takes as input variable indices
+   * 
+   * suffix k : related to jump *k*ernels
+   * suffix d : related to timers (which provide *d*elta times)
+   * 
+   * For example, Nd_nk[j]: 
+   *   for given factor index j, this returns Nd(nk(j)), 
+   *   a list of variables.
+   */
 
   // factor -> var
   private final int [][] nd, nk;
@@ -75,10 +91,10 @@ public class PDMPSimulator
   // event source -> isBound?
   private boolean []           isBoundIndicators;
   
-  private Random random;
-  private StoppingCriterion stoppingRule;
-  private long startTimeMilliSeconds;
-  private int numberOfQueuePolls;
+  private Random               random;
+  private StoppingCriterion    stoppingRule;
+  private long                 startTimeMilliSeconds;
+  private int                  numberOfQueuePolls; 
   
   private void init(Random random, StoppingCriterion stoppingRule)
   {
@@ -92,11 +108,9 @@ public class PDMPSimulator
     this.numberOfQueuePolls = 0;
   }
   
-  // TODO: unify notation for factor, jumpProcess, eventSource, et
-  
   // TODO: the public version of that will truncate in process time to ensure better numerical properties
   // TODO: test by having a long chain followed by a bunch of short ones; watch moments
-  private void simulate(Random random, StoppingCriterion stoppingCriterion)
+  void simulate(Random random, StoppingCriterion stoppingCriterion)
   {
     init(random, stoppingCriterion);
     
@@ -129,7 +143,7 @@ public class PDMPSimulator
         // do the jump
         pdmp.jumpProcesses.get(eventSourceIndex).kernel.simulate(random);
         
-        // recompute factor 'hood new times (including self)
+        // recompute factor 'hood new times (including self) 
         simulateNextEventDeltaTimes(Nd_nk[eventSourceIndex]);
         
         // extended 'hood: undo
@@ -193,14 +207,14 @@ public class PDMPSimulator
           pdmp.processors.get(processorIdx).process(deltaTime);
       lastUpdateTime[variableIndex] = time;
     }
-    coordinate.extrapolate(deltaTime);
+    coordinate.extrapolateInPlace(deltaTime);
   }
   
   private void _rollBack(int variableIndex)
   {
     final Coordinate coordinate = pdmp.dynamics.get(variableIndex);
     final double deltaTime = time - lastUpdateTime[variableIndex];
-    coordinate.extrapolate(-deltaTime);
+    coordinate.extrapolateInPlace(-deltaTime);
   }
   
   private void rollBack(int [] variableIndices)

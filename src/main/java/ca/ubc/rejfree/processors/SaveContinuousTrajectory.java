@@ -19,7 +19,7 @@ public class SaveContinuousTrajectory extends ContinuousStateDependent implement
   {
     super(Collections.singletonList(variable));
     this.variable = variable;
-  }
+  } 
   
   @Override
   public void process(double deltaTime)

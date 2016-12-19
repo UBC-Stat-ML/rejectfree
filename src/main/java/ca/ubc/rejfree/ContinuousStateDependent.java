@@ -21,13 +21,13 @@ public abstract class ContinuousStateDependent extends StateDependentBase
   private void extrapolate(double deltaTime)
   {
     for (ContinuouslyEvolving coordinate : continuousCoordinates)
-      coordinate.extrapolate(deltaTime);
+      coordinate.extrapolateInPlace(deltaTime);
   }
   
   private boolean isPiecewiseLinear()
   {
     for (ContinuouslyEvolving coordinate : continuousCoordinates)
-      if (!(coordinate instanceof PiecewiseLinear))
+      if (!(coordinate.dynamics instanceof PiecewiseLinear))
         return false;
     return true;
   }
