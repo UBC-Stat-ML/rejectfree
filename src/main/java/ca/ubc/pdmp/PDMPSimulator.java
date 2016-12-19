@@ -138,7 +138,7 @@ public class PDMPSimulator
     }
     
     // final update on all variables
-    updateAllVariables(); 
+    updateAllVariables(true); 
   }
   
   private boolean moreSamplesNeeded()
@@ -160,10 +160,10 @@ public class PDMPSimulator
     return true;
   }
 
-  private void updateAllVariables()
+  private void updateAllVariables(boolean commit)
   {
     for (int varIdx = 0; varIdx < numberOfVariables; varIdx++)
-      _updateVariable(varIdx, true);
+      _updateVariable(varIdx, commit);
   }
   
   private void updateVariables(int [] variables, boolean commit)
@@ -172,7 +172,7 @@ public class PDMPSimulator
       return;
     
     if (variables[0] == -1)
-      updateAllVariables();
+      updateAllVariables(commit);
     else
       for (int variableIdx : variables)
         _updateVariable(variableIdx, commit);

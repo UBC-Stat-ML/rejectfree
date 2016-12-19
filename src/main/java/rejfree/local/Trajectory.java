@@ -124,19 +124,4 @@ public class Trajectory
   {
     return endTimeOfRay(index) - rays.get(index).t;
   }
-  
-  
-//  public static List<List<TrajectoryRay>> splitIntoBlocks(List<TrajectoryRay> fullTrajectory, double fullLength, int nSegments)
-//  {
-//    List<List<TrajectoryRay>> result = new ArrayList<>();
-//    
-//    if (fullTrajectory.isEmpty())
-//      return result;
-//    
-//    double delta = fullLength / nSegments;
-//    double nextTime = fullTrajectory.get(0).t + delta;
-//    
-//    
-//    return result;
-//  }
 }
