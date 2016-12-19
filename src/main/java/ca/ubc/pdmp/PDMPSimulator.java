@@ -43,7 +43,8 @@ public class PDMPSimulator
     buildCaches();
   }
   
-  ///// Permanent cachef : 
+  
+  ///// Permanent caches : 
 
   private final int numberOfJumpProcesses;
   private final int numberOfVariables;
@@ -59,6 +60,7 @@ public class PDMPSimulator
   
   // variable -> processors
   private final int [][] processors;
+  
   
   ///// Data updated during simulation :
   
@@ -127,10 +129,10 @@ public class PDMPSimulator
         // do the jump
         pdmp.jumpProcesses.get(eventSourceIndex).kernel.simulate(random);
         
-        // recompute factor hood new times (including self)
+        // recompute factor 'hood new times (including self)
         simulateNextEventDeltaTimes(Nd_nk[eventSourceIndex]);
         
-        // extended hood: undo
+        // extended 'hood: undo
         rollBack(nd_Nd_nk_plus_nd_minus_n_k[eventSourceIndex]);
       }
     }

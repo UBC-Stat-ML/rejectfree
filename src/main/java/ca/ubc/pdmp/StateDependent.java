@@ -16,5 +16,4 @@ public interface StateDependent
    * distribution, function or kernel.
    */
   List<Coordinate> requiredVariables();
-
 }

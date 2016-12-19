@@ -5,7 +5,6 @@ import java.util.List;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.StateDependent;
 
-// add 
 public abstract class StateDependentBase implements StateDependent
 {
   protected final List<Coordinate> requiredVariables;
@@ -13,5 +12,11 @@ public abstract class StateDependentBase implements StateDependent
   public StateDependentBase(List<Coordinate> requiredVariables)
   {
     this.requiredVariables = requiredVariables;
+  }
+
+  @Override
+  public final List<Coordinate> requiredVariables()
+  {
+    return requiredVariables;
   }
 }

@@ -8,7 +8,7 @@ import ca.ubc.pdmp.Coordinate;
 
 public abstract class ContinuousStateDependent extends StateDependentBase
 {
-  private final List<ContinuouslyEvolving> continuousCoordinates;
+  protected final List<ContinuouslyEvolving> continuousCoordinates;
   private final boolean isPiecewiseLinear;
   
   public ContinuousStateDependent(List<Coordinate> requiredVariables)
