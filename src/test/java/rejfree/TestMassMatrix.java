@@ -6,6 +6,7 @@ import org.jblas.DoubleMatrix;
 import org.junit.Assert;
 import org.junit.Test;
 
+import bayonet.math.JBlasUtils;
 import bayonet.math.NumericalUtils;
 
 
@@ -24,28 +25,63 @@ public class TestMassMatrix
       DoubleMatrix velocity = DoubleMatrix.randn(dim);
       DoubleMatrix massMatrix = randomPosDef(rand, dim);
       
-//      Assert.assertEquals(
-//          + dot(gradient, bounce(velocity, gradient, massMatrix), massMatrix),
-//          - dot(gradient, velocity, massMatrix),
-//          NumericalUtils.THRESHOLD);
-      
       Assert.assertEquals(
-          + gradient.dot(bounce(velocity, gradient, massMatrix)),
-          - gradient.dot(velocity),
+          + dot(gradient, bounce(velocity, gradient, massMatrix), massMatrix),
+          - dot(gradient, velocity, massMatrix),
           NumericalUtils.THRESHOLD);
+      
+//      Assert.assertEquals(
+//          + gradient.dot(bounce(velocity, gradient, massMatrix)),
+//          - gradient.dot(velocity),
+//          NumericalUtils.THRESHOLD);
       
       
     }
   }
   
+  @Test
+  public void testInverseBounce()
+  {
+    org.jblas.util.Random.seed(10001);
+    int dim = 10;
+    Random rand = new Random(1);
+    
+    for (int i = 0; i < 10_000; i++)
+    {
+      DoubleMatrix gradient = DoubleMatrix.randn(dim);
+      DoubleMatrix velocity = DoubleMatrix.randn(dim);
+      DoubleMatrix massMatrix = randomPosDef(rand, dim);
+      
+      DoubleMatrix bouncedOnce  = bounce(velocity, gradient, massMatrix);
+      DoubleMatrix bouncedTwice = bounce(bouncedOnce, gradient, massMatrix);
+      
+      System.out.println(" --- ");
+      System.out.println("v  = " + velocity);
+      System.out.println("b  = " + bouncedOnce);
+      System.out.println("bb = " + bouncedTwice);
+      System.out.println(" --- ");
+      
+    }
+  }
+  
+  
+  
   public static void main(String [] args) 
   {
+    
+    
     DoubleMatrix gradient = new DoubleMatrix(new double[]{1.0, 1.0});
     DoubleMatrix velocity = new DoubleMatrix(new double[]{0.0, 1.0});
     DoubleMatrix massMatrix = new DoubleMatrix(new double [][]{
       {1.0, 0.0},
       {0.0, 2.0}
     });
+    
+    DoubleMatrix GGp = gradient.mmul(gradient.transpose());
+    System.out.println("1: " + GGp);
+    System.out.println("2: " + massMatrix.mmul(GGp).mmul(JBlasUtils.inversePositiveMatrix(massMatrix)));
+    
+    
     System.out.println(bounce(velocity, gradient, massMatrix));
     System.out.println(gradient.dot(bounce(velocity, gradient, massMatrix)));
     System.out.println(gradient.dot(velocity));
@@ -67,14 +103,17 @@ public class TestMassMatrix
   public void testNormalTargetInvar()
   {
     org.jblas.util.Random.seed(10001);
-    int dim = 10;
+    int dim = 3;
     Random rand = new Random(1);
     
     for (int i = 0; i < 10_000; i++)
     {
-      DoubleMatrix v = DoubleMatrix.randn(10);
+      DoubleMatrix v = DoubleMatrix.randn(dim);
       DoubleMatrix massMatrix = randomPosDef(rand, dim);
       DoubleMatrix gradient = DoubleMatrix.randn(dim);
+      
+//      System.out.println(normalKernel(v, massMatrix));
+//      System.out.println(normalKernel(bounce(v, gradient, massMatrix), massMatrix));
       
       Assert.assertEquals(
           normalKernel(v, massMatrix),
