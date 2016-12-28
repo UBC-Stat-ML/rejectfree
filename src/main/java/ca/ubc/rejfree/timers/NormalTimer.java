@@ -60,7 +60,8 @@ public class NormalTimer extends ContinuousStateDependent implements EventTimer
     }
     final double e = StaticUtils.generateUnitRateExponential(random);
     
-    return DeltaTime.isEqualTo(NormalFactor.normalCollisionTime(e, xv, vv));
+    final double delta = NormalFactor.normalCollisionTime(e, xv, vv);
+    return DeltaTime.isEqualTo(delta);
   }
   
   private double dotProd(final double [] array0, final double [] array1)

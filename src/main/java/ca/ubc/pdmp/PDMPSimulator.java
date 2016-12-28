@@ -122,11 +122,10 @@ public class PDMPSimulator
       // retrieve info about event
       final Entry<Double, Integer> event = queue.pollEvent();
       numberOfQueuePolls++;
-      
+
       time = event.getKey();
       final int eventSourceIndex = event.getValue();
       
-        
       if (isBoundIndicators[eventSourceIndex])  
       {
         updateVariables(nd[eventSourceIndex], false);
@@ -245,6 +244,7 @@ public class PDMPSimulator
   
   private void simulateNextEventDeltaTime(int eventSourceIndex)
   {
+    queue.remove(eventSourceIndex);
     final DeltaTime nextEvent = pdmp.jumpProcesses.get(eventSourceIndex).timer.next(random);
     double absoluteTime = time + nextEvent.deltaTime;
     if (absoluteTime <= stoppingRule.stochasticProcessTime)

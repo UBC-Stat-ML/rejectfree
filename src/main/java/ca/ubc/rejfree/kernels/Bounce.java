@@ -28,5 +28,4 @@ public class Bounce extends ContinuousStateDependent implements JumpKernel
     DoubleMatrix gradient = new DoubleMatrix(energy.gradient(currentPosition()));
     setVelocity(StaticUtils.bounce(oldVelocity, gradient).data);
   }
-
 }

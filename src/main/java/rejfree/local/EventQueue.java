@@ -51,7 +51,8 @@ public class EventQueue<S>
     if (containsTime(time))
       throw new RuntimeException("EventQueue does not support two events at the same time (t=" + time + ",event=" + event + ")");
     sortedEvents.put(time, event);
-    eventTimes.put(event, time);
+    if (eventTimes.put(event, time) != null)
+      throw new RuntimeException("An event cannot be associated to two times.");
   }
   
   public final boolean containsTime(double t)
