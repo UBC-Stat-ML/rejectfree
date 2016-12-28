@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.ubc.pdmp.Processor;
-import ca.ubc.rejfree.ContinuousStateDependent;
-import ca.ubc.rejfree.ContinuouslyEvolving;
 import ca.ubc.rejfree.TrajectorySegment;
+import ca.ubc.rejfree.state.ContinuousStateDependent;
+import ca.ubc.rejfree.state.ContinuouslyEvolving;
 
 public class SaveContinuousTrajectory extends ContinuousStateDependent implements Processor
 {

@@ -30,11 +30,11 @@ public class PDMPSimulator
 {
   private final PDMP pdmp;
    
-  private PDMPSimulator(PDMP pdmp) 
+  public PDMPSimulator(PDMP pdmp) 
   {
     this.pdmp = pdmp; 
     this.numberOfJumpProcesses = pdmp.jumpProcesses.size();
-    this.numberOfVariables = pdmp.dynamics.size();
+    this.numberOfVariables = pdmp.coordinates.size();
     this.nd = new int[numberOfJumpProcesses][];
     this.nk = new int[numberOfJumpProcesses][];
     this.Nd_nk = new int[numberOfJumpProcesses][];
@@ -122,8 +122,10 @@ public class PDMPSimulator
       // retrieve info about event
       final Entry<Double, Integer> event = queue.pollEvent();
       numberOfQueuePolls++;
+      
       time = event.getKey();
       final int eventSourceIndex = event.getValue();
+      
         
       if (isBoundIndicators[eventSourceIndex])  
       {
@@ -197,7 +199,7 @@ public class PDMPSimulator
     if (lastUpdateTime[variableIndex] == time)
       return;
     
-    final Coordinate coordinate = pdmp.dynamics.get(variableIndex);
+    final Coordinate coordinate = pdmp.coordinates.get(variableIndex);
     final double deltaTime = time - lastUpdateTime[variableIndex];
     if (commit)
     {
@@ -212,7 +214,7 @@ public class PDMPSimulator
   
   private void _rollBack(int variableIndex)
   {
-    final Coordinate coordinate = pdmp.dynamics.get(variableIndex);
+    final Coordinate coordinate = pdmp.coordinates.get(variableIndex);
     final double deltaTime = time - lastUpdateTime[variableIndex];
     coordinate.extrapolateInPlace(-deltaTime);
   }
@@ -285,8 +287,8 @@ public class PDMPSimulator
     {
       this.pdmp = pdmp;
       // index the variables and create variable nodes
-      for (int variableIndex = 0; variableIndex < pdmp.dynamics.size(); variableIndex++)
-        variable2Index.put(pdmp.dynamics.get(variableIndex), variableIndex);
+      for (int variableIndex = 0; variableIndex < pdmp.coordinates.size(); variableIndex++)
+        variable2Index.put(pdmp.coordinates.get(variableIndex), variableIndex);
       for (int factorIndex = 0; factorIndex < pdmp.jumpProcesses.size(); factorIndex++)
         for (Object var : pdmp.jumpProcesses.get(factorIndex).timer.requiredVariables())
           BriefMaps.getOrPutSet(_Nds, variable2Index.get(var)).add(factorIndex);
@@ -335,12 +337,12 @@ public class PDMPSimulator
     
     private int [] convert(Collection<Integer> collection, boolean isVar)
     {
-      return convert(collection, (isVar ? pdmp.dynamics.size() : pdmp.jumpProcesses.size()));
+      return convert(collection, (isVar ? pdmp.coordinates.size() : pdmp.jumpProcesses.size()));
     }
     
     private int [] convert(Collection<Integer> collection, int size)
     {
-      if (collection.isEmpty())
+      if (collection == null || collection.isEmpty())
         return null;
       
       if (collection.size() == size)

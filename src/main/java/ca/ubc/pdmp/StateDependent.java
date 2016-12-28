@@ -15,5 +15,5 @@ public interface StateDependent
    * @return The variables that need to be up to date to compute the present 
    * distribution, function or kernel.
    */
-  List<Coordinate> requiredVariables();
+  List<? extends Coordinate> requiredVariables();
 }

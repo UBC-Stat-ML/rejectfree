@@ -14,7 +14,9 @@ public class EventQueue<S>
   
   public Entry<Double,S> pollEvent()
   {
-    return sortedEvents.pollFirstEntry();
+    Entry<Double,S> result = sortedEvents.pollFirstEntry();
+    eventTimes.remove(result.getValue());
+    return result;
   }
   
   public Entry<Double,S> peekEvent()
@@ -24,7 +26,7 @@ public class EventQueue<S>
   
   public int size()
   {
-    return eventTimes.size();
+    return sortedEvents.size();
   }
   
   public boolean isEmpty()
@@ -60,5 +62,11 @@ public class EventQueue<S>
   public double peekTime()
   {
     return sortedEvents.firstKey();
+  }
+  
+  @Override
+  public String toString()
+  {
+    return "EventQueue[nextTime=" + peekTime() + ",nEvents=" + size() + "]";
   }
 }

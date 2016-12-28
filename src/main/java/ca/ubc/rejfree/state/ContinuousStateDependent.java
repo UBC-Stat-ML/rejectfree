@@ -1,19 +1,22 @@
-package ca.ubc.rejfree;
+package ca.ubc.rejfree.state;
 
 import java.util.List;
 
 import com.google.common.collect.FluentIterable;
 
 import ca.ubc.pdmp.Coordinate;
+import ca.ubc.pdmp.StateDependentBase;
 
 public abstract class ContinuousStateDependent extends StateDependentBase
 {
   protected final List<ContinuouslyEvolving> continuousCoordinates;
   private final boolean isPiecewiseLinear;
   
-  public ContinuousStateDependent(List<Coordinate> requiredVariables)
+  public ContinuousStateDependent(List<? extends Coordinate> requiredVariables)
   {
+    // maintain all the dependencies (some of which may not be continuously evolving)
     super(requiredVariables);
+    // identify the subset that is continuously evolving
     this.continuousCoordinates = FluentIterable.from(requiredVariables).filter(ContinuouslyEvolving.class).toList();
     isPiecewiseLinear = isPiecewiseLinear();
   }

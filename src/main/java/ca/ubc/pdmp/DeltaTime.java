@@ -7,6 +7,8 @@ public class DeltaTime
   
   public DeltaTime(double deltaTime, boolean isBound)
   {
+    if (!(deltaTime > 0.0))
+      throw new RuntimeException();
     this.deltaTime = deltaTime;
     this.isBound = isBound;
   }

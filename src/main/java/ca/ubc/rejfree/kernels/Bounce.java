@@ -7,8 +7,8 @@ import org.jblas.DoubleMatrix;
 
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.JumpKernel;
-import ca.ubc.rejfree.ContinuousStateDependent;
-import ca.ubc.rejfree.EnergyGradient;
+import ca.ubc.rejfree.energies.EnergyGradient;
+import ca.ubc.rejfree.state.ContinuousStateDependent;
 import rejfree.StaticUtils;
 
 public class Bounce extends ContinuousStateDependent implements JumpKernel

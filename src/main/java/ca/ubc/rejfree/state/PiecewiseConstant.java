@@ -1,4 +1,4 @@
-package ca.ubc.rejfree;
+package ca.ubc.rejfree.state;
 
 import ca.ubc.pdmp.Coordinate;
 

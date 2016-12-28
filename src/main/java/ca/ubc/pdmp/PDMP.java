@@ -8,8 +8,6 @@ import java.util.List;
 /**
  * A Piecewise deterministic Markov Process.
  * 
- * 
- * 
  * @author bouchard
  *
  */
@@ -20,24 +18,25 @@ public class PDMP
    * to lists for fast indexing.
    * 
    * @param jumpProcesses
-   * @param dynamics
+   * @param coordinates
    * @param processors
    */
+  @SuppressWarnings("unchecked")
   public PDMP(
-      Collection<JumpProcess> jumpProcesses,
-      Collection<Coordinate> dynamics,
-      Collection<Processor> processors)
+      Collection<? extends JumpProcess> jumpProcesses,
+      Collection<? extends Coordinate> coordinates,
+      Collection<? extends Processor> processors)
   {
-    this.jumpProcesses = toListEnsureElementsUniques(jumpProcesses);
-    this.dynamics = toListEnsureElementsUniques(dynamics);
-    this.processors = toListEnsureElementsUniques(processors);
+    this.jumpProcesses = (List<JumpProcess>) toListEnsureElementsUniques(jumpProcesses);
+    this.coordinates = (List<Coordinate>) toListEnsureElementsUniques(coordinates);
+    this.processors = (List<Processor>) toListEnsureElementsUniques(processors);
   }
   
   final List<JumpProcess> jumpProcesses;
-  final List<Coordinate> dynamics;
+  final List<Coordinate> coordinates;
   final List<Processor> processors;
   
-  static <T> List<T> toListEnsureElementsUniques(Collection<T> collection)
+  private static <T> List<T> toListEnsureElementsUniques(Collection<T> collection)
   {
     LinkedHashSet<T> copy = new LinkedHashSet<>(collection);
     if (copy.size() != collection.size())

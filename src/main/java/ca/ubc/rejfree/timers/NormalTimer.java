@@ -3,30 +3,32 @@ package ca.ubc.rejfree.timers;
 import java.util.List;
 import java.util.Random;
 
-import org.jblas.DoubleMatrix;
-
 import bayonet.math.NumericalUtils;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
 import ca.ubc.pdmp.EventTimer;
-import ca.ubc.rejfree.ContinuousStateDependent;
+import ca.ubc.rejfree.state.ContinuousStateDependent;
 import rejfree.StaticUtils;
 import rejfree.models.normal.NormalFactor;
+import xlinear.DenseMatrix;
+import xlinear.Matrix;
+import xlinear.MatrixExtensions;
+import xlinear.MatrixOperations;
 
 public class NormalTimer extends ContinuousStateDependent implements EventTimer
 {
-  final DoubleMatrix precision;
+  final Matrix precision;
   
   // Some low level optimization for binary Gaussian potentials 
   // which frequently occurs in practice and ends up in the inner loop
   final boolean cachedBinary;
   final double p0, p1, d;
 
-  public NormalTimer(List<Coordinate> requiredVariables, DoubleMatrix precision)
+  public NormalTimer(List<Coordinate> requiredVariables, Matrix precision)
   {
     super(requiredVariables);
     this.precision = precision;
-    boolean parametersConstant = requiredVariables.size() == precision.getColumns();
+    boolean parametersConstant = requiredVariables.size() == precision.nCols();
     boolean isBin = requiredVariables.size() == 2;
     cachedBinary = parametersConstant && isBin;
     p0 = cachedBinary ? precision.get(0,0) : Double.NaN;
@@ -39,29 +41,37 @@ public class NormalTimer extends ContinuousStateDependent implements EventTimer
   @Override
   public DeltaTime next(Random random)
   {
-    final DoubleMatrix x = new DoubleMatrix(currentPosition());
-    final DoubleMatrix v = new DoubleMatrix(currentVelocity());
+    double xv, vv;
     
-    final double xv = dotProd(x, v);
-    final double vv = dotProd(v, v);
+    double [] currentPos = currentPosition();
+    double [] currentVel = currentVelocity();
+    
+    if (cachedBinary)
+    {
+      xv = dotProd(currentPos, currentVel);
+      vv = dotProd(currentVel, currentVel);
+    }
+    else
+    {
+      final DenseMatrix x = MatrixOperations.denseCopy(currentPos);
+      final DenseMatrix v = MatrixOperations.denseCopy(currentVel);
+      xv = dotProd(x, v);
+      vv = dotProd(v, v);
+    }
     final double e = StaticUtils.generateUnitRateExponential(random);
     
     return DeltaTime.isEqualTo(NormalFactor.normalCollisionTime(e, xv, vv));
   }
   
-  private double dotProd(final DoubleMatrix x1, final DoubleMatrix x2)
+  private double dotProd(final double [] array0, final double [] array1)
   {
-    // from NormalFactor.java in previous version
-    if (cachedBinary)
-    { // optimization of computational inner-loop bottleneck
-      final double [] 
-        array0 = x1.data,
-        array1 = x2.data;
-      return 
-        array0[0] * (array1[0] * p0 + array1[1] * d) + 
-        array0[1] * (array1[0] * d  + array1[1] * p1);
-    }
-    else
-      return x1.transpose().mmuli(precision).dot(x2);
+    return 
+      array0[0] * (array1[0] * p0 + array1[1] * d) + 
+      array0[1] * (array1[0] * d  + array1[1] * p1);
+  }
+  
+  private double dotProd(final DenseMatrix x1, final DenseMatrix x2)
+  {
+    return MatrixExtensions.dot(x1.transpose().mul(precision),x2);
   }
 }

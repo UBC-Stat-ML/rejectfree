@@ -31,7 +31,7 @@ public class NormalChain
   
   private DoubleMatrix fullPrecision;
   public  DoubleMatrix covarMatrix;
-  private List<DoubleMatrix> pairPrecisions;
+  public List<DoubleMatrix> pairPrecisions;
   private MultivariateNormalDistribution normal;
   
   public class NormalChainModel
