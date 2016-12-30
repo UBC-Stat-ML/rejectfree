@@ -7,7 +7,8 @@ import java.util.Random;
 import ca.ubc.rejfree.energies.NormalEnergy;
 import ca.ubc.rejfree.kernels.Bounce;
 import ca.ubc.rejfree.kernels.Refreshment;
-import ca.ubc.rejfree.processors.SaveContinuousTrajectory;
+import ca.ubc.rejfree.processors.IntegrateTrajectory;
+import ca.ubc.rejfree.processors.SaveTrajectory;
 import ca.ubc.rejfree.state.ContinuouslyEvolving;
 import ca.ubc.rejfree.state.PiecewiseLinear;
 import ca.ubc.rejfree.timers.HomogeneousPP;
@@ -45,16 +46,15 @@ public class NormalTest
     HomogeneousPP homog = new HomogeneousPP(1.0);
     jumpProcesses.add(new JumpProcess(homog, ref));
     // processors
-    List<SaveContinuousTrajectory> processors = new ArrayList<>();
-    SaveContinuousTrajectory saveTraj = new SaveContinuousTrajectory(states.get(0));
-    processors.add(saveTraj);
+    List<IntegrateTrajectory> processors = new ArrayList<>();
+    IntegrateTrajectory processor = new IntegrateTrajectory(states.get(0), new IntegrateTrajectory.MonomialIntegral(2));
+    processors.add(processor);
     // running
     PDMP pdmp = new PDMP(jumpProcesses, states, processors);
     PDMPSimulator simu = new PDMPSimulator(pdmp);
-    simu.simulate(random, StoppingCriterion.byStochasticProcessTime(100.0));
+    simu.simulate(random, StoppingCriterion.byStochasticProcessTime(100_000.0));
     // analysis
-    // ..
-    // TODO: into Geweke
-    
+    System.out.println(processor.evaluateIntegral());
+    System.out.println(chain.covarMatrix.get(0,0));
   }
 }
