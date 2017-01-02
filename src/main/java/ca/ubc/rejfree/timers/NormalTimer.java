@@ -20,7 +20,7 @@ public class NormalTimer extends ContinuousStateDependent implements EventTimer
   final Matrix precision;
   
   // Some low level optimization for binary Gaussian potentials 
-  // which frequently occurs in practice and ends up in the inner loop
+  // which frequently occur in practice and end up in the inner loop
   final boolean cachedBinary;
   final double p0, p1, d;
 

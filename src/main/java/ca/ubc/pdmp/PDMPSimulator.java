@@ -93,31 +93,53 @@ public class PDMPSimulator
   
   private Random               random;
   private StoppingCriterion    stoppingRule;
+  private long                 numberOfQueuePolls; 
   private long                 startTimeMilliSeconds;
-  private int                  numberOfQueuePolls; 
   
-  private void init(Random random, StoppingCriterion stoppingRule)
+  private double               maxTrajectoryLengthPerChunk = 10_000;
+  
+  private void init()
   {
     this.time = 0.0;
     this.queue = new EventQueue<>();
     this.lastUpdateTime = new double[numberOfVariables];
     this.isBoundIndicators = new boolean[numberOfVariables];
-    this.stoppingRule = stoppingRule;
-    this.random = random;
-    this.startTimeMilliSeconds = System.currentTimeMillis();
-    this.numberOfQueuePolls = 0;
   }
   
-  // TODO: the public version of that will truncate in process time to ensure better numerical properties
-  // TODO: test by having a long chain followed by a bunch of short ones; watch moments
-  void simulate(Random random, StoppingCriterion stoppingCriterion)
+  public void simulate(Random random, StoppingCriterion inputStoppingRule)
   {
-    init(random, stoppingCriterion);
+    double totalProcessTime = 0.0;
+    this.numberOfQueuePolls = 0;
+    this.startTimeMilliSeconds = System.currentTimeMillis();
+    this.random = random;
+    
+    loop:while (inputStoppingRule.stochasticProcessTime - totalProcessTime > 0)
+    {
+      double processIncrementTime = 
+         Math.min(
+             maxTrajectoryLengthPerChunk, 
+             inputStoppingRule.stochasticProcessTime - totalProcessTime);
+      this.stoppingRule = new StoppingCriterion(
+          processIncrementTime,
+          inputStoppingRule.wallClockTimeMilliseconds,
+          inputStoppingRule.numberOfQueuePolls
+          );
+      simulateChunk();
+      totalProcessTime += processIncrementTime;
+      
+      if (!computeBudgetPositive())
+        break loop;
+    }
+  }
+  
+  private void simulateChunk()
+  {
+    init();
     
     for (int eventSourceIndex = 0; eventSourceIndex < pdmp.jumpProcesses.size(); eventSourceIndex++)
       simulateNextEventDeltaTime(eventSourceIndex);
     
-    while (moreSamplesNeeded())
+    while (computeBudgetPositive() && !queue.isEmpty())
     {
       // retrieve info about event
       final Entry<Double, Integer> event = queue.pollEvent();
@@ -156,15 +178,8 @@ public class PDMPSimulator
     updateAllVariables(true); 
   }
   
-  private boolean moreSamplesNeeded()
+  private boolean computeBudgetPositive()
   {
-    // Do not need the following, since this is checked in simulateNextEventDeltaTime
-    // if (time > stoppingRule.processTime)
-    //  return false;
-    // instead:
-    if (queue.isEmpty())
-      return false;
-    
     if (System.currentTimeMillis() - startTimeMilliSeconds 
         > stoppingRule.wallClockTimeMilliseconds)
       return false;

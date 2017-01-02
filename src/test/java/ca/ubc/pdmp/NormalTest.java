@@ -8,7 +8,6 @@ import ca.ubc.rejfree.energies.NormalEnergy;
 import ca.ubc.rejfree.kernels.Bounce;
 import ca.ubc.rejfree.kernels.Refreshment;
 import ca.ubc.rejfree.processors.IntegrateTrajectory;
-import ca.ubc.rejfree.processors.SaveTrajectory;
 import ca.ubc.rejfree.state.ContinuouslyEvolving;
 import ca.ubc.rejfree.state.PiecewiseLinear;
 import ca.ubc.rejfree.timers.HomogeneousPP;
@@ -52,7 +51,7 @@ public class NormalTest
     // running
     PDMP pdmp = new PDMP(jumpProcesses, states, processors);
     PDMPSimulator simu = new PDMPSimulator(pdmp);
-    simu.simulate(random, StoppingCriterion.byStochasticProcessTime(100_000.0));
+    simu.simulate(random, StoppingCriterion.byStochasticProcessTime(10_000_000.0));
     // analysis
     System.out.println(processor.evaluateIntegral());
     System.out.println(chain.covarMatrix.get(0,0));

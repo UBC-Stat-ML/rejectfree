@@ -36,4 +36,23 @@ public class StoppingCriterion
     result.numberOfQueuePolls = nQueuePolls;
     return result;
   }
+  
+  private StoppingCriterion()
+  {
+    
+  }
+
+  public StoppingCriterion(double stochasticProcessTime, long wallClockTimeMilliseconds, long numberOfQueuePolls)
+  {
+    this.stochasticProcessTime = stochasticProcessTime;
+    this.wallClockTimeMilliseconds = wallClockTimeMilliseconds;
+    this.numberOfQueuePolls = numberOfQueuePolls;
+  }
+
+  @Override
+  public String toString()
+  {
+    return "StoppingCriterion [stochasticProcessTime=" + stochasticProcessTime + ", wallClockTimeMilliseconds="
+        + wallClockTimeMilliseconds + ", numberOfQueuePolls=" + numberOfQueuePolls + "]";
+  }
 }
