@@ -14,27 +14,27 @@ import ca.ubc.rejfree.state.PiecewiseLinear;
 public class IntegrateTrajectory extends ContinuousStateDependent implements Processor
 {
   final ContinuouslyEvolving variable;
-  final Integrator integrator;
+  final TrajectoryIntegrator integrator;
   
-  public static double evaluateIntegral(Trajectory trajectory, SegmentIntegral integral)
+  public static double integrate(Trajectory trajectory, SegmentIntegrator integral)
   {
     integral.setup(trajectory.dynamics);
-    Integrator integrator = new Integrator(integral);
+    TrajectoryIntegrator integrator = new TrajectoryIntegrator(integral);
     for (TrajectorySegment segment : trajectory.segments)
       integrator.process(segment.deltaTime, segment.startPosition, segment.startVelocity);
-    return integrator.evaluateIntegral();
+    return integrator.integrate();
   }
   
-  public double evaluateIntegral()
+  public double integrate()
   {
-    return integrator.evaluateIntegral();
+    return integrator.integrate();
   }
   
-  public IntegrateTrajectory(ContinuouslyEvolving variable, SegmentIntegral integral)
+  public IntegrateTrajectory(ContinuouslyEvolving variable, SegmentIntegrator integral)
   {
     super(Collections.singletonList(variable));
     this.variable = variable;
-    this.integrator = new Integrator(integral);
+    this.integrator = new TrajectoryIntegrator(integral);
   }
 
   @Override
@@ -43,11 +43,11 @@ public class IntegrateTrajectory extends ContinuousStateDependent implements Pro
     integrator.process(deltaTime, variable.position.get(), variable.velocity.get());
   }
   
-  private static class Integrator
+  private static class TrajectoryIntegrator
   {
-    final SegmentIntegral integral;
+    final SegmentIntegrator integral;
     double totalLength = 0.0, sum = 0.0;
-    Integrator(SegmentIntegral integral)
+    TrajectoryIntegrator(SegmentIntegrator integral)
     {
       this.integral = integral;
     }
@@ -56,7 +56,7 @@ public class IntegrateTrajectory extends ContinuousStateDependent implements Pro
       totalLength += deltaTime;
       sum += integral.evaluate(x, v, deltaTime);
     }
-    double evaluateIntegral()
+    double integrate()
     {
       if (totalLength == 0.0)
         throw new RuntimeException();
@@ -64,17 +64,17 @@ public class IntegrateTrajectory extends ContinuousStateDependent implements Pro
     }
   }
   
-  public static interface SegmentIntegral
+  public static interface SegmentIntegrator
   {
     void setup(Dynamics dynamics);
     double evaluate(double x, double v, double deltaT);
   }
   
-  public static class MonomialIntegral implements SegmentIntegral
+  public static class MomentIntegrator implements SegmentIntegrator
   {
     final int degree;
     
-    public MonomialIntegral(int degree)
+    public MomentIntegrator(int degree)
     {
       if (degree < 0)
         throw new RuntimeException();

@@ -46,14 +46,14 @@ public class NormalTest
     jumpProcesses.add(new JumpProcess(homog, ref));
     // processors
     List<IntegrateTrajectory> processors = new ArrayList<>();
-    IntegrateTrajectory processor = new IntegrateTrajectory(states.get(0), new IntegrateTrajectory.MonomialIntegral(2));
+    IntegrateTrajectory processor = new IntegrateTrajectory(states.get(0), new IntegrateTrajectory.MomentIntegrator(2));
     processors.add(processor);
     // running
     PDMP pdmp = new PDMP(jumpProcesses, states, processors);
     PDMPSimulator simu = new PDMPSimulator(pdmp);
     simu.simulate(random, StoppingCriterion.byStochasticProcessTime(10_000_000.0));
     // analysis
-    System.out.println(processor.evaluateIntegral());
+    System.out.println(processor.integrate());
     System.out.println(chain.covarMatrix.get(0,0));
   }
 }

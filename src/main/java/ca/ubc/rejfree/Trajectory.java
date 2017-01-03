@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 import bayonet.math.NumericalUtils;
+import ca.ubc.rejfree.processors.EffectiveSampleSize;
+import ca.ubc.rejfree.processors.IntegrateTrajectory.SegmentIntegrator;
 import ca.ubc.rejfree.state.Dynamics;
 
 public class Trajectory
@@ -86,6 +88,22 @@ public class Trajectory
     }
     
     return result;
+  }
+
+  public double numberOfSegments()
+  {
+    return segments.size();
+  }
+  
+  public double ess(SegmentIntegrator testFunction, 
+      SegmentIntegrator testFunctionSquared)
+  {
+    return EffectiveSampleSize.ess(this, testFunction, testFunctionSquared);
+  }
+  
+  public double momentEss(int degree)
+  {
+    return EffectiveSampleSize.momentEss(this, degree);
   }
   
   // viz
