@@ -6,6 +6,7 @@ import com.google.common.collect.FluentIterable;
 
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.StateDependentBase;
+import ca.ubc.rejfree.StaticUtils;
 
 public abstract class ContinuousStateDependent extends StateDependentBase
 {
@@ -30,7 +31,7 @@ public abstract class ContinuousStateDependent extends StateDependentBase
   private boolean isPiecewiseLinear()
   {
     for (ContinuouslyEvolving coordinate : continuousCoordinates)
-      if (!(coordinate.dynamics instanceof PiecewiseLinear))
+      if (!StaticUtils.isPiecewiseLinear(coordinate))
         return false;
     return true;
   }

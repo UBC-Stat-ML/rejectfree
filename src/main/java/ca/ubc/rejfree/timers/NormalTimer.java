@@ -8,6 +8,7 @@ import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
 import ca.ubc.pdmp.EventTimer;
 import ca.ubc.rejfree.state.ContinuousStateDependent;
+import ca.ubc.rejfree.state.ContinuouslyEvolving;
 import rejfree.StaticUtils;
 import rejfree.models.normal.NormalFactor;
 import xlinear.DenseMatrix;
@@ -27,6 +28,12 @@ public class NormalTimer extends ContinuousStateDependent implements EventTimer
   public NormalTimer(List<Coordinate> requiredVariables, Matrix precision)
   {
     super(requiredVariables);
+    
+    // check dynamics are linear
+    for (ContinuouslyEvolving continuous : continuousCoordinates)
+      if (!ca.ubc.rejfree.StaticUtils.isPiecewiseLinear(continuous))
+        throw new RuntimeException();
+    
     this.precision = precision;
     boolean parametersConstant = requiredVariables.size() == precision.nCols();
     boolean isBin = requiredVariables.size() == 2;

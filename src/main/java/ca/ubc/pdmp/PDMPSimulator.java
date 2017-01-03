@@ -93,7 +93,7 @@ public class PDMPSimulator
   
   private Random               random;
   private StoppingCriterion    stoppingRule;
-  private long                 numberOfQueuePolls; 
+  private long                 numberOfQueuePolls, numberOfEvents; 
   private long                 startTimeMilliSeconds;
   
   private double               maxTrajectoryLengthPerChunk = 10_000;
@@ -110,6 +110,7 @@ public class PDMPSimulator
   {
     double totalProcessTime = 0.0;
     this.numberOfQueuePolls = 0;
+    this.numberOfEvents = 0;
     this.startTimeMilliSeconds = System.currentTimeMillis();
     this.random = random;
     
@@ -160,6 +161,7 @@ public class PDMPSimulator
       }
       else
       {
+        numberOfEvents++;
         updateVariables(nk[eventSourceIndex], true);
         updateVariables(nd_Nd_nk_plus_nd_minus_n_k[eventSourceIndex], false);
         
@@ -289,6 +291,43 @@ public class PDMPSimulator
     return proposedTime;
   }
   
+  private void buildCaches()
+  {
+    Dependencies deps = new Dependencies(pdmp);
+    
+    // processors: variable -> processors
+    Map<Integer,Set<Integer>> processorMappings = new LinkedHashMap<Integer, Set<Integer>>();
+    for (int procIdx = 0; procIdx < pdmp.processors.size(); procIdx++)
+    {
+      Processor currentProc = pdmp.processors.get(procIdx);
+      if (currentProc.requiredVariables().size() != 1)
+        throw new RuntimeException("Currently, processors depending on only one variable are " 
+            + "supported. \n" 
+            + "Other cases can be handled as post-processing without loss of generality.");
+      int variableIdx = deps.variable2Index.get(currentProc.requiredVariables().get(0));
+      BriefMaps.getOrPutSet(processorMappings, variableIdx).add(procIdx);
+    }
+    for (int variableIdx = 0; variableIdx < numberOfVariables; variableIdx++)
+      processors[variableIdx] = deps.convert(processorMappings.get(variableIdx), Integer.MAX_VALUE);
+    
+    // variable and factor neighborhoods
+    for (int eventIdx = 0; eventIdx < numberOfJumpProcesses; eventIdx++)
+    {
+      final Set<Integer> _nd = deps.nd(eventIdx);
+      final Set<Integer> _nk = deps.nk(eventIdx);
+      final Set<Integer> _Nd_nk = deps.Nd(_nk);
+      final Set<Integer> _nd_Nd_nk = deps.nd(_Nd_nk);
+      _nd_Nd_nk.addAll(_nd);
+      _nd_Nd_nk.removeAll(_nk);
+      final Set<Integer> _nd_Nd_nk_plus_nd_minus_n_k = _nd_Nd_nk;
+      
+      nd[eventIdx] = deps.convert(_nd, true);
+      nk[eventIdx] = deps.convert(_nk, true);
+      Nd_nk[eventIdx] = deps.convert(_Nd_nk, false);
+      nd_Nd_nk_plus_nd_minus_n_k[eventIdx] = deps.convert(_nd_Nd_nk_plus_nd_minus_n_k, true);
+    }
+  }
+  
   private static class Dependencies
   {
     // var -> jump timers that refer to it
@@ -373,40 +412,26 @@ public class PDMPSimulator
     }
   }
   
-  private void buildCaches()
+  
+  //// Setters and getters
+  
+  public double getMaxTrajectoryLengthPerChunk()
   {
-    Dependencies deps = new Dependencies(pdmp);
-    
-    // processors: variable -> processors
-    Map<Integer,Set<Integer>> processorMappings = new LinkedHashMap<Integer, Set<Integer>>();
-    for (int procIdx = 0; procIdx < pdmp.processors.size(); procIdx++)
-    {
-      Processor currentProc = pdmp.processors.get(procIdx);
-      if (currentProc.requiredVariables().size() != 1)
-        throw new RuntimeException("Currently, processors depending on only one variable are " 
-            + "supported. \n" 
-            + "Other cases can be handled as post-processing without loss of generality.");
-      int variableIdx = deps.variable2Index.get(currentProc.requiredVariables().get(0));
-      BriefMaps.getOrPutSet(processorMappings, variableIdx).add(procIdx);
-    }
-    for (int variableIdx = 0; variableIdx < numberOfVariables; variableIdx++)
-      processors[variableIdx] = deps.convert(processorMappings.get(variableIdx), Integer.MAX_VALUE);
-    
-    // variable and factor neighborhoods
-    for (int eventIdx = 0; eventIdx < numberOfJumpProcesses; eventIdx++)
-    {
-      final Set<Integer> _nd = deps.nd(eventIdx);
-      final Set<Integer> _nk = deps.nk(eventIdx);
-      final Set<Integer> _Nd_nk = deps.Nd(_nk);
-      final Set<Integer> _nd_Nd_nk = deps.nd(_Nd_nk);
-      _nd_Nd_nk.addAll(_nd);
-      _nd_Nd_nk.removeAll(_nk);
-      final Set<Integer> _nd_Nd_nk_plus_nd_minus_n_k = _nd_Nd_nk;
-      
-      nd[eventIdx] = deps.convert(_nd, true);
-      nk[eventIdx] = deps.convert(_nk, true);
-      Nd_nk[eventIdx] = deps.convert(_Nd_nk, false);
-      nd_Nd_nk_plus_nd_minus_n_k[eventIdx] = deps.convert(_nd_Nd_nk_plus_nd_minus_n_k, true);
-    }
+    return maxTrajectoryLengthPerChunk;
+  }
+
+  public void setMaxTrajectoryLengthPerChunk(double maxTrajectoryLengthPerChunk)
+  {
+    this.maxTrajectoryLengthPerChunk = maxTrajectoryLengthPerChunk;
+  }
+
+  public long getNumberOfQueuePolls()
+  {
+    return numberOfQueuePolls;
+  }
+
+  public long getNumberOfEvents()
+  {
+    return numberOfEvents;
   }
 }
