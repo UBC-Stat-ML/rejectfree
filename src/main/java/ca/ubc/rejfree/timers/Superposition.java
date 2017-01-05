@@ -11,6 +11,7 @@ import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
 import ca.ubc.rejfree.BPSPotential;
+import ca.ubc.rejfree.StaticUtils;
 import ca.ubc.rejfree.energies.EnergyGradient;
 import ca.ubc.rejfree.state.ContinuousStateDependent;
 
@@ -88,6 +89,6 @@ public class Superposition extends ContinuousStateDependent implements Clock, En
 
   public static double canonicalRate(double [] velocity, double [] gradient)
   {
-    return Math.max(0.0, NumericalUtils.dot(velocity, gradient));
+    return Math.max(0.0, StaticUtils.dot(velocity, gradient));
   }
 }
