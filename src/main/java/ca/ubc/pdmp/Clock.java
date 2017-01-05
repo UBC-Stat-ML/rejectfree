@@ -9,7 +9,7 @@ import java.util.Random;
  * 
  * @author bouchard
  */
-public interface EventTimer extends StateDependent
+public interface Clock extends StateDependent
 {
   /**
    * 

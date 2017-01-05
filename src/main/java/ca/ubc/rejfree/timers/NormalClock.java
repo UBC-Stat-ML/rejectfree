@@ -6,7 +6,7 @@ import java.util.Random;
 import bayonet.math.NumericalUtils;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
-import ca.ubc.pdmp.EventTimer;
+import ca.ubc.pdmp.Clock;
 import ca.ubc.rejfree.state.ContinuousStateDependent;
 import ca.ubc.rejfree.state.ContinuouslyEvolving;
 import rejfree.StaticUtils;
@@ -16,7 +16,7 @@ import xlinear.Matrix;
 import xlinear.MatrixExtensions;
 import xlinear.MatrixOperations;
 
-public class NormalTimer extends ContinuousStateDependent implements EventTimer
+public class NormalClock extends ContinuousStateDependent implements Clock
 {
   final Matrix precision;
   
@@ -25,7 +25,7 @@ public class NormalTimer extends ContinuousStateDependent implements EventTimer
   final boolean cachedBinary;
   final double p0, p1, d;
 
-  public NormalTimer(List<Coordinate> requiredVariables, Matrix precision)
+  public NormalClock(List<Coordinate> requiredVariables, Matrix precision)
   {
     super(requiredVariables);
     

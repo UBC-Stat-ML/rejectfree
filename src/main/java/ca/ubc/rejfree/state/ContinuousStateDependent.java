@@ -1,5 +1,7 @@
 package ca.ubc.rejfree.state;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.google.common.collect.FluentIterable;
@@ -10,15 +12,16 @@ import ca.ubc.rejfree.StaticUtils;
 
 public abstract class ContinuousStateDependent extends StateDependentBase
 {
+  // we use a list here to fix an ordering for the vector reprensentation
   protected final List<ContinuouslyEvolving> continuousCoordinates;
   private final boolean isPiecewiseLinear;
   
-  public ContinuousStateDependent(List<? extends Coordinate> requiredVariables)
+  public ContinuousStateDependent(Collection<? extends Coordinate> requiredVariables)
   {
     // maintain all the dependencies (some of which may not be continuously evolving)
     super(requiredVariables);
-    // identify the subset that is continuously evolving
-    this.continuousCoordinates = FluentIterable.from(requiredVariables).filter(ContinuouslyEvolving.class).toList();
+    // identify the subset that is continuously evolving (getting rid of duplicates at same time)
+    this.continuousCoordinates = new ArrayList<>(FluentIterable.from(requiredVariables).filter(ContinuouslyEvolving.class).toSet());
     isPiecewiseLinear = isPiecewiseLinear();
   }
 

@@ -262,7 +262,7 @@ public class PDMPSimulator
   private void simulateNextEventDeltaTime(int eventSourceIndex)
   {
     queue.remove(eventSourceIndex);
-    final DeltaTime nextEvent = pdmp.jumpProcesses.get(eventSourceIndex).timer.next(random);
+    final DeltaTime nextEvent = pdmp.jumpProcesses.get(eventSourceIndex).clock.next(random);
     double absoluteTime = time + nextEvent.deltaTime;
     if (absoluteTime <= stoppingRule.stochasticProcessTime)
     {
@@ -304,7 +304,7 @@ public class PDMPSimulator
         throw new RuntimeException("Currently, processors depending on only one variable are " 
             + "supported. \n" 
             + "Other cases can be handled as post-processing without loss of generality.");
-      int variableIdx = deps.variable2Index.get(currentProc.requiredVariables().get(0));
+      int variableIdx = deps.variable2Index.get(currentProc.requiredVariables().iterator().next());
       BriefMaps.getOrPutSet(processorMappings, variableIdx).add(procIdx);
     }
     for (int variableIdx = 0; variableIdx < numberOfVariables; variableIdx++)
@@ -344,13 +344,13 @@ public class PDMPSimulator
       for (int variableIndex = 0; variableIndex < pdmp.coordinates.size(); variableIndex++)
         variable2Index.put(pdmp.coordinates.get(variableIndex), variableIndex);
       for (int factorIndex = 0; factorIndex < pdmp.jumpProcesses.size(); factorIndex++)
-        for (Object var : pdmp.jumpProcesses.get(factorIndex).timer.requiredVariables())
+        for (Object var : pdmp.jumpProcesses.get(factorIndex).clock.requiredVariables())
           BriefMaps.getOrPutSet(_Nds, variable2Index.get(var)).add(factorIndex);
     }
     
     private Set<Integer> nd(int j)
     {
-      return n_(j, pdmp.jumpProcesses.get(j).timer);
+      return n_(j, pdmp.jumpProcesses.get(j).clock);
     }
     
     private Set<Integer> nd(Set<Integer> js)

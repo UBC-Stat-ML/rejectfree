@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Random;
 
 import bayonet.distributions.Exponential;
+import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
 
-public class HomogeneousPP implements PoissonProcess
+public class HomogeneousPP implements Clock
 {
   final double rate;
 
@@ -28,12 +29,6 @@ public class HomogeneousPP implements PoissonProcess
   public List<Coordinate> requiredVariables()
   {
     return Collections.emptyList();
-  }
-
-  @Override
-  public double rate(double deltaTime)
-  {
-    return rate;
   }
 
 }

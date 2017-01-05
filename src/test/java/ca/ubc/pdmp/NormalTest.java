@@ -7,11 +7,11 @@ import java.util.Random;
 import ca.ubc.rejfree.energies.NormalEnergy;
 import ca.ubc.rejfree.kernels.Bounce;
 import ca.ubc.rejfree.kernels.Refreshment;
-import ca.ubc.rejfree.processors.IntegrateTrajectory;
+import ca.ubc.rejfree.processors.SaveTrajectory;
 import ca.ubc.rejfree.state.ContinuouslyEvolving;
 import ca.ubc.rejfree.state.PiecewiseLinear;
 import ca.ubc.rejfree.timers.HomogeneousPP;
-import ca.ubc.rejfree.timers.NormalTimer;
+import ca.ubc.rejfree.timers.NormalClock;
 import rejfree.models.normal.NormalChain;
 import rejfree.models.normal.NormalChainOptions;
 import xlinear.DenseMatrix;
@@ -36,7 +36,7 @@ public class NormalTest
       List<Coordinate> reqVars = new ArrayList<>();
       reqVars.add(states.get(i));
       reqVars.add(states.get(i+1));
-      NormalTimer timer = new NormalTimer(reqVars, pairPrecision);
+      NormalClock timer = new NormalClock(reqVars, pairPrecision);
       NormalEnergy energy = new NormalEnergy(pairPrecision);
       JumpKernel bounce = new Bounce(reqVars, energy);
       JumpProcess jp = new JumpProcess(timer, bounce);
@@ -47,13 +47,14 @@ public class NormalTest
     HomogeneousPP homog = new HomogeneousPP(1.0);
     pdmp.jumpProcesses.add(new JumpProcess(homog, ref));
     // processors
-    IntegrateTrajectory processor = new IntegrateTrajectory(states.get(0), new IntegrateTrajectory.MomentIntegrator(2));
+    SaveTrajectory processor = new SaveTrajectory(states.get(0));
     pdmp.processors.add(processor);
     // running
     PDMPSimulator simu = new PDMPSimulator(pdmp);
-    simu.simulate(random, StoppingCriterion.byStochasticProcessTime(10_000_000.0));
+    simu.simulate(random, StoppingCriterion.byStochasticProcessTime(100_000));
     // analysis
-    System.out.println(processor.integrate());
-    System.out.println(chain.covarMatrix.get(0,0));
+    System.out.println("Approx = " + processor.getTrajectory().moment(2)); //integrate());
+    System.out.println("Exact  = " + chain.covarMatrix.get(0,0));
+    System.out.println("ESS = " + processor.getTrajectory().momentEss(2));
   }
 }

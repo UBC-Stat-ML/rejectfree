@@ -1,18 +1,18 @@
 package ca.ubc.pdmp;
 
-import java.util.List;
+import java.util.Collection;
 
 public abstract class StateDependentBase implements StateDependent
 {
-  protected final List<? extends Coordinate> requiredVariables;
+  protected final Collection<? extends Coordinate> requiredVariables;
   
-  public StateDependentBase(List<? extends Coordinate> requiredVariables)
+  public StateDependentBase(Collection<? extends Coordinate> requiredVariables)
   {
     this.requiredVariables = requiredVariables;
   }
 
   @Override
-  public final List<? extends Coordinate> requiredVariables()
+  public final Collection<? extends Coordinate> requiredVariables()
   {
     return requiredVariables;
   }

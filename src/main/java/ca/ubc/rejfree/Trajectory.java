@@ -7,6 +7,7 @@ import java.util.List;
 
 import bayonet.math.NumericalUtils;
 import ca.ubc.rejfree.processors.EffectiveSampleSize;
+import ca.ubc.rejfree.processors.IntegrateTrajectory;
 import ca.ubc.rejfree.processors.IntegrateTrajectory.SegmentIntegrator;
 import ca.ubc.rejfree.state.Dynamics;
 
@@ -95,6 +96,16 @@ public class Trajectory
     return segments.size();
   }
   
+  public double integrate(SegmentIntegrator integrator)
+  {
+    return IntegrateTrajectory.integrate(this, integrator);
+  }
+  
+  public double moment(int degree)
+  {
+    return integrate(new IntegrateTrajectory.MomentIntegrator(degree));
+  }
+  
   public double ess(SegmentIntegrator testFunction, 
       SegmentIntegrator testFunctionSquared)
   {
@@ -107,8 +118,6 @@ public class Trajectory
   }
   
   // viz
-  // moments
-  // ESS
   // discretizations
   // CIs
 }
