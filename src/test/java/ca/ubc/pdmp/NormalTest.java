@@ -21,13 +21,15 @@ public class NormalTest
 {
   public static void main(String [] args)
   {
+    PDMP pdmp = new PDMP();
+    
     Random random = new Random(1);
     final int size = 10;
     NormalChainOptions options = new NormalChainOptions();
     options.nPairs = size - 1;
     NormalChain chain = new NormalChain(options);
     List<ContinuouslyEvolving> states = ContinuouslyEvolving.buildIsotropicNormalArray(size, PiecewiseLinear.instance, random);
-    List<JumpProcess> jumpProcesses = new ArrayList<>();
+    pdmp.coordinates.addAll(states);
     DenseMatrix pairPrecision = MatrixOperations.denseCopy(chain.pairPrecisions.get(0)); // all equal
     for (int i = 0; i < size - 1; i++)
     {
@@ -38,18 +40,16 @@ public class NormalTest
       NormalEnergy energy = new NormalEnergy(pairPrecision);
       JumpKernel bounce = new Bounce(reqVars, energy);
       JumpProcess jp = new JumpProcess(timer, bounce);
-      jumpProcesses.add(jp);
+      pdmp.jumpProcesses.add(jp);
     }
     // refreshment
     Refreshment ref = new Refreshment(states);
     HomogeneousPP homog = new HomogeneousPP(1.0);
-    jumpProcesses.add(new JumpProcess(homog, ref));
+    pdmp.jumpProcesses.add(new JumpProcess(homog, ref));
     // processors
-    List<IntegrateTrajectory> processors = new ArrayList<>();
     IntegrateTrajectory processor = new IntegrateTrajectory(states.get(0), new IntegrateTrajectory.MomentIntegrator(2));
-    processors.add(processor);
+    pdmp.processors.add(processor);
     // running
-    PDMP pdmp = new PDMP(jumpProcesses, states, processors);
     PDMPSimulator simu = new PDMPSimulator(pdmp);
     simu.simulate(random, StoppingCriterion.byStochasticProcessTime(10_000_000.0));
     // analysis
