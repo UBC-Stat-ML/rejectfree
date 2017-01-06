@@ -1,16 +1,15 @@
 package ca.ubc.pdmp;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.google.common.collect.ImmutableList;
+
+import ca.ubc.rejfree.Bounces;
 import ca.ubc.rejfree.Refreshments;
-import ca.ubc.rejfree.energies.NormalEnergy;
-import ca.ubc.rejfree.kernels.Bounce;
 import ca.ubc.rejfree.processors.SaveTrajectory;
 import ca.ubc.rejfree.state.ContinuouslyEvolving;
 import ca.ubc.rejfree.state.PiecewiseLinear;
-import ca.ubc.rejfree.timers.NormalClock;
 import rejfree.models.normal.NormalChain;
 import rejfree.models.normal.NormalChainOptions;
 import xlinear.DenseMatrix;
@@ -31,16 +30,13 @@ public class NormalTest
     
     DenseMatrix pairPrecision = MatrixOperations.denseCopy(chain.pairPrecisions.get(0)); // all equal
     for (int i = 0; i < size - 1; i++)
-    {
-      List<Coordinate> reqVars = new ArrayList<>();
-      reqVars.add(states.get(i));
-      reqVars.add(states.get(i+1));
-      NormalClock timer = new NormalClock(reqVars, pairPrecision);
-      NormalEnergy energy = new NormalEnergy(pairPrecision);
-      JumpKernel bounce = new Bounce(reqVars, energy);
-      JumpProcess jp = new JumpProcess(timer, bounce);
-      pdmp.jumpProcesses.add(jp);
-    }
+      Bounces.addNormalPotential(
+          pdmp, 
+          ImmutableList.of(
+              states.get(i), 
+              states.get(i+1)), 
+          pairPrecision);
+
     // refreshment
     Refreshments.addGlobal(pdmp, 1.0);
     // processors

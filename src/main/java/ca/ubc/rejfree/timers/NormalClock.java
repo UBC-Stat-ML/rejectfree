@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Random;
 
 import bayonet.math.NumericalUtils;
-import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.rejfree.state.ContinuousStateDependent;
@@ -25,15 +24,9 @@ public class NormalClock extends ContinuousStateDependent implements Clock
   final boolean cachedBinary;
   final double p0, p1, d;
 
-  public NormalClock(List<Coordinate> requiredVariables, Matrix precision)
+  public NormalClock(List<ContinuouslyEvolving> requiredVariables, Matrix precision)
   {
     super(requiredVariables);
-    
-    // check dynamics are linear
-    for (ContinuouslyEvolving continuous : continuousCoordinates)
-      if (!ca.ubc.rejfree.StaticUtils.isPiecewiseLinear(continuous))
-        throw new RuntimeException();
-    
     this.precision = precision;
     boolean parametersConstant = requiredVariables.size() == precision.nCols();
     boolean isBin = requiredVariables.size() == 2;
