@@ -1,15 +1,15 @@
 package ca.ubc.rejfree.kernels;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Random;
 
 import ca.ubc.pdmp.JumpKernel;
 import ca.ubc.rejfree.state.ContinuousStateDependent;
 import ca.ubc.rejfree.state.ContinuouslyEvolving;
 
-public class Refreshment extends ContinuousStateDependent implements JumpKernel
+public class IndependentRefreshment extends ContinuousStateDependent implements JumpKernel
 {
-  public Refreshment(List<ContinuouslyEvolving> requiredVariables)
+  public IndependentRefreshment(Collection<ContinuouslyEvolving> requiredVariables)
   {
     super(requiredVariables);
   }

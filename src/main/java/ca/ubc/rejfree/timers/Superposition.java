@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import bayonet.math.NumericalUtils;
+import bayonet.distributions.Bernoulli;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
@@ -26,7 +26,6 @@ public class Superposition extends ContinuousStateDependent implements Clock, En
       throw new RuntimeException();
     this.potentials = potentials;
   }
-
 
   private static Collection<Coordinate> unionOfRequiredVariables(List<BPSPotential> potentials)
   {
@@ -55,7 +54,7 @@ public class Superposition extends ContinuousStateDependent implements Clock, En
     if (isMinBound)
       return DeltaTime.isGreaterThan(min);
     
-    if (random.nextDouble() < acceptanceRate(min))
+    if (Bernoulli.generate(random, acceptanceRate(min)))
       return DeltaTime.isEqualTo(min);
     else
       return DeltaTime.isGreaterThan(min);

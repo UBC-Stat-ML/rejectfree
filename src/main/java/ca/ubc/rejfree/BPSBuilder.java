@@ -8,7 +8,7 @@ public class BPSBuilder
     
   }
   
-  // global
+  // pot 
   
   // keeps track of continuous variables
   

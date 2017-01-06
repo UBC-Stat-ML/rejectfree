@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import ca.ubc.rejfree.Refreshments;
 import ca.ubc.rejfree.energies.NormalEnergy;
 import ca.ubc.rejfree.kernels.Bounce;
-import ca.ubc.rejfree.kernels.Refreshment;
 import ca.ubc.rejfree.processors.SaveTrajectory;
 import ca.ubc.rejfree.state.ContinuouslyEvolving;
 import ca.ubc.rejfree.state.PiecewiseLinear;
-import ca.ubc.rejfree.timers.HomogeneousPP;
 import ca.ubc.rejfree.timers.NormalClock;
 import rejfree.models.normal.NormalChain;
 import rejfree.models.normal.NormalChainOptions;
@@ -21,15 +20,15 @@ public class NormalTest
 {
   public static void main(String [] args)
   {
-    PDMP pdmp = new PDMP();
-    
     Random random = new Random(1);
     final int size = 10;
+    List<ContinuouslyEvolving> states = ContinuouslyEvolving.buildIsotropicNormalArray(size, PiecewiseLinear.instance, random);
+    PDMP pdmp = new PDMP(states);
+    
     NormalChainOptions options = new NormalChainOptions();
     options.nPairs = size - 1;
     NormalChain chain = new NormalChain(options);
-    List<ContinuouslyEvolving> states = ContinuouslyEvolving.buildIsotropicNormalArray(size, PiecewiseLinear.instance, random);
-    pdmp.coordinates.addAll(states);
+    
     DenseMatrix pairPrecision = MatrixOperations.denseCopy(chain.pairPrecisions.get(0)); // all equal
     for (int i = 0; i < size - 1; i++)
     {
@@ -43,9 +42,7 @@ public class NormalTest
       pdmp.jumpProcesses.add(jp);
     }
     // refreshment
-    Refreshment ref = new Refreshment(states);
-    HomogeneousPP homog = new HomogeneousPP(1.0);
-    pdmp.jumpProcesses.add(new JumpProcess(homog, ref));
+    Refreshments.addGlobal(pdmp, 1.0);
     // processors
     SaveTrajectory processor = new SaveTrajectory(states.get(0));
     pdmp.processors.add(processor);
