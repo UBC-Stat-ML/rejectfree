@@ -28,14 +28,6 @@ public class ContinuouslyEvolving implements Coordinate
     dynamics.extrapolateInPlace(deltaTime, position, velocity);
   }
   
-  public static List<ContinuouslyEvolving> buildIsotropicNormalArray(int size, Dynamics dynamics, Random random)
-  {
-    List<ContinuouslyEvolving> result = buildArray(size, dynamics);
-    for (int i = 0; i < size; i++)
-      result.get(i).velocity.set(random.nextGaussian());
-    return result;
-  }
-  
   public static List<ContinuouslyEvolving> buildArray(int size, Dynamics dynamics)
   {
     List<ContinuouslyEvolving> result = new ArrayList<>(size);

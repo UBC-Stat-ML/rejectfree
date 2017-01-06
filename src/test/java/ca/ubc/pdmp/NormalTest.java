@@ -6,10 +6,11 @@ import java.util.Random;
 import com.google.common.collect.ImmutableList;
 
 import ca.ubc.rejfree.Bounces;
+import ca.ubc.rejfree.PDMPs;
 import ca.ubc.rejfree.Refreshments;
+import ca.ubc.rejfree.StaticUtils;
 import ca.ubc.rejfree.processors.SaveTrajectory;
 import ca.ubc.rejfree.state.ContinuouslyEvolving;
-import ca.ubc.rejfree.state.PiecewiseLinear;
 import rejfree.models.normal.NormalChain;
 import rejfree.models.normal.NormalChainOptions;
 import xlinear.DenseMatrix;
@@ -21,8 +22,9 @@ public class NormalTest
   {
     Random random = new Random(1);
     final int size = 10;
-    List<ContinuouslyEvolving> states = ContinuouslyEvolving.buildIsotropicNormalArray(size, PiecewiseLinear.instance, random);
-    PDMP pdmp = new PDMP(states);
+    PDMP pdmp = PDMPs.withLinearDynamics(size, random);
+    List<ContinuouslyEvolving> states = 
+        StaticUtils.continuousCoordinates(pdmp.coordinates);
     
     NormalChainOptions options = new NormalChainOptions();
     options.nPairs = size - 1;

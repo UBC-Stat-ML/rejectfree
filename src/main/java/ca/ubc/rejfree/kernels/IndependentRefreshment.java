@@ -17,8 +17,15 @@ public class IndependentRefreshment extends ContinuousStateDependent implements 
   @Override
   public void simulate(Random random)
   {
-    for (int i = 0; i < requiredVariables.size(); i++)
-      continuousCoordinates.get(i).velocity.set(random.nextGaussian());
+    simulate(random, continuousCoordinates);
+  }
+  
+  public static void simulate(
+      Random random, 
+      Collection<ContinuouslyEvolving> continuousCoordinates)
+  {
+    for (ContinuouslyEvolving coordinate : continuousCoordinates)
+      coordinate.velocity.set(random.nextGaussian());
   }
 
 }

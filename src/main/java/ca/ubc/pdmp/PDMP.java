@@ -16,7 +16,7 @@ import static ca.ubc.rejfree.StaticUtils.*;
 public class PDMP
 {
   public final List<JumpProcess> jumpProcesses = new ArrayList<>();
-  public final List<Coordinate> coordinates;
+  public final ImmutableList<Coordinate> coordinates;
   public final List<Processor> processors = new ArrayList<>();
   
   public PDMP(List<? extends Coordinate> coordinates)
