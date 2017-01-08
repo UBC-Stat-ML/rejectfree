@@ -1,14 +1,14 @@
-package ca.ubc.rejfree.processors;
+package ca.ubc.bps.processors;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import ca.ubc.bps.Trajectory;
+import ca.ubc.bps.TrajectorySegment;
+import ca.ubc.bps.state.ContinuousStateDependent;
+import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.Processor;
-import ca.ubc.rejfree.Trajectory;
-import ca.ubc.rejfree.TrajectorySegment;
-import ca.ubc.rejfree.state.ContinuousStateDependent;
-import ca.ubc.rejfree.state.ContinuouslyEvolving;
 
 public class SaveTrajectory extends ContinuousStateDependent implements Processor
 {

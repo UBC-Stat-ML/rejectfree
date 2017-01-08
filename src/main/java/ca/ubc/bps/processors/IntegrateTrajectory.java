@@ -1,15 +1,15 @@
-package ca.ubc.rejfree.processors;
+package ca.ubc.bps.processors;
 
 import java.util.Collections;
 
 import bayonet.math.SpecialFunctions;
+import ca.ubc.bps.Trajectory;
+import ca.ubc.bps.TrajectorySegment;
+import ca.ubc.bps.state.ContinuousStateDependent;
+import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.Dynamics;
+import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.pdmp.Processor;
-import ca.ubc.rejfree.Trajectory;
-import ca.ubc.rejfree.TrajectorySegment;
-import ca.ubc.rejfree.state.ContinuousStateDependent;
-import ca.ubc.rejfree.state.ContinuouslyEvolving;
-import ca.ubc.rejfree.state.Dynamics;
-import ca.ubc.rejfree.state.PiecewiseLinear;
 
 public class IntegrateTrajectory extends ContinuousStateDependent implements Processor
 {

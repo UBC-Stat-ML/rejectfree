@@ -1,4 +1,4 @@
-package ca.ubc.rejfree.state;
+package ca.ubc.bps.state;
 
 public interface MutableDouble
 {

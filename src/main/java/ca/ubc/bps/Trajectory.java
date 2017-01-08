@@ -1,4 +1,4 @@
-package ca.ubc.rejfree;
+package ca.ubc.bps;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,10 +6,10 @@ import java.util.Collections;
 import java.util.List;
 
 import bayonet.math.NumericalUtils;
-import ca.ubc.rejfree.processors.EffectiveSampleSize;
-import ca.ubc.rejfree.processors.IntegrateTrajectory;
-import ca.ubc.rejfree.processors.IntegrateTrajectory.SegmentIntegrator;
-import ca.ubc.rejfree.state.Dynamics;
+import ca.ubc.bps.processors.EffectiveSampleSize;
+import ca.ubc.bps.processors.IntegrateTrajectory;
+import ca.ubc.bps.processors.IntegrateTrajectory.SegmentIntegrator;
+import ca.ubc.bps.state.Dynamics;
 
 public class Trajectory
 {

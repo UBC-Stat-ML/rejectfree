@@ -1,4 +1,4 @@
-package ca.ubc.rejfree.timers;
+package ca.ubc.bps.timers;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -7,13 +7,13 @@ import java.util.Random;
 import java.util.Set;
 
 import bayonet.distributions.Bernoulli;
+import ca.ubc.bps.BPSPotential;
+import ca.ubc.bps.StaticUtils;
+import ca.ubc.bps.energies.EnergyGradient;
+import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
-import ca.ubc.rejfree.BPSPotential;
-import ca.ubc.rejfree.StaticUtils;
-import ca.ubc.rejfree.energies.EnergyGradient;
-import ca.ubc.rejfree.state.ContinuousStateDependent;
 
 public class Superposition extends ContinuousStateDependent implements Clock, EnergyGradient
 {

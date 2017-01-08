@@ -1,16 +1,17 @@
 package ca.ubc.pdmp;
 
+import static ca.ubc.bps.StaticUtils.*;
+
 import java.util.List;
 import java.util.Random;
 
 import com.google.common.collect.ImmutableList;
 
-import ca.ubc.rejfree.Bounces;
-import ca.ubc.rejfree.PDMPs;
-import ca.ubc.rejfree.Refreshments;
-import ca.ubc.rejfree.StaticUtils;
-import ca.ubc.rejfree.processors.SaveTrajectory;
-import ca.ubc.rejfree.state.ContinuouslyEvolving;
+import ca.ubc.bps.Bounces;
+import ca.ubc.bps.PDMPs;
+import ca.ubc.bps.Refreshments;
+import ca.ubc.bps.processors.SaveTrajectory;
+import ca.ubc.bps.state.ContinuouslyEvolving;
 import rejfree.models.normal.NormalChain;
 import rejfree.models.normal.NormalChainOptions;
 import xlinear.DenseMatrix;
@@ -24,7 +25,7 @@ public class NormalTest
     final int size = 10;
     PDMP pdmp = PDMPs.withLinearDynamics(size, random);
     List<ContinuouslyEvolving> states = 
-        StaticUtils.continuousCoordinates(pdmp.coordinates);
+        continuousCoordinates(pdmp.coordinates);
     
     NormalChainOptions options = new NormalChainOptions();
     options.nPairs = size - 1;

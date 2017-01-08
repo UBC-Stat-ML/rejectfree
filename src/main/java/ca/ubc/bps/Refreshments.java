@@ -1,15 +1,15 @@
-package ca.ubc.rejfree;
+package ca.ubc.bps;
 
 import java.util.Collection;
+
+import static ca.ubc.bps.StaticUtils.*;
 import static java.util.Collections.singleton;
 
+import ca.ubc.bps.kernels.IndependentRefreshment;
+import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.timers.HomogeneousPP;
 import ca.ubc.pdmp.JumpProcess;
 import ca.ubc.pdmp.PDMP;
-import ca.ubc.rejfree.kernels.IndependentRefreshment;
-import ca.ubc.rejfree.state.ContinuouslyEvolving;
-import ca.ubc.rejfree.timers.HomogeneousPP;
-
-import static ca.ubc.rejfree.StaticUtils.*;
 
 public class Refreshments
 {

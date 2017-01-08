@@ -1,4 +1,4 @@
-package ca.ubc.rejfree.timers;
+package ca.ubc.bps.timers;
 
 import java.util.Collections;
 import java.util.List;

@@ -1,7 +1,7 @@
-package ca.ubc.rejfree;
+package ca.ubc.bps;
 
+import ca.ubc.bps.energies.EnergyGradient;
 import ca.ubc.pdmp.Clock;
-import ca.ubc.rejfree.energies.EnergyGradient;
 
 public class BPSPotential
 {

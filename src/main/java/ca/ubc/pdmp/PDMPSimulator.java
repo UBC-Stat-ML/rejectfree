@@ -82,18 +82,19 @@ public class PDMPSimulator
   
   private double               time;
   
-  // queue over event sources and their next schedule time
+  // queue over jump processes and their next schedule time
   private EventQueue<Integer>  queue;
   
   // variable -> last updated time
   private double  []           lastUpdateTime; 
   
-  // event source -> isBound?
+  // jump processes -> isBound?
   private boolean []           isBoundIndicators;
   
   private Random               random;
   private StoppingCriterion    stoppingRule;
-  private long                 numberOfQueuePolls, numberOfEvents; 
+  private long                 numberOfQueuePolls, 
+                               numberOfJumps;  // number of jumps
   private long                 startTimeMilliSeconds;
   
   private double               maxTrajectoryLengthPerChunk = 10_000;
@@ -110,7 +111,7 @@ public class PDMPSimulator
   {
     double totalProcessTime = 0.0;
     this.numberOfQueuePolls = 0;
-    this.numberOfEvents = 0;
+    this.numberOfJumps = 0;
     this.startTimeMilliSeconds = System.currentTimeMillis();
     this.random = random;
     
@@ -137,8 +138,8 @@ public class PDMPSimulator
   {
     init();
     
-    for (int eventSourceIndex = 0; eventSourceIndex < pdmp.jumpProcesses.size(); eventSourceIndex++)
-      simulateNextEventDeltaTime(eventSourceIndex);
+    for (int jumpProcessIndex = 0; jumpProcessIndex < pdmp.jumpProcesses.size(); jumpProcessIndex++)
+      simulateNextEventDeltaTime(jumpProcessIndex);
     
     while (computeBudgetPositive() && !queue.isEmpty())
     {
@@ -147,32 +148,32 @@ public class PDMPSimulator
       numberOfQueuePolls++;
 
       time = event.getKey();
-      final int eventSourceIndex = event.getValue();
+      final int eventJumpProcessIndex = event.getValue();
       
-      if (isBoundIndicators[eventSourceIndex])  
+      if (isBoundIndicators[eventJumpProcessIndex])  
       {
-        updateVariables(nd[eventSourceIndex], false);
+        updateVariables(nd[eventJumpProcessIndex], false);
         
         // recompute new time
-        simulateNextEventDeltaTime(eventSourceIndex);
+        simulateNextEventDeltaTime(eventJumpProcessIndex);
         
         // undo
-        rollBack(nd[eventSourceIndex]);
+        rollBack(nd[eventJumpProcessIndex]);
       }
       else
       {
-        numberOfEvents++;
-        updateVariables(nk[eventSourceIndex], true);
-        updateVariables(nd_Nd_nk_plus_nd_minus_n_k[eventSourceIndex], false);
+        numberOfJumps++;
+        updateVariables(nk[eventJumpProcessIndex], true);
+        updateVariables(nd_Nd_nk_plus_nd_minus_n_k[eventJumpProcessIndex], false);
         
         // do the jump
-        pdmp.jumpProcesses.get(eventSourceIndex).kernel.simulate(random);
+        pdmp.jumpProcesses.get(eventJumpProcessIndex).kernel.simulate(random);
         
         // recompute factor 'hood new times (including self) 
-        simulateNextEventDeltaTimes(Nd_nk[eventSourceIndex]);
+        simulateNextEventDeltaTimes(Nd_nk[eventJumpProcessIndex]);
         
         // extended 'hood: undo
-        rollBack(nd_Nd_nk_plus_nd_minus_n_k[eventSourceIndex]);
+        rollBack(nd_Nd_nk_plus_nd_minus_n_k[eventJumpProcessIndex]);
       }
     }
     
@@ -212,6 +213,7 @@ public class PDMPSimulator
 
   private void _updateVariable(int variableIndex, boolean commit)
   {
+    // avoid extraneous processing calls
     if (lastUpdateTime[variableIndex] == time)
       return;
     
@@ -247,28 +249,28 @@ public class PDMPSimulator
         _rollBack(index);
   }
   
-  private void simulateNextEventDeltaTimes(int [] eventSourceIndices)
+  private void simulateNextEventDeltaTimes(int [] jumpProcessIndices)
   {
-    if (eventSourceIndices == null)
+    if (jumpProcessIndices == null)
       return;
-    if (eventSourceIndices[0] == -1)
+    if (jumpProcessIndices[0] == -1)
       for (int i = 0; i < numberOfJumpProcesses; i++)
         simulateNextEventDeltaTime(i);
     else
-      for (int index : eventSourceIndices)
+      for (int index : jumpProcessIndices)
         simulateNextEventDeltaTime(index);
   }
   
-  private void simulateNextEventDeltaTime(int eventSourceIndex)
+  private void simulateNextEventDeltaTime(int jumpProcessIndex)
   {
-    queue.remove(eventSourceIndex);
-    final DeltaTime nextEvent = pdmp.jumpProcesses.get(eventSourceIndex).clock.next(random);
+    queue.remove(jumpProcessIndex);
+    final DeltaTime nextEvent = pdmp.jumpProcesses.get(jumpProcessIndex).clock.next(random);
     double absoluteTime = time + nextEvent.deltaTime;
     if (absoluteTime <= stoppingRule.stochasticProcessTime)
     {
-      isBoundIndicators[eventSourceIndex] = nextEvent.isBound;
+      isBoundIndicators[jumpProcessIndex] = nextEvent.isBound;
       absoluteTime = fixNumericalIssue(absoluteTime);
-      queue.add(eventSourceIndex, absoluteTime);
+      queue.add(jumpProcessIndex, absoluteTime);
     }
   }
   
@@ -311,20 +313,20 @@ public class PDMPSimulator
       processors[variableIdx] = deps.convert(processorMappings.get(variableIdx), Integer.MAX_VALUE);
     
     // variable and factor neighborhoods
-    for (int eventIdx = 0; eventIdx < numberOfJumpProcesses; eventIdx++)
+    for (int jumpProcessIdx = 0; jumpProcessIdx < numberOfJumpProcesses; jumpProcessIdx++)
     {
-      final Set<Integer> _nd = deps.nd(eventIdx);
-      final Set<Integer> _nk = deps.nk(eventIdx);
+      final Set<Integer> _nd = deps.nd(jumpProcessIdx);
+      final Set<Integer> _nk = deps.nk(jumpProcessIdx);
       final Set<Integer> _Nd_nk = deps.Nd(_nk);
       final Set<Integer> _nd_Nd_nk = deps.nd(_Nd_nk);
       _nd_Nd_nk.addAll(_nd);
       _nd_Nd_nk.removeAll(_nk);
       final Set<Integer> _nd_Nd_nk_plus_nd_minus_n_k = _nd_Nd_nk;
       
-      nd[eventIdx] = deps.convert(_nd, true);
-      nk[eventIdx] = deps.convert(_nk, true);
-      Nd_nk[eventIdx] = deps.convert(_Nd_nk, false);
-      nd_Nd_nk_plus_nd_minus_n_k[eventIdx] = deps.convert(_nd_Nd_nk_plus_nd_minus_n_k, true);
+      nd[jumpProcessIdx] = deps.convert(_nd, true);
+      nk[jumpProcessIdx] = deps.convert(_nk, true);
+      Nd_nk[jumpProcessIdx] = deps.convert(_Nd_nk, false);
+      nd_Nd_nk_plus_nd_minus_n_k[jumpProcessIdx] = deps.convert(_nd_Nd_nk_plus_nd_minus_n_k, true);
     }
   }
   
@@ -430,8 +432,8 @@ public class PDMPSimulator
     return numberOfQueuePolls;
   }
 
-  public long getNumberOfEvents()
+  public long getNumberOfJumps()
   {
-    return numberOfEvents;
+    return numberOfJumps;
   }
 }

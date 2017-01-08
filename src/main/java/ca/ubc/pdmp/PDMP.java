@@ -1,11 +1,11 @@
 package ca.ubc.pdmp;
 
+import static ca.ubc.bps.StaticUtils.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
-
-import static ca.ubc.rejfree.StaticUtils.*;
 
 /**
  * A Piecewise deterministic Markov Process.

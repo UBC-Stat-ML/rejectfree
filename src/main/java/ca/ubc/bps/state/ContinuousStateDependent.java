@@ -1,11 +1,11 @@
-package ca.ubc.rejfree.state;
+package ca.ubc.bps.state;
 
 import java.util.Collection;
 import java.util.List;
 
+import ca.ubc.bps.StaticUtils;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.StateDependentBase;
-import ca.ubc.rejfree.StaticUtils;
 
 public abstract class ContinuousStateDependent extends StateDependentBase
 {

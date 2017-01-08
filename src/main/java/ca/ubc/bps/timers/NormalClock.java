@@ -1,13 +1,13 @@
-package ca.ubc.rejfree.timers;
+package ca.ubc.bps.timers;
 
 import java.util.List;
 import java.util.Random;
 
 import bayonet.math.NumericalUtils;
 import ca.ubc.pdmp.DeltaTime;
+import ca.ubc.bps.state.ContinuousStateDependent;
+import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.Clock;
-import ca.ubc.rejfree.state.ContinuousStateDependent;
-import ca.ubc.rejfree.state.ContinuouslyEvolving;
 import rejfree.StaticUtils;
 import rejfree.models.normal.NormalFactor;
 import xlinear.DenseMatrix;

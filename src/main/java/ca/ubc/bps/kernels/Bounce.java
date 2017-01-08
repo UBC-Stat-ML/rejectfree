@@ -1,14 +1,14 @@
-package ca.ubc.rejfree.kernels;
+package ca.ubc.bps.kernels;
 
 import java.util.List;
 import java.util.Random;
 
 import org.jblas.DoubleMatrix;
 
+import ca.ubc.bps.energies.EnergyGradient;
+import ca.ubc.bps.state.ContinuousStateDependent;
+import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.JumpKernel;
-import ca.ubc.rejfree.energies.EnergyGradient;
-import ca.ubc.rejfree.state.ContinuousStateDependent;
-import ca.ubc.rejfree.state.ContinuouslyEvolving;
 import rejfree.StaticUtils;
 
 public class Bounce extends ContinuousStateDependent implements JumpKernel

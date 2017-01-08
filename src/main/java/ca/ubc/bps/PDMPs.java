@@ -1,12 +1,12 @@
-package ca.ubc.rejfree;
+package ca.ubc.bps;
 
 import java.util.List;
 import java.util.Random;
 
+import ca.ubc.bps.kernels.IndependentRefreshment;
+import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.pdmp.PDMP;
-import ca.ubc.rejfree.kernels.IndependentRefreshment;
-import ca.ubc.rejfree.state.ContinuouslyEvolving;
-import ca.ubc.rejfree.state.PiecewiseLinear;
 
 public class PDMPs
 {

@@ -1,4 +1,4 @@
-package ca.ubc.rejfree;
+package ca.ubc.bps;
 
 public class TrajectorySegment
 {

@@ -1,11 +1,11 @@
-package ca.ubc.rejfree.kernels;
+package ca.ubc.bps.kernels;
 
 import java.util.Collection;
 import java.util.Random;
 
+import ca.ubc.bps.state.ContinuousStateDependent;
+import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.JumpKernel;
-import ca.ubc.rejfree.state.ContinuousStateDependent;
-import ca.ubc.rejfree.state.ContinuouslyEvolving;
 
 public class IndependentRefreshment extends ContinuousStateDependent implements JumpKernel
 {

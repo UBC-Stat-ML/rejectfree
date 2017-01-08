@@ -1,4 +1,4 @@
-package ca.ubc.rejfree.energies;
+package ca.ubc.bps.energies;
 
 public interface EnergyGradient
 {

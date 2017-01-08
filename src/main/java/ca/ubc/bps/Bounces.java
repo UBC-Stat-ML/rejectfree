@@ -1,14 +1,14 @@
-package ca.ubc.rejfree;
+package ca.ubc.bps;
 
 import java.util.List;
 
+import ca.ubc.bps.energies.NormalEnergy;
+import ca.ubc.bps.kernels.Bounce;
+import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.timers.NormalClock;
 import ca.ubc.pdmp.JumpKernel;
 import ca.ubc.pdmp.JumpProcess;
 import ca.ubc.pdmp.PDMP;
-import ca.ubc.rejfree.energies.NormalEnergy;
-import ca.ubc.rejfree.kernels.Bounce;
-import ca.ubc.rejfree.state.ContinuouslyEvolving;
-import ca.ubc.rejfree.timers.NormalClock;
 import xlinear.Matrix;
 
 public class Bounces

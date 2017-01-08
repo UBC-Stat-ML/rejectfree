@@ -1,4 +1,4 @@
-package ca.ubc.rejfree;
+package ca.ubc.bps;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -6,10 +6,10 @@ import java.util.List;
 
 import com.google.common.collect.FluentIterable;
 
+import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.Dynamics;
+import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.pdmp.Coordinate;
-import ca.ubc.rejfree.state.ContinuouslyEvolving;
-import ca.ubc.rejfree.state.Dynamics;
-import ca.ubc.rejfree.state.PiecewiseLinear;
 
 public class StaticUtils
 {

@@ -1,14 +1,14 @@
-package ca.ubc.rejfree.processors;
+package ca.ubc.bps.processors;
+
+import static ca.ubc.bps.processors.IntegrateTrajectory.integrate;
 
 import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
-import ca.ubc.rejfree.Trajectory;
-import ca.ubc.rejfree.processors.IntegrateTrajectory.SegmentIntegrator;
-import ca.ubc.rejfree.processors.IntegrateTrajectory.MomentIntegrator;
-
-import static ca.ubc.rejfree.processors.IntegrateTrajectory.integrate;
+import ca.ubc.bps.Trajectory;
+import ca.ubc.bps.processors.IntegrateTrajectory.MomentIntegrator;
+import ca.ubc.bps.processors.IntegrateTrajectory.SegmentIntegrator;
 
 public class EffectiveSampleSize
 {
