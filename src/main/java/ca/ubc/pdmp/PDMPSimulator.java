@@ -38,7 +38,7 @@ public class PDMPSimulator
     this.nd = new int[numberOfJumpProcesses][];
     this.nk = new int[numberOfJumpProcesses][];
     this.Nd_nk = new int[numberOfJumpProcesses][];
-    this.nd_Nd_nk_plus_nd_minus_n_k = new int[numberOfJumpProcesses][];
+    this.nd_Nd_nk_plus_nd_minus_nk = new int[numberOfJumpProcesses][];
     this.processors = new int[numberOfVariables][];
     buildCaches();
   }
@@ -53,7 +53,7 @@ public class PDMPSimulator
    * Conventions for variables with pattern {n,N}{d,k}:
    * 
    * prefix n : neighbors (obtained via StateDependent.requiredVariables())
-   *            takes as input factor indices
+   *            takes as input JumpProcess indices
    * prefix N : inverse neighbors (i.e. set of timers/kernels that depend on given variable index)
    *            takes as input variable indices
    * 
@@ -61,20 +61,20 @@ public class PDMPSimulator
    * suffix d : related to timers (which provide *d*elta times)
    * 
    * For example, Nd_nk[j]: 
-   *   for given factor index j, this returns Nd(nk(j)), 
+   *   for given JumpProcess index j, this returns Nd(nk(j)), 
    *   a list of variables.
    */
 
-  // factor -> var
+  // JumpProcess -> Coordinate
   private final int [][] nd, nk;
   
-  // factor -> factor
+  // JumpProcess -> JumpProcess
   private final int [][] Nd_nk;
   
-  // factor -> var
-  private final int [][] nd_Nd_nk_plus_nd_minus_n_k; 
+  // JumpProcess -> Coordinate
+  private final int [][] nd_Nd_nk_plus_nd_minus_nk; 
   
-  // variable -> processors
+  // Coordinate -> Processors
   private final int [][] processors;
   
   
@@ -86,7 +86,7 @@ public class PDMPSimulator
   private EventQueue<Integer>  queue;
   
   // variable -> last updated time
-  private double  []           lastUpdateTime; 
+  private double  []           lastUpdateTimes; 
   
   // jump processes -> isBound?
   private boolean []           isBoundIndicators;
@@ -103,7 +103,7 @@ public class PDMPSimulator
   {
     this.time = 0.0;
     this.queue = new EventQueue<>();
-    this.lastUpdateTime = new double[numberOfVariables];
+    this.lastUpdateTimes = new double[numberOfVariables];
     this.isBoundIndicators = new boolean[numberOfVariables];
   }
   
@@ -164,7 +164,7 @@ public class PDMPSimulator
       {
         numberOfJumps++;
         updateVariables(nk[eventJumpProcessIndex], true);
-        updateVariables(nd_Nd_nk_plus_nd_minus_n_k[eventJumpProcessIndex], false);
+        updateVariables(nd_Nd_nk_plus_nd_minus_nk[eventJumpProcessIndex], false);
         
         // do the jump
         pdmp.jumpProcesses.get(eventJumpProcessIndex).kernel.simulate(random);
@@ -173,7 +173,7 @@ public class PDMPSimulator
         simulateNextEventDeltaTimes(Nd_nk[eventJumpProcessIndex]);
         
         // extended 'hood: undo
-        rollBack(nd_Nd_nk_plus_nd_minus_n_k[eventJumpProcessIndex]);
+        rollBack(nd_Nd_nk_plus_nd_minus_nk[eventJumpProcessIndex]);
       }
     }
     
@@ -214,18 +214,18 @@ public class PDMPSimulator
   private void _updateVariable(int variableIndex, boolean commit)
   {
     // avoid extraneous processing calls
-    if (lastUpdateTime[variableIndex] == time)
+    if (lastUpdateTimes[variableIndex] == time)
       return;
     
     final Coordinate coordinate = pdmp.coordinates.get(variableIndex);
-    final double deltaTime = time - lastUpdateTime[variableIndex];
+    final double deltaTime = time - lastUpdateTimes[variableIndex];
     if (commit)
     {
       final int [] processorsForThisVar = processors[variableIndex];
       if (processorsForThisVar != null)
         for (int processorIdx : processorsForThisVar)
           pdmp.processors.get(processorIdx).process(deltaTime);
-      lastUpdateTime[variableIndex] = time;
+      lastUpdateTimes[variableIndex] = time;
     }
     coordinate.extrapolateInPlace(deltaTime);
   }
@@ -233,7 +233,7 @@ public class PDMPSimulator
   private void _rollBack(int variableIndex)
   {
     final Coordinate coordinate = pdmp.coordinates.get(variableIndex);
-    final double deltaTime = time - lastUpdateTime[variableIndex];
+    final double deltaTime = time - lastUpdateTimes[variableIndex];
     coordinate.extrapolateInPlace(-deltaTime);
   }
   
@@ -326,7 +326,7 @@ public class PDMPSimulator
       nd[jumpProcessIdx] = deps.convert(_nd, true);
       nk[jumpProcessIdx] = deps.convert(_nk, true);
       Nd_nk[jumpProcessIdx] = deps.convert(_Nd_nk, false);
-      nd_Nd_nk_plus_nd_minus_n_k[jumpProcessIdx] = deps.convert(_nd_Nd_nk_plus_nd_minus_n_k, true);
+      nd_Nd_nk_plus_nd_minus_nk[jumpProcessIdx] = deps.convert(_nd_Nd_nk_plus_nd_minus_n_k, true);
     }
   }
   

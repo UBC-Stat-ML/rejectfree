@@ -164,17 +164,149 @@ Alternative stopping criteria include ``byWallClockTimeMilliseconds(millis)`` an
 
 ### Implementation
 
-The main data structures maintained during simulation are:
+The main data structures updated during simulation are:
+
+- ``time``: a global variable for the current process time;
+- ``queue``: a priority queue where priorities are (absolute) times and items are integers indexing the list of jump processes specified by the PDMP;
+- ``lastUpdateTimes``: an array of positive numbers, indexed by jump process indices; for each, we keep track of the last time a jump occurred;
+- ``isBoundIndicators``: an array of booleans, indexed by jump process indices; for each, we keep track of whether the even in the queue is an actual jump, or a bound on the time (see discussion on DeltaTime above).
+
+In addition to this, some quantities related to the factor graph structure are 
+cached as a pre-processing step. We start by introducing some notation related to 
+a certain factor graph structure.
+
+Here we generalize the notion of factor graph used for local BPS into factor 
+graphs corresponding to generic sparse PDMPs. The factor graph consists in an undirected bipartite multigraph where the 
+nodes in one component are Coordinate's, and the nodes in the other component are 
+the JumpProcess objects associated to the sparse PDMP. To define edges, we visit 
+both the Clock and JumpKernel of each JumpProcess. We create one edge for each 
+elements returned by the collection of each call to  
+the method ``requiredVariables()`` specified by the StateDependent super interface   
+of Clock and JumpKernel. Each edge has a label to denote if it associated to a 
+Clock or a JumpKernel.
+
+We define in the following a few functions that take as input a set of nodes A 
+in one component of the graph and return the set of all nodes connected to A. 
+As a convention, we use the notation ``{n,N}{d,k}`` for these functions, where:
+
+- the prefixes mean:
+    - ``n``: if the function take as input JumpProcess nodes;
+    - ``N``: if the function take as input Coordinate nodes;
+- the suffixes mean:
+    - ``k``: the function is based on edges with label JumpKernel;
+    - ``d``: the function is based on edges with label Clock.
+
+For example, ``Nd_nk[j]`` returns, for given JumpProcess index j, Nd(nk({j})).
+
+With this notation, we can write the four caches needed by the algorithm as:
+
+- ``nd`` and ``nk``, two arrays indexed by JumpProcesses returning 
+  sets of Coordinate's;
+- ``Nd_nk``, an array indexed by JumpProcesses and returning sets of 
+  JumpProcesses, namely Nd(nk({j})) as above;
+- ``nd_Nd_nk_plus_nd_minus_nk``, an array indexed by JumpProcesses and 
+  and returning sets of Coordinates, namely nd(Nd(nk({j}))) U nd({j}) \ nk({j}).
+  
+For efficiency, these caches are implemented as arrays of arrays of integers, 
+where the inner arrays encode the sets, and with the convention that a null means 
+the empty set, and the array containing only -1 is the set of all variables.
+  
+With these definition, we can now introduce the two core methods implementing 
+the sparse PDMP simulator.
+
+First, ``updateVariable(int variableIndex, boolean commit)`` 
+performs extrapolation of the provided variable index to the time stored 
+in the global variable ``time``. The parameter commit controls whether this update 
+will be used to perform a jump on that variable at that time (true), or because 
+the variable is a neighbour needed by a Clock time to event re-computation (false).
+The processor is called only in the case of a commit as shown in the pseudo-code below:
 
 ```java
-double               time;
-  
-// queue over the jump processes and their next schedule time
-EventQueue<Integer>  queue;
-  
-  // variable -> last updated time
-  private double  []           lastUpdateTime; 
-  
-  // event source -> isBound?
-  private boolean []           isBoundIndicators;
+  updateVariable(int variableIndex, boolean commit) {
+    Coordinate coordinate = pdmp.coordinates.get(variableIndex)
+    deltaTime = time - lastUpdateTimes[variableIndex]
+    if (commit) {
+      for (int processorIdx : processors[variableIndex])
+        pdmp.processors.get(processorIdx).process(deltaTime)
+      lastUpdateTimes[variableIndex] = time
+    }
+    coordinate.extrapolateInPlace(deltaTime)
+  }
+```
+ 
+In the latter case, the variable is rolled back after it is needed via a call to 
+``rollBack`` to ensure processor is called once per deterministic trajectory chunk:
+
+```java
+  rollBack(int variableIndex) {
+    Coordinate coordinate = pdmp.coordinates.get(variableIndex)
+    deltaTime = time - lastUpdateTimes[variableIndex]
+    coordinate.extrapolateInPlace(-deltaTime)
+  }
+```
+
+We also need a utility function to simulate event times:
+
+```java
+  simulateNextEventDeltaTime(int jumpProcessIndex) {
+    queue.remove(jumpProcessIndex)
+    DeltaTime nextEvent = pdmp.jumpProcesses.get(jumpProcessIndex).clock.next(random)
+    absoluteTime = time + nextEvent.deltaTime
+    if (absoluteTime <= stoppingRule.stochasticProcessTime) {
+      isBoundIndicators[jumpProcessIndex] = nextEvent.isBound
+      absoluteTime = fixNumericalIssue(absoluteTime)
+      queue.add(jumpProcessIndex, absoluteTime)
+    }
+  }
+```
+
+With these definitions, the core algorithm in the package is as follows:
+
+```java
+  simulateChunk()
+  {
+    for (jumpProcessIndex : jumpProcessIndices)
+      simulateNextEventDeltaTime(jumpProcessIndex)
+    
+    while (computeBudgetPositive() && !queue.isEmpty()) {
+      event = queue.pollEvent()
+      time = event.time()
+      eventJumpProcessIndex = event.jumpProcessIndex()
+      if (isBoundIndicators[eventJumpProcessIndex]) {
+        updateVariables(nd[eventJumpProcessIndex], false)
+        simulateNextEventDeltaTime(eventJumpProcessIndex)
+        rollBack(nd[eventJumpProcessIndex])
+      } else {
+        updateVariables(nk[eventJumpProcessIndex], true)
+        updateVariables(nd_Nd_nk_plus_nd_minus_nk[eventJumpProcessIndex], false)
+        pdmp.jumpProcesses.get(eventJumpProcessIndex).kernel.simulate(random)
+        simulateNextEventDeltaTimes(Nd_nk[eventJumpProcessIndex])
+        rollBack(nd_Nd_nk_plus_nd_minus_nk[eventJumpProcessIndex]);
+      }
+    }
+    updateAllVariables(true) 
+  }
+```
+
+Finally, since times are expressed as absolute times, to avoid loss of numerical 
+accuracy in long simulation, we break long trajectories into chunks (hence the name 
+simulateChunk() above), 
+
+```java
+  simulate(Random random, StoppingCriterion inputStoppingRule) {
+    while (inputStoppingRule.stochasticProcessTime - totalProcessTime > 0) {
+      processIncrementTime = 
+         min(
+             maxTrajectoryLengthPerChunk, 
+             inputStoppingRule.stochasticProcessTime - totalProcessTime
+         )
+      this.stoppingRule = new StoppingCriterion(
+          processIncrementTime,
+          inputStoppingRule.wallClockTimeMilliseconds,
+          inputStoppingRule.numberOfQueuePolls
+      )
+      simulateChunk()
+      totalProcessTime += processIncrementTime
+    }
+  }
 ```
