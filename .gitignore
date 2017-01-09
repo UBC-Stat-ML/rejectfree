@@ -18,3 +18,5 @@ development
 hs_err_pid45345.log
 java.hprof.txt
 todo.txt
+doc/html
+doc/pdf
