@@ -75,6 +75,7 @@ described next.
 When computation is performed by a Clock or a JumpKernel, 
 the values of a subset of the variables need to be accessed. 
 To do this, instances of Clock and JumpKernel hold references 
+to a subset of the coordinates.
 
 Since the variables change in continuous manner, PDMPSimulator 
 takes care of updating the coordinates via appropriate calls to 
@@ -92,10 +93,12 @@ interface specifies how to do this, namely via implementation of:
 Collection<? extends Coordinate> requiredVariables();
 ```
 
+which is queried by PDMPSimulator in a pre-processing stage.
+
 
 ### Interfaces ``JumpKernel`` and ``Clock``
 
-JumpKernel specifies the following method to implement:
+Interface JumpKernel specifies the following method to implement:
 
 ```java
 void simulate(Random random);
@@ -104,7 +107,7 @@ void simulate(Random random);
 which samples the jump. The change is again performed 
 in place into the coordinates held by the instance.
 
-Clock on the other hand specifies:
+Interface Clock specifies:
 
 ```java
 DeltaTime next(Random random);
@@ -182,16 +185,16 @@ the JumpProcess objects associated to the sparse PDMP. To define edges, we visit
 both the Clock and JumpKernel of each JumpProcess. We create one edge for each 
 elements returned by the collection of each call to  
 the method ``requiredVariables()`` specified by the StateDependent super interface   
-of Clock and JumpKernel. Each edge has a label to denote if it associated to a 
+of Clock and JumpKernel. Each edge has a label to denote if it is associated to a 
 Clock or a JumpKernel.
 
-We define in the following a few functions that take as input a set of nodes A 
+We define in the following a functions that take as input a set of nodes A 
 in one component of the graph and return the set of all nodes connected to A. 
 As a convention, we use the notation ``{n,N}{d,k}`` for these functions, where:
 
 - the prefixes mean:
-    - ``n``: if the function take as input JumpProcess nodes;
-    - ``N``: if the function take as input Coordinate nodes;
+    - ``n``: the function take as input JumpProcess nodes;
+    - ``N``: the function take as input Coordinate nodes;
 - the suffixes mean:
     - ``k``: the function is based on edges with label JumpKernel;
     - ``d``: the function is based on edges with label Clock.
@@ -211,12 +214,12 @@ For efficiency, these caches are implemented as arrays of arrays of integers,
 where the inner arrays encode the sets, and with the convention that a null means 
 the empty set, and the array containing only -1 is the set of all variables.
   
-With these definition, we can now introduce the two core methods implementing 
+With these definitions, we can now introduce the two core methods implementing 
 the sparse PDMP simulator.
 
 First, ``updateVariable(int variableIndex, boolean commit)`` 
 performs extrapolation of the provided variable index to the time stored 
-in the global variable ``time``. The parameter commit controls whether this update 
+in the global variable ``time``. The parameter ``commit`` controls whether this update 
 will be used to perform a jump on that variable at that time (true), or because 
 the variable is a neighbour needed by a Clock time to event re-computation (false).
 The processor is called only in the case of a commit as shown in the pseudo-code below:
