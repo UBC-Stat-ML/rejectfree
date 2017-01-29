@@ -37,7 +37,7 @@ public class PDMPSimulator
     this.numberOfVariables = pdmp.coordinates.size();
     this.nd = new int[numberOfJumpProcesses][];
     this.nk = new int[numberOfJumpProcesses][];
-    this.Nd_nk = new int[numberOfJumpProcesses][];
+    this.Nd_nk_plus_id = new int[numberOfJumpProcesses][];
     this.nd_Nd_nk_plus_nd_minus_nk = new int[numberOfJumpProcesses][];
     this.processors = new int[numberOfVariables][];
     buildCaches();
@@ -69,7 +69,7 @@ public class PDMPSimulator
   private final int [][] nd, nk;
   
   // JumpProcess -> JumpProcess
-  private final int [][] Nd_nk;
+  private final int [][] Nd_nk_plus_id;
   
   // JumpProcess -> Coordinate
   private final int [][] nd_Nd_nk_plus_nd_minus_nk; 
@@ -104,7 +104,7 @@ public class PDMPSimulator
     this.time = 0.0;
     this.queue = new EventQueue<>();
     this.lastUpdateTimes = new double[numberOfVariables];
-    this.isBoundIndicators = new boolean[numberOfVariables];
+    this.isBoundIndicators = new boolean[numberOfJumpProcesses];
   }
   
   public void simulate(Random random, StoppingCriterion inputStoppingRule)
@@ -170,7 +170,7 @@ public class PDMPSimulator
         pdmp.jumpProcesses.get(eventJumpProcessIndex).kernel.simulate(random);
         
         // recompute factor 'hood new times (including self) 
-        simulateNextEventDeltaTimes(Nd_nk[eventJumpProcessIndex]);
+        simulateNextEventDeltaTimes(Nd_nk_plus_id[eventJumpProcessIndex]);
         
         // extended 'hood: undo
         rollBack(nd_Nd_nk_plus_nd_minus_nk[eventJumpProcessIndex]);
@@ -325,7 +325,8 @@ public class PDMPSimulator
       
       nd[jumpProcessIdx] = deps.convert(_nd, true);
       nk[jumpProcessIdx] = deps.convert(_nk, true);
-      Nd_nk[jumpProcessIdx] = deps.convert(_Nd_nk, false);
+      _Nd_nk.add(jumpProcessIdx);
+      Nd_nk_plus_id[jumpProcessIdx] = deps.convert(_Nd_nk, false);
       nd_Nd_nk_plus_nd_minus_nk[jumpProcessIdx] = deps.convert(_nd_Nd_nk_plus_nd_minus_n_k, true);
     }
   }

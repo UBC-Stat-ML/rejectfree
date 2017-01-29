@@ -9,7 +9,7 @@ import ca.ubc.pdmp.StateDependentBase;
 
 public abstract class ContinuousStateDependent extends StateDependentBase
 {
-  // we use a list here to fix an ordering for the vector reprensentation
+  // we use a list here to fix an ordering for the vector representation
   protected final List<ContinuouslyEvolving> continuousCoordinates;
   private final boolean isPiecewiseLinear;
   
@@ -18,17 +18,18 @@ public abstract class ContinuousStateDependent extends StateDependentBase
     // maintain all the dependencies (some of which may not be continuously evolving)
     super(requiredVariables);
     // identify the subset that is continuously evolving (getting rid of potential duplicates at same time)
-    this.continuousCoordinates = StaticUtils.continuousCoordinates(requiredVariables);
-    isPiecewiseLinear = isPiecewiseLinear();
+    continuousCoordinates = StaticUtils.continuousCoordinates(requiredVariables);
+    isPiecewiseLinear = _isPiecewiseLinear(continuousCoordinates);
   }
 
   private void extrapolate(double deltaTime)
   {
-    for (ContinuouslyEvolving coordinate : continuousCoordinates)
-      coordinate.extrapolateInPlace(deltaTime);
+    // avoid building iterator here as this will be in inner loop
+    for (int i = 0; i < continuousCoordinates.size(); i++)
+      continuousCoordinates.get(i).extrapolateInPlace(deltaTime);
   }
   
-  private boolean isPiecewiseLinear()
+  private static boolean _isPiecewiseLinear(Collection<ContinuouslyEvolving> continuousCoordinates)
   {
     for (ContinuouslyEvolving coordinate : continuousCoordinates)
       if (!StaticUtils.isPiecewiseLinear(coordinate))

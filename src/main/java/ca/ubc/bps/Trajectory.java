@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
 import bayonet.math.NumericalUtils;
 import ca.ubc.bps.processors.EffectiveSampleSize;
 import ca.ubc.bps.processors.IntegrateTrajectory;
@@ -15,20 +17,28 @@ public class Trajectory
 {
   public final Dynamics dynamics;
   public final List<TrajectorySegment> segments;
-  public final double totalTime;
   
   public Trajectory(Dynamics dynamics, List<TrajectorySegment> segments)
   {
     this.dynamics = dynamics;
     this.segments = segments;
-    this.totalTime = segments.stream()
-         .mapToDouble(s -> s.deltaTime)
-         .sum();
+  }
+  
+  public Trajectory(Dynamics dynamics)
+  {
+    this(dynamics, new ArrayList<>());
+  }
+  
+  public double totalTime()
+  {
+    return segments.stream()
+      .mapToDouble(s -> s.deltaTime)
+      .sum();
   }
   
   public List<Trajectory> split(int nBlocks)
   {
-    final double delta = totalTime / nBlocks;
+    final double delta = totalTime() / nBlocks;
     List<Double> blockSizes = Collections.nCopies(nBlocks, delta);
     return split(blockSizes);
   }
@@ -38,15 +48,21 @@ public class Trajectory
     if (fractionForFirstHalf < 0.0 || fractionForFirstHalf > 1.0)
       throw new RuntimeException();
     
+    double totalTime = totalTime();
     List<Double> blockSizes = Arrays.asList(fractionForFirstHalf * totalTime, (1.0 - fractionForFirstHalf) * totalTime);
     return split(blockSizes);
+  }
+  
+  public Trajectory burnOut(double fractionToBurnOut)
+  {
+    return splitInTwo(fractionToBurnOut).get(1);
   }
   
   public List<Trajectory> split(List<Double> blockSizes)
   {
     final double sumBlockSizes = blockSizes.stream().reduce(0.0, Double::sum);
     
-    if (!NumericalUtils.isClose(totalTime, sumBlockSizes, NumericalUtils.THRESHOLD))
+    if (!NumericalUtils.isClose(totalTime()/sumBlockSizes, 1.0, NumericalUtils.THRESHOLD))
       throw new RuntimeException();
     
     final int nBlocks = blockSizes.size();
@@ -58,7 +74,7 @@ public class Trajectory
     double remainingLenCurrentBlock = blockSizes.get(0);
     double remainingLenCurrentSegment = segments.get(0).deltaTime;
     
-    Trajectory currentTraj = new Trajectory(this.dynamics, new ArrayList<>());
+    Trajectory currentTraj = new Trajectory(this.dynamics);
     
     int currentSegIndex = 0;
     int currentBlockIndex = 0;
@@ -115,6 +131,14 @@ public class Trajectory
   public double momentEss(int degree)
   {
     return EffectiveSampleSize.momentEss(this, degree);
+  }
+  
+  public SummaryStatistics segmentLengthSummaryStatistics()
+  {
+    SummaryStatistics result = new SummaryStatistics();
+    for (TrajectorySegment segment : segments)
+      result.addValue(segment.deltaTime);
+    return result;
   }
   
   // viz

@@ -205,8 +205,8 @@ With this notation, we can write the four caches needed by the algorithm as:
 
 - ``nd`` and ``nk``, two arrays indexed by JumpProcesses returning 
   sets of Coordinate's;
-- ``Nd_nk``, an array indexed by JumpProcesses and returning sets of 
-  JumpProcesses, namely Nd(nk({j})) as above;
+- ``Nd_nk_plus_id``, an array indexed by JumpProcesses and returning sets of 
+  JumpProcesses, namely Nd(nk({j})) union {j};
 - ``nd_Nd_nk_plus_nd_minus_nk``, an array indexed by JumpProcesses and 
   and returning sets of Coordinates, namely nd(Nd(nk({j}))) U nd({j}) \ nk({j}).
   
@@ -283,7 +283,7 @@ With these definitions, the core algorithm in the package is as follows:
         updateVariables(nk[eventJumpProcessIndex], true)
         updateVariables(nd_Nd_nk_plus_nd_minus_nk[eventJumpProcessIndex], false)
         pdmp.jumpProcesses.get(eventJumpProcessIndex).kernel.simulate(random)
-        simulateNextEventDeltaTimes(Nd_nk[eventJumpProcessIndex])
+        simulateNextEventDeltaTimes(Nd_nk_plus_id[eventJumpProcessIndex])
         rollBack(nd_Nd_nk_plus_nd_minus_nk[eventJumpProcessIndex]);
       }
     }

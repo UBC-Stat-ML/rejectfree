@@ -3,6 +3,8 @@ package ca.ubc.bps.timers;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
 import bayonet.math.NumericalUtils;
 import ca.ubc.pdmp.DeltaTime;
 import ca.ubc.bps.state.ContinuousStateDependent;
@@ -61,8 +63,13 @@ public class NormalClock extends ContinuousStateDependent implements Clock
     final double e = StaticUtils.generateUnitRateExponential(random);
     
     final double delta = NormalFactor.normalCollisionTime(e, xv, vv);
+    
+    stats.addValue(delta);
+    
     return DeltaTime.isEqualTo(delta);
   }
+  
+  public static SummaryStatistics stats = new SummaryStatistics();
   
   private double dotProd(final double [] array0, final double [] array1)
   {
@@ -73,6 +80,6 @@ public class NormalClock extends ContinuousStateDependent implements Clock
   
   private double dotProd(final DenseMatrix x1, final DenseMatrix x2)
   {
-    return MatrixExtensions.dot(x1.transpose().mul(precision),x2);
+    return MatrixExtensions.dot(x1,precision.mul(x2));
   }
 }

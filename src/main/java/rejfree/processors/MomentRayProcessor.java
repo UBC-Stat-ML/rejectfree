@@ -11,7 +11,8 @@ public class MomentRayProcessor implements RayProcessor
 {
   public Counter<RealVariable> 
     sum   = new Counter<RealVariable>(),
-    sumSq = new Counter<RealVariable>();
+    sumSq = new Counter<RealVariable>(),
+    nUpdates = new Counter<RealVariable>();
   public double currentTime = 0.0;
 
   public double getMeanEstimate(RealVariable variable) 
@@ -30,6 +31,11 @@ public class MomentRayProcessor implements RayProcessor
     return sumSq.getCount(variable) / currentTime;
   }
   
+  public double meanSegmentLength(RealVariable variable)
+  {
+    return currentTime / nUpdates.getCount(variable);
+  }
+  
   @Override
   public void init(LocalRFSampler sampler) {}
   
@@ -42,6 +48,9 @@ public class MomentRayProcessor implements RayProcessor
     
     sumSq.incrementCount(var, 
         indefIntegralForSecondMoment(ray.position_t, ray.velocity_t, time - ray.t));
+    
+    nUpdates.incrementCount(var, 1.0);
+    
     currentTime = time;
   }
   

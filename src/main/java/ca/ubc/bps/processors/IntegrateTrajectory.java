@@ -101,6 +101,5 @@ public class IntegrateTrajectory extends ContinuousStateDependent implements Pro
           / (degree - k + 1);
       return sum;
     }
-    
   }
 }
