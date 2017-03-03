@@ -62,7 +62,7 @@ public class Trajectory
   {
     final double sumBlockSizes = blockSizes.stream().reduce(0.0, Double::sum);
     
-    if (!NumericalUtils.isClose(totalTime()/sumBlockSizes, 1.0, NumericalUtils.THRESHOLD))
+    if (!NumericalUtils.isClose(totalTime()/sumBlockSizes, 1.0, 1e-6))
       throw new RuntimeException();
     
     final int nBlocks = blockSizes.size();
@@ -92,7 +92,7 @@ public class Trajectory
       currentTraj.segments.add(current);
       remainingLenCurrentBlock -= consumedLength;
       remainingLenCurrentSegment -= consumedLength;
-      if (NumericalUtils.isClose(0.0, remainingLenCurrentBlock, NumericalUtils.THRESHOLD))
+      if (NumericalUtils.isClose(0.0, remainingLenCurrentBlock, 1e-4) || currentSegIndex + 1 == segments.size())
       {
         result.add(currentTraj);
         if (result.size() == nBlocks)
@@ -100,7 +100,7 @@ public class Trajectory
         currentTraj = new Trajectory(this.dynamics, new ArrayList<>());
         remainingLenCurrentBlock = blockSizes.get(++currentBlockIndex);
       }
-      if (NumericalUtils.isClose(0.0, remainingLenCurrentSegment, NumericalUtils.THRESHOLD))
+      if (NumericalUtils.isClose(0.0, remainingLenCurrentSegment, 1e-4))
         remainingLenCurrentSegment = segments.get(++currentSegIndex).deltaTime;
     }
     

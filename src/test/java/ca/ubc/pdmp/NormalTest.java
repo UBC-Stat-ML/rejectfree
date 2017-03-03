@@ -54,8 +54,8 @@ public class NormalTest
     pdmp.processors.add(processor);
     // running
     PDMPSimulator simu = new PDMPSimulator(pdmp);
-    simu.setMaxTrajectoryLengthPerChunk(Double.POSITIVE_INFINITY); 
-    simu.simulate(random, StoppingCriterion.byStochasticProcessTime(100_000));
+//    simu.setMaxTrajectoryLengthPerChunk(Double.POSITIVE_INFINITY); 
+    simu.simulate(random, StoppingCriterion.byStochasticProcessTime(1_000_000));
     // some statistics
     Trajectory trajectory = processor.getTrajectory();
     System.out.println("Approx = " + trajectory.moment(2)); 
@@ -63,8 +63,5 @@ public class NormalTest
     System.out.println("ESS = " + trajectory.momentEss(2));
     SummaryStatistics segLenStats = trajectory.segmentLengthSummaryStatistics();
     System.out.println("segment lengths mean = " + segLenStats.getMean() + " SD = " + segLenStats.getStandardDeviation());
-    
-    System.out.println(NormalClock.stats.getMean());
-    
   }
 }
