@@ -146,7 +146,7 @@ public class BivariateNormalExperiment
   {
     NormalClock timer = new NormalClock(variables, precision);
     NormalEnergy energy = new NormalEnergy(precision);
-    JumpKernel bounce =  new RandomizedBounce(variables, energy);
+    JumpKernel bounce =  new RandomizedBounce(variables, energy, false);
     pdmp.jumpProcesses.add(new JumpProcess(timer, bounce));
   }
   

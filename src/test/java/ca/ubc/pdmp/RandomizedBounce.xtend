@@ -13,9 +13,10 @@ import static java.lang.Math.*
 
 public class RandomizedBounce extends ContinuousStateDependent implements JumpKernel  {
   
-  val EnergyGradient energy;
+  val EnergyGradient energy
+  var boolean completelyIgnoreIncomingAngle
 
-  new (List<ContinuouslyEvolving> requiredVariables, EnergyGradient energy)
+  new (List<ContinuouslyEvolving> requiredVariables, EnergyGradient energy, boolean completelyIgnoreIncomingAngle)
   {
     super(requiredVariables);
     this.energy = energy;
@@ -26,9 +27,19 @@ public class RandomizedBounce extends ContinuousStateDependent implements JumpKe
     var oldVelocity = denseCopy(currentVelocity)
     val oldNorm = oldVelocity.norm
     oldVelocity = oldVelocity / oldNorm
-    
+    val dim = oldVelocity.nEntries
     val gradient = denseCopy(energy.gradient(currentPosition))
-    val double dim = oldVelocity.nEntries
+    
+    if (completelyIgnoreIncomingAngle) {
+      // randomize oldVelocity subject to positive dot product with energy gradient
+      for (var int i = 0; i < dim; i++) {
+        oldVelocity.set(i, random.nextGaussian);
+      }
+      oldVelocity = oldVelocity / oldVelocity.norm
+      if (oldVelocity.dot(gradient) < 0) {
+        oldVelocity = oldVelocity * 1.0
+      }
+    }
       
     val n1 = -1.0 * gradient / gradient.norm 
     var n2 = oldVelocity - n1 * (oldVelocity.dot(n1))
