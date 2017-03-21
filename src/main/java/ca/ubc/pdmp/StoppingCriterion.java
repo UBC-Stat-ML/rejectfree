@@ -1,5 +1,8 @@
 package ca.ubc.pdmp;
 
+import blang.inits.Arg;
+import blang.inits.DefaultValue;
+
 /**
  * PDMP simulation will stop when any one of the following occurs:
  * 
@@ -12,8 +15,13 @@ package ca.ubc.pdmp;
  */
 public class StoppingCriterion
 {
+  @Arg @DefaultValue("INF")
   public double stochasticProcessTime = Double.POSITIVE_INFINITY;
+  
+  @Arg @DefaultValue("INF")
   public long wallClockTimeMilliseconds = Long.MAX_VALUE;
+  
+  @Arg @DefaultValue("INF")
   public long numberOfQueuePolls = Long.MAX_VALUE;
 
   public static StoppingCriterion byStochasticProcessTime(double stochasticProcessTime)

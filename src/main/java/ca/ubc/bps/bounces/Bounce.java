@@ -1,4 +1,4 @@
-package ca.ubc.bps.kernels;
+package ca.ubc.bps.bounces;
 
 import java.util.List;
 import java.util.Random;

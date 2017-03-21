@@ -1,4 +1,4 @@
-package ca.ubc.pdmp
+package ca.ubc.bps.bounces
 
 import java.util.List
 import ca.ubc.bps.state.ContinuouslyEvolving
@@ -9,7 +9,7 @@ import ca.ubc.bps.state.ContinuousStateDependent
 import static extension xlinear.MatrixExtensions.*
 import static xlinear.MatrixOperations.*
 
-import static java.lang.Math.*
+import ca.ubc.pdmp.JumpKernel
 
 public class FlipBounce extends ContinuousStateDependent implements JumpKernel  {
   

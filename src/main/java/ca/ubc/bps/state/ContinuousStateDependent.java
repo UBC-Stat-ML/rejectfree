@@ -24,6 +24,8 @@ public abstract class ContinuousStateDependent extends StateDependentBase
 
   private void extrapolate(double deltaTime)
   {
+    if (deltaTime == 0.0 || deltaTime == -0.0)
+      return;
     // avoid building iterator here as this will be in inner loop
     for (int i = 0; i < continuousCoordinates.size(); i++)
       continuousCoordinates.get(i).extrapolateInPlace(deltaTime);

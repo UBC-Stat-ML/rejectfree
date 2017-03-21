@@ -2,8 +2,8 @@ package ca.ubc.bps;
 
 import java.util.List;
 
+import ca.ubc.bps.bounces.Bounce;
 import ca.ubc.bps.energies.NormalEnergy;
-import ca.ubc.bps.kernels.Bounce;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.NormalClock;
 import ca.ubc.pdmp.JumpKernel;
