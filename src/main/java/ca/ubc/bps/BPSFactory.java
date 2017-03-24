@@ -1,7 +1,14 @@
 package ca.ubc.bps;
 
 
+import static ca.ubc.bps.BPSFactoryHelpers.all;
+import static ca.ubc.bps.BPSFactoryHelpers.isotropicGlobal;
+import static ca.ubc.bps.BPSFactoryHelpers.linear;
+import static ca.ubc.bps.BPSFactoryHelpers.local;
+import static ca.ubc.bps.BPSFactoryHelpers.standard;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -10,10 +17,28 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import com.google.common.collect.Table;
+import com.google.common.collect.Table.Cell;
+import com.google.common.collect.Tables;
 import com.google.inject.TypeLiteral;
 
+import blang.inits.Arg;
+import blang.inits.Creator;
+import blang.inits.DefaultValue;
+import blang.inits.DesignatedConstructor;
+import blang.inits.Implementations;
+import blang.inits.InitService;
+import blang.inits.Input;
+import blang.inits.experiments.Experiment;
+import blang.inits.experiments.ExperimentResults;
+import blang.inits.providers.CollectionsProviders;
+import briefj.BriefIO;
 import ca.ubc.bps.bounces.BounceFactory;
-import ca.ubc.bps.processors.SaveTrajectory;
+import ca.ubc.bps.models.FixedPrecisionNormalModel;
+import ca.ubc.bps.processors.IntegrateTrajectory;
+import ca.ubc.bps.processors.IntegrateTrajectory.SegmentIntegrator;
+import ca.ubc.bps.processors.MemorizeTrajectory;
+import ca.ubc.bps.processors.WriteTrajectory;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.Dynamics;
 import ca.ubc.bps.state.PiecewiseConstant;
@@ -23,34 +48,34 @@ import ca.ubc.pdmp.JumpProcess;
 import ca.ubc.pdmp.PDMP;
 import ca.ubc.pdmp.PDMPSimulator;
 import ca.ubc.pdmp.StoppingCriterion;
-import blang.inits.Arg;
-import blang.inits.Creator;
-import blang.inits.DefaultValue;
-import blang.inits.DesignatedConstructor;
-import blang.inits.InitService;
-import blang.inits.Input;
-import blang.inits.providers.CollectionsProviders;
 
-import static ca.ubc.bps.BPSFactoryHelpers.*;
-
-public class BPSFactory
+public class BPSFactory extends Experiment
 {
-  @Arg 
+  @Arg @DefaultValue("FixedPrecisionNormalModel")
   public Model model = isotropicGlobal(2);
   
-  @Arg 
-  public Dynamics dynamics = linear;
+  @Arg @DefaultValue("PiecewiseLinear")
+  public Dynamics dynamics = linear();
   
-  @Arg 
+  @Arg @DefaultValue("Standard")
   public BounceFactory bounce = standard;
   
-  @Arg
+  @Arg @DefaultValue("Standard")
   public RefreshmentFactory refreshment = local(1);
   
-  @Arg
-  public MonitoredIndices save = all;
+  @Arg @DefaultValue("all")
+  public MonitoredIndices write = all;
   
-  @Arg
+  @Arg @DefaultValue("all")
+  public MonitoredIndices memorize = all;
+  
+  @Arg @DefaultValue("all")
+  public MonitoredIndices summarize = all;
+  
+  @Arg @DefaultValue({"1", "2"})
+  public List<Integer> summarizedMomentDegrees = Arrays.asList(1, 2);
+  
+  @Arg @DefaultValue("false")
   public boolean stationaryInitialization = false;
   
   @Arg @DefaultValue("1")
@@ -59,7 +84,7 @@ public class BPSFactory
   @Arg @DefaultValue("1")
   public Random initializationRandom = new Random(1);
   
-  @Arg @DefaultValue("--stochasticProcessTime 100.0")
+  @Arg @DefaultValue({"--stochasticProcessTime", "100.0"})
   public StoppingCriterion stoppingRule = StoppingCriterion.byStochasticProcessTime(100.0);
   
   @Arg @DefaultValue("ZERO")
@@ -70,48 +95,7 @@ public class BPSFactory
     ZERO, STATIONARY;
   }
   
-  public static class MonitoredIndices
-  {
-    private final List<Integer> list;
-    @DesignatedConstructor
-    public MonitoredIndices(
-        @Input(formatDescription = "all|none|space-separated indices") List<String> strings,
-        @InitService final Creator creator)
-    {
-      if (strings.size() == 1 && strings.get(0).trim().equals("all"))
-        this.list = null;
-      else if (strings.size() == 1 && strings.get(0).trim().equals("none"))
-        this.list = new ArrayList<>();
-      else
-      {
-        TypeLiteral<List<Integer>> listOfInts = new TypeLiteral<List<Integer>>() {};
-        this.list = CollectionsProviders.parseList(strings, listOfInts, creator);
-      }
-    }
-    public MonitoredIndices(List<Integer> list) 
-    {
-      this.list = list;
-    }
-    public List<Integer> get(int numberItems)
-    {
-      if (list == null)
-      {
-        List<Integer> result = new ArrayList<Integer>();
-        for (int i = 0; i < numberItems; i++)
-          result.add(i);
-        return result;
-      }
-      else
-        return list;
-    }
-  }
-
-  @FunctionalInterface
-  public static interface RefreshmentFactory
-  {
-     public void addRefreshment(PDMP pdmp);
-  }
-  
+  @Implementations({FixedPrecisionNormalModel.class})
   public static interface Model
   {
     public void setup(ModelBuildingContext context, boolean initializeStatesFromStationary);
@@ -120,14 +104,15 @@ public class BPSFactory
   public class ModelBuildingContext
   {
     public final Random initializationRandom;
+    private List<JumpProcess> jumpProcesses = new ArrayList<>();
+    private LinkedHashSet<ContinuouslyEvolving> continuouslyEvolvingStates = null;
+    private LinkedHashSet<PiecewiseConstant<?>> piecewiseConstantStates = new LinkedHashSet<>();
+    
     public ModelBuildingContext(Random initializationRandom)
     {
       this.initializationRandom = initializationRandom;
     }
-    private List<JumpProcess> jumpProcesses = new ArrayList<>();
-    private LinkedHashSet<ContinuouslyEvolving> continuouslyEvolvingStates = null;
-    private LinkedHashSet<PiecewiseConstant<?>> piecewiseConstantStates = new LinkedHashSet<>();
-    public List<ContinuouslyEvolving> continuouslyEvolvingStates(int dim) 
+    public List<ContinuouslyEvolving> buildAndRegisterContinuouslyEvolvingStates(int dim) 
     {
       if (continuouslyEvolvingStates != null)
         throw new RuntimeException();
@@ -148,7 +133,7 @@ public class BPSFactory
       JumpProcess process = new JumpProcess(potential.clock, kernel);
       registerJumpProcess(process);
     }
-    public List<Coordinate> coordinates() 
+    private List<Coordinate> coordinates() 
     {
       List<Coordinate> result = new ArrayList<>();
       result.addAll(continuouslyEvolvingStates);
@@ -174,42 +159,21 @@ public class BPSFactory
     }
   }
 
-  public BPS buildAndRun()
+  public BPS buildAndRun() 
   {
-    ModelBuildingContext modelContext = new ModelBuildingContext(initializationRandom);
-    
-    // setup bounces and variables
-    boolean modelShouldInitToStationarity = initialization == InitializationStrategy.STATIONARY;
-    model.setup(modelContext, modelShouldInitToStationarity);
-    PDMP pdmp = new PDMP(modelContext.coordinates());
-    pdmp.jumpProcesses.addAll(modelContext.jumpProcesses);
-    
-    // refreshments
-    refreshment.addRefreshment(pdmp);
-    BPS result = new BPS(pdmp, new ArrayList<>(modelContext.continuouslyEvolvingStates));
-    
-    // monitors
-    Set<Integer> savedIndices = new LinkedHashSet<>(save.get(result.continuouslyEvolvingStates.size()));
-    int index = 0;
-    for (ContinuouslyEvolving variable : result.continuouslyEvolvingStates)
-      if (savedIndices.contains(index++))
-      {
-        SaveTrajectory processor = new SaveTrajectory(variable);
-        result.savedTrajectories.put(variable, processor);
-        pdmp.processors.add(processor);
-      }
-    
-    // initializations 
-    initializeVelocities(result.continuouslyEvolvingStates);
-    initializePositions(result.continuouslyEvolvingStates);
-    
-    result.simulator = new PDMPSimulator(result.pdmp);
+    BPS result = new BPS();
     result.simulator.simulate(simulationRandom, stoppingRule);
-    
+    result.writeResults();
     return result;
   }
   
-  private void initializePositions(List<ContinuouslyEvolving> continuouslyEvolvingStates)
+  @Override
+  public void run()
+  {
+    buildAndRun();
+  }
+  
+  private void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
   {
     if (initialization == InitializationStrategy.ZERO)
       ; // nothing to do, this is the default
@@ -219,34 +183,188 @@ public class BPSFactory
       throw new RuntimeException();
   }
 
-  private void initializeVelocities(List<ContinuouslyEvolving> continuouslyEvolvingStates)
+  private void initializeVelocities(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
   {
     for (ContinuouslyEvolving coordinate : continuouslyEvolvingStates)
       coordinate.velocity.set(initializationRandom.nextGaussian());
   }
-
-  public static class BPS
+  
+  public class BPS
   {
-    public final PDMP pdmp;
-    public PDMPSimulator simulator;
-    public final List<ContinuouslyEvolving> continuouslyEvolvingStates;
+    public final PDMPSimulator simulator;
+    public final Map<ContinuouslyEvolving, MemorizeTrajectory> memorizedTrajectories = new LinkedHashMap<>();
+    public final Table<ContinuouslyEvolving, String, IntegrateTrajectory> summarizedTrajectories 
+      = Tables.newCustomTable(new LinkedHashMap<>(), LinkedHashMap::new);
+    private final ModelBuildingContext modelContext;
+    private final int nRefreshmentProcesses;
     
-    public final Map<ContinuouslyEvolving, SaveTrajectory> savedTrajectories = new LinkedHashMap<ContinuouslyEvolving, SaveTrajectory>();
-
-    public BPS(PDMP pdmp, List<ContinuouslyEvolving> continuouslyEvolvingStates)
+    public boolean isRefreshment(int jumpCoordinate)
     {
-      this.continuouslyEvolvingStates = continuouslyEvolvingStates;
-      this.pdmp = pdmp;
+      return jumpCoordinate < nRefreshmentProcesses;
     }
     
-    // convenience methods
+    public BPS()
+    {
+      modelContext = new ModelBuildingContext(initializationRandom);
+      
+      // setup bounces and variables
+      PDMP pdmp = setupVariablesAndBounces();
+      nRefreshmentProcesses = pdmp.jumpProcesses.size();
+      
+      // refreshments
+      refreshment.addRefreshment(pdmp);
+      
+      // monitors
+      for (MonitorType type : MonitorType.values())
+        setupMonitors(pdmp, type);
+      
+      // initializations 
+      initializeVelocities(modelContext.continuouslyEvolvingStates);
+      initializePositions(modelContext.continuouslyEvolvingStates);
+      
+      simulator = new PDMPSimulator(pdmp);
+    }
+    
+    public void writeResults()
+    {
+      StringBuilder result = new StringBuilder();
+      result.append(VARIABLE_KEY + ",moment,value\n");
+      for (Cell<ContinuouslyEvolving, String, IntegrateTrajectory> cell : summarizedTrajectories.cellSet())
+        result.append("" + cell.getRowKey().key + "," + cell.getColumnKey() + "," + cell.getValue().integrate() + "\n");
+      BriefIO.write(results.getFileInResultFolder("summaryStatistics.csv"), result);
+    }
+    
+    public static final String CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME =  "continuouslyEvolvingSamples";
+    
+    private void setupMonitors(
+        PDMP pdmp, 
+        MonitorType type
+        )
+    {
+      MonitoredIndices requested;
+      ExperimentResults results = null;
+      switch (type) 
+      {
+        case MEMORIZE:
+          requested = memorize;
+          break;
+        case SUMMARIZE:
+          requested = summarize;
+          break;
+        case WRITE:
+          results = BPSFactory.this.results.child(CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME);
+          requested = write;
+          break;
+        default:
+          throw new RuntimeException();
+      }
+      Set<Integer> savedIndices = new LinkedHashSet<>(requested.get(modelContext.continuouslyEvolvingStates.size()));
+      
+      for (ContinuouslyEvolving variable : modelContext.continuouslyEvolvingStates)
+      {
+        final int index = (int) variable.key;
+        if (savedIndices.contains(index))
+        {
+          switch (type) 
+          {
+            case MEMORIZE:
+            {
+              MemorizeTrajectory processor = new MemorizeTrajectory(variable);
+              memorizedTrajectories.put(variable, processor);
+              pdmp.processors.add(processor);
+              break;
+            }
+            case SUMMARIZE:
+            {
+              for (int degree : summarizedMomentDegrees)
+              {
+                SegmentIntegrator integrator = new IntegrateTrajectory.MomentIntegrator(degree);
+                IntegrateTrajectory processor = new IntegrateTrajectory(variable, integrator); 
+                summarizedTrajectories.put(variable, momentKey(degree), processor);
+                pdmp.processors.add(processor);
+              }
+              break;
+            }
+            case WRITE:
+            {
+              ExperimentResults variableResults = results.child(VARIABLE_KEY, index);
+              WriteTrajectory processor = new WriteTrajectory(variable, variableResults.getAutoClosedBufferedWriter("data.csv"));
+              pdmp.processors.add(processor);
+              break;
+            }
+            default:
+              throw new RuntimeException();
+          }
+        }
+      }
+    }
+
+    private PDMP setupVariablesAndBounces() 
+    {
+      boolean modelShouldInitToStationarity = initialization == InitializationStrategy.STATIONARY;
+      model.setup(modelContext, modelShouldInitToStationarity);
+      checkModelCreated();
+      PDMP pdmp = new PDMP(modelContext.coordinates());
+      pdmp.jumpProcesses.addAll(modelContext.jumpProcesses);
+      return pdmp;
+    }
+
+    private void checkModelCreated()
+    {
+      if (modelContext.jumpProcesses.isEmpty())
+        throw new RuntimeException("No bounce added by the model.");
+      if (modelContext.continuouslyEvolvingStates.isEmpty() && modelContext.piecewiseConstantStates.isEmpty())
+        throw new RuntimeException("No variables added by the model.");
+    }
+  }
+  
+  public static String momentKey(int degree) 
+  {
+    return "" + degree;
+  }
+  
+  public static final String VARIABLE_KEY = "variable";
+  
+  private static enum MonitorType { MEMORIZE, WRITE, SUMMARIZE }
+  
+  public static class MonitoredIndices
+  {
+    private final List<Integer> list;
+    @DesignatedConstructor
+    public MonitoredIndices(
+        @Input(formatDescription = "all|none|space-separated indices") List<String> strings,
+        @InitService final Creator creator)
+    {
+      if (strings.size() == 1 && strings.get(0).trim().equals("all"))
+        this.list = null;
+      else if (strings.size() == 1 && strings.get(0).trim().equals("none"))
+        this.list = new ArrayList<>();
+      else
+      {
+        TypeLiteral<List<Integer>> listOfInts = new TypeLiteral<List<Integer>>() {};
+        this.list = CollectionsProviders.parseList(strings, listOfInts, creator);
+      }
+    }
+    public MonitoredIndices(List<Integer> list) 
+    {
+      this.list = list;
+    }
+    private List<Integer> get(int numberItems)
+    {
+      if (list == null)
+      {
+        List<Integer> result = new ArrayList<Integer>();
+        for (int i = 0; i < numberItems; i++)
+          result.add(i);
+        return result;
+      }
+      else
+        return list;
+    }
   }
   
   public static void main(String [] args)
   {
-    BPSFactory f = new BPSFactory();
-    f.bounce = dependentRandomized;
-    BPS bps = f.buildAndRun();
+    Experiment.start(args);
   }
-  
 }

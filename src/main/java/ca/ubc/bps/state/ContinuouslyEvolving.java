@@ -15,17 +15,25 @@ public class ContinuouslyEvolving implements Coordinate
   
   public final Dynamics dynamics;
   
-  public ContinuouslyEvolving(MutableDouble position, MutableDouble velocity, Dynamics dynamics)
+  public final Object key;
+  
+  public ContinuouslyEvolving(MutableDouble position, MutableDouble velocity, Dynamics dynamics, Object key)
   {
     this.position = position;
     this.velocity = velocity;
     this.dynamics = dynamics;
+    this.key = key;
   }
 
   @Override
   public void extrapolateInPlace(double deltaTime)
   {
     dynamics.extrapolateInPlace(deltaTime, position, velocity);
+  }
+  
+  public String toString() 
+  {
+    return key.toString();
   }
   
   public static List<ContinuouslyEvolving> buildArray(int size, Dynamics dynamics)
@@ -36,7 +44,8 @@ public class ContinuouslyEvolving implements Coordinate
           new ContinuouslyEvolving(
               new MutableDoubleImplementation(), 
               new MutableDoubleImplementation(), 
-              dynamics
+              dynamics,
+              i
               )
           );
     return result;

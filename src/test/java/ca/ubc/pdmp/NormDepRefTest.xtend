@@ -2,8 +2,7 @@ package ca.ubc.pdmp
 
 import static ca.ubc.bps.BPSFactoryHelpers.*
 import ca.ubc.bps.BPSFactory
-import ca.ubc.bps.BPSFactoryHelpers.NormDependentRefreshment
-import ca.ubc.bps.models.FixedPrecisionNormalModel
+import briefj.BriefCollections
 
 class NormDepRefTest {
   
@@ -13,12 +12,13 @@ class NormDepRefTest {
       refreshment = 
         global(1.0)
 //        new NormDependentRefreshment
-      stoppingRule = StoppingCriterion.byStochasticProcessTime(100_000)
-      model = isotropicGlobal(1000)
-      save = subset(#[1])
+      stoppingRule = StoppingCriterion.byStochasticProcessTime(10_000)
+      model = isotropicGlobal(100)
+      write = none
+      summarize = none
     ]
     val bps = factory.buildAndRun
-    val traj = bps.savedTrajectories.values.iterator.next.trajectory
+    val traj = BriefCollections.pick(bps.memorizedTrajectories.values).trajectory
     println("moment-1 = " + traj.moment(1))
     println("moment-2 = " + traj.moment(2))
     println("ESS = " + traj.momentEss(2))

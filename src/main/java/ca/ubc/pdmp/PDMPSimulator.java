@@ -156,7 +156,7 @@ public class PDMPSimulator
       
       if (isBoundIndicators[eventJumpProcessIndex])  
       {
-        updateVariables(nd[eventJumpProcessIndex], false);
+        updateVariables(nd[eventJumpProcessIndex], false, -1);
         
         // recompute new time
         simulateNextEventDeltaTime(eventJumpProcessIndex);
@@ -167,8 +167,8 @@ public class PDMPSimulator
       else
       {
         numberOfJumps++;
-        updateVariables(nk[eventJumpProcessIndex], true);
-        updateVariables(nd_Nd_nk_plus_nd_minus_nk[eventJumpProcessIndex], false);
+        updateVariables(nk[eventJumpProcessIndex], true, eventJumpProcessIndex);
+        updateVariables(nd_Nd_nk_plus_nd_minus_nk[eventJumpProcessIndex], false, -1);
         
         // do the jump
         pdmp.jumpProcesses.get(eventJumpProcessIndex).kernel.simulate(random);
@@ -182,7 +182,7 @@ public class PDMPSimulator
     }
     
     // final update on all variables
-    updateAllVariables(true); 
+    updateAllVariables(true, -1); 
   }
   
   private boolean computeBudgetPositive()
@@ -197,25 +197,25 @@ public class PDMPSimulator
     return true;
   }
 
-  private void updateAllVariables(boolean commit)
+  private void updateAllVariables(boolean commit, int source)
   {
     for (int varIdx = 0; varIdx < numberOfVariables; varIdx++)
-      _updateVariable(varIdx, commit);
+      _updateVariable(varIdx, commit, source);
   }
   
-  private void updateVariables(int [] variables, boolean commit)
+  private void updateVariables(int [] variables, boolean commit, int source)
   {
     if (variables == null)
       return;
     
     if (variables[0] == -1)
-      updateAllVariables(commit);
+      updateAllVariables(commit, source);
     else
       for (int variableIdx : variables)
-        _updateVariable(variableIdx, commit);
+        _updateVariable(variableIdx, commit, source);
   }
 
-  private void _updateVariable(int variableIndex, boolean commit)
+  private void _updateVariable(int variableIndex, boolean commit, int source)
   {
     // avoid extraneous processing calls
     if (lastUpdateTimes[variableIndex] == time)
@@ -228,7 +228,7 @@ public class PDMPSimulator
       final int [] processorsForThisVar = processors[variableIndex];
       if (processorsForThisVar != null)
         for (int processorIdx : processorsForThisVar)
-          pdmp.processors.get(processorIdx).process(deltaTime);
+          pdmp.processors.get(processorIdx).process(deltaTime, source);
       lastUpdateTimes[variableIndex] = time;
     }
     coordinate.extrapolateInPlace(deltaTime);

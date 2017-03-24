@@ -13,7 +13,7 @@ import ca.ubc.bps.Bounces;
 import ca.ubc.bps.PDMPs;
 import ca.ubc.bps.Refreshments;
 import ca.ubc.bps.Trajectory;
-import ca.ubc.bps.processors.SaveTrajectory;
+import ca.ubc.bps.processors.MemorizeTrajectory;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.NormalClock;
 import rejfree.models.normal.NormalChain;
@@ -50,7 +50,7 @@ public class NormalTest
     // refreshment
     Refreshments.addGlobal(pdmp, 1.0);
     // processors
-    SaveTrajectory processor = new SaveTrajectory(states.get(stateIndex));
+    MemorizeTrajectory processor = new MemorizeTrajectory(states.get(stateIndex));
     pdmp.processors.add(processor);
     // running
     PDMPSimulator simu = new PDMPSimulator(pdmp);

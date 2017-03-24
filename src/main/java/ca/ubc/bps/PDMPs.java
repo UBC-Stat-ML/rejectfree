@@ -22,7 +22,7 @@ public class PDMPs
     List<ContinuouslyEvolving> states = 
         ContinuouslyEvolving.buildArray(
             d, 
-            PiecewiseLinear.instance);
+            new PiecewiseLinear());
     
     IndependentRefreshment.simulate(velocityRandom, states);
     

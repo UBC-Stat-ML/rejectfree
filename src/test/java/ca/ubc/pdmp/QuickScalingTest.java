@@ -11,7 +11,7 @@ import ca.ubc.bps.Bounces;
 import ca.ubc.bps.PDMPs;
 import ca.ubc.bps.Refreshments;
 import ca.ubc.bps.Trajectory;
-import ca.ubc.bps.processors.SaveTrajectory;
+import ca.ubc.bps.processors.MemorizeTrajectory;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.BivariateNormalExperiment.MyRegression;
 import xlinear.Matrix;
@@ -118,7 +118,7 @@ public class QuickScalingTest
     if (refresh)
       Refreshments.addGlobal(pdmp, 1.0);
     
-    SaveTrajectory processor = new SaveTrajectory(states.get(0));
+    MemorizeTrajectory processor = new MemorizeTrajectory(states.get(0));
     pdmp.processors.add(processor);
     PDMPSimulator simu = new PDMPSimulator(pdmp);
     simu.setPrintSummaryStatistics(false);
@@ -146,7 +146,7 @@ public class QuickScalingTest
     // no need for refresh
     Refreshments.addGlobal(pdmp, 1.0);
     
-    SaveTrajectory processor = new SaveTrajectory(states.get(0));
+    MemorizeTrajectory processor = new MemorizeTrajectory(states.get(0));
     pdmp.processors.add(processor);
     PDMPSimulator simu = new PDMPSimulator(pdmp);
     simu.setPrintSummaryStatistics(false);
@@ -174,7 +174,7 @@ public class QuickScalingTest
     // no need for refresh
      Refreshments.addGlobal(pdmp, 1.0);
     
-    SaveTrajectory processor = new SaveTrajectory(states.get(0));
+    MemorizeTrajectory processor = new MemorizeTrajectory(states.get(0));
     pdmp.processors.add(processor);
     PDMPSimulator simu = new PDMPSimulator(pdmp);
     simu.setPrintSummaryStatistics(false);

@@ -6,6 +6,7 @@ import java.util.Random;
 
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
+import blang.inits.Implementations;
 import ca.ubc.bps.BPSFactory.Model;
 import ca.ubc.bps.BPSFactory.ModelBuildingContext;
 import ca.ubc.bps.energies.NormalEnergy;
@@ -21,12 +22,13 @@ import xlinear.StaticUtils;
 
 public class FixedPrecisionNormalModel implements Model
 {
-  @Arg
-  public PrecisionBuilder precision;
+  @Arg @DefaultValue("DiagonalPrecision")
+  public PrecisionBuilder precision = new DiagonalPrecision();
   
   @Arg @DefaultValue("true")
   public boolean useLocal = true;
   
+  @Implementations({DiagonalPrecision.class})
   public static interface PrecisionBuilder
   {
     public Matrix build();
@@ -34,22 +36,21 @@ public class FixedPrecisionNormalModel implements Model
   
   public static class DiagonalPrecision implements PrecisionBuilder
   {
-    @Arg 
-    public int size;
+    @Arg @DefaultValue("2")
+    public int size = 2;
 
     @Override
     public Matrix build()
     {
       return MatrixOperations.identity(size);
     }
-    
   }
 
   @Override
   public void setup(ModelBuildingContext context, boolean initializeToStationary)
   {
     Matrix precisionMatrix = precision.build();
-    List<ContinuouslyEvolving> vars = context.continuouslyEvolvingStates(precisionMatrix.nCols());
+    List<ContinuouslyEvolving> vars = context.buildAndRegisterContinuouslyEvolvingStates(precisionMatrix.nCols());
     if (initializeToStationary)
       initializeToStationary(vars, precisionMatrix, context.initializationRandom);
     if (useLocal && precisionMatrix.nCols() > 2)

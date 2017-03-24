@@ -26,7 +26,7 @@ import ca.ubc.bps.bounces.RandomizedBounce;
 import ca.ubc.bps.energies.EnergyGradient;
 import ca.ubc.bps.energies.NormalEnergy;
 import ca.ubc.bps.processors.EffectiveSampleSize;
-import ca.ubc.bps.processors.SaveTrajectory;
+import ca.ubc.bps.processors.MemorizeTrajectory;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.NormalClock;
@@ -127,7 +127,7 @@ public class BivariateNormalExperiment
     // no need for refresh
     // Refreshments.addGlobal(pdmp, 1.0);
     
-    SaveTrajectory processor = new SaveTrajectory(states.get(0));
+    MemorizeTrajectory processor = new MemorizeTrajectory(states.get(0));
     pdmp.processors.add(processor);
     PDMPSimulator simu = new PDMPSimulator(pdmp);
     simu.setPrintSummaryStatistics(false);
@@ -215,7 +215,7 @@ public class BivariateNormalExperiment
             states.get(1)), 
         precision(rho));
     Refreshments.addGlobal(pdmp, 1.0);
-    SaveTrajectory processor = new SaveTrajectory(states.get(0));
+    MemorizeTrajectory processor = new MemorizeTrajectory(states.get(0));
     pdmp.processors.add(processor);
     PDMPSimulator simu = new PDMPSimulator(pdmp);
     simu.setPrintSummaryStatistics(false);

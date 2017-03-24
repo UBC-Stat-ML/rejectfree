@@ -38,7 +38,7 @@ public class IntegrateTrajectory extends ContinuousStateDependent implements Pro
   }
 
   @Override
-  public void process(double deltaTime)
+  public void process(double deltaTime, int jumpProcessIndex)
   {
     integrator.process(deltaTime, variable.position.get(), variable.velocity.get());
   }

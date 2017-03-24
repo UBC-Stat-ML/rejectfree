@@ -2,6 +2,7 @@ package ca.ubc.pdmp;
 
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
+import blang.inits.DesignatedConstructor;
 
 /**
  * PDMP simulation will stop when any one of the following occurs:
@@ -45,9 +46,9 @@ public class StoppingCriterion
     return result;
   }
   
-  private StoppingCriterion()
+  @DesignatedConstructor
+  public StoppingCriterion()
   {
-    
   }
 
   public StoppingCriterion(double stochasticProcessTime, long wallClockTimeMilliseconds, long numberOfQueuePolls)
