@@ -84,8 +84,8 @@ public class BPSFactory extends Experiment
   @Arg @DefaultValue("1")
   public Random initializationRandom = new Random(1);
   
-  @Arg @DefaultValue({"--stochasticProcessTime", "100.0"})
-  public StoppingCriterion stoppingRule = StoppingCriterion.byStochasticProcessTime(100.0);
+  @Arg @DefaultValue({"--stochasticProcessTime", "10000"})
+  public StoppingCriterion stoppingRule = StoppingCriterion.byStochasticProcessTime(10_000);
   
   @Arg @DefaultValue("ZERO")
   public InitializationStrategy initialization = InitializationStrategy.ZERO;
@@ -111,6 +111,10 @@ public class BPSFactory extends Experiment
     public ModelBuildingContext(Random initializationRandom)
     {
       this.initializationRandom = initializationRandom;
+    }
+    public Dynamics dynamics()
+    {
+      return dynamics;
     }
     public List<ContinuouslyEvolving> buildAndRegisterContinuouslyEvolvingStates(int dim) 
     {
@@ -227,6 +231,8 @@ public class BPSFactory extends Experiment
     
     public void writeResults()
     {
+      if (summarizedTrajectories.isEmpty())
+        return;
       StringBuilder result = new StringBuilder();
       result.append(VARIABLE_KEY + ",moment,value\n");
       for (Cell<ContinuouslyEvolving, String, IntegrateTrajectory> cell : summarizedTrajectories.cellSet())
@@ -241,61 +247,44 @@ public class BPSFactory extends Experiment
         MonitorType type
         )
     {
-      MonitoredIndices requested;
       ExperimentResults results = null;
-      switch (type) 
-      {
-        case MEMORIZE:
-          requested = memorize;
-          break;
-        case SUMMARIZE:
-          requested = summarize;
-          break;
-        case WRITE:
-          results = BPSFactory.this.results.child(CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME);
-          requested = write;
-          break;
-        default:
-          throw new RuntimeException();
-      }
+      MonitoredIndices requested = null;
+      
+      requested = type == MonitorType.MEMORIZE  ? memorize  : requested;
+      requested = type == MonitorType.SUMMARIZE ? summarize : requested;
+      requested = type == MonitorType.WRITE     ? write     : requested;
+
       Set<Integer> savedIndices = new LinkedHashSet<>(requested.get(modelContext.continuouslyEvolvingStates.size()));
       
-      for (ContinuouslyEvolving variable : modelContext.continuouslyEvolvingStates)
+      loop : for (ContinuouslyEvolving variable : modelContext.continuouslyEvolvingStates)
       {
         final int index = (int) variable.key;
-        if (savedIndices.contains(index))
+        if (!savedIndices.contains(index))
+           continue loop;
+        if (type == MonitorType.MEMORIZE)
         {
-          switch (type) 
-          {
-            case MEMORIZE:
-            {
-              MemorizeTrajectory processor = new MemorizeTrajectory(variable);
-              memorizedTrajectories.put(variable, processor);
-              pdmp.processors.add(processor);
-              break;
-            }
-            case SUMMARIZE:
-            {
-              for (int degree : summarizedMomentDegrees)
-              {
-                SegmentIntegrator integrator = new IntegrateTrajectory.MomentIntegrator(degree);
-                IntegrateTrajectory processor = new IntegrateTrajectory(variable, integrator); 
-                summarizedTrajectories.put(variable, momentKey(degree), processor);
-                pdmp.processors.add(processor);
-              }
-              break;
-            }
-            case WRITE:
-            {
-              ExperimentResults variableResults = results.child(VARIABLE_KEY, index);
-              WriteTrajectory processor = new WriteTrajectory(variable, variableResults.getAutoClosedBufferedWriter("data.csv"));
-              pdmp.processors.add(processor);
-              break;
-            }
-            default:
-              throw new RuntimeException();
-          }
+          MemorizeTrajectory processor = new MemorizeTrajectory(variable);
+          memorizedTrajectories.put(variable, processor);
+          pdmp.processors.add(processor);
         }
+        else if (type == MonitorType.SUMMARIZE)
+          for (int degree : summarizedMomentDegrees)
+          {
+            SegmentIntegrator integrator = new IntegrateTrajectory.MomentIntegrator(degree);
+            IntegrateTrajectory processor = new IntegrateTrajectory(variable, integrator); 
+            summarizedTrajectories.put(variable, momentKey(degree), processor);
+            pdmp.processors.add(processor);
+          }
+        else if (type == MonitorType.WRITE)
+        {
+          if (results == null)
+            results = BPSFactory.this.results.child(CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME);
+          ExperimentResults variableResults = results.child(VARIABLE_KEY, index);
+          WriteTrajectory processor = new WriteTrajectory(variable, variableResults.getAutoClosedBufferedWriter("data.csv"));
+          pdmp.processors.add(processor);
+        }
+        else
+          throw new RuntimeException();
       }
     }
 

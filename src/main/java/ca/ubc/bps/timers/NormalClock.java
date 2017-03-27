@@ -7,6 +7,7 @@ import bayonet.math.NumericalUtils;
 import ca.ubc.pdmp.DeltaTime;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.pdmp.Clock;
 import rejfree.StaticUtils;
 import rejfree.models.normal.NormalFactor;
@@ -36,6 +37,8 @@ public class NormalClock extends ContinuousStateDependent implements Clock
     d  = cachedBinary ? precision.get(0,1) : Double.NaN;
     if (cachedBinary)
       NumericalUtils.checkIsClose(precision.get(0,1), precision.get(1,0));
+    if (!(requiredVariables.get(0).dynamics instanceof PiecewiseLinear))
+      throw new RuntimeException();
   }
 
   @Override

@@ -56,7 +56,7 @@ public class FixedPrecisionNormalModel implements Model
     if (useLocal && precisionMatrix.nCols() > 2)
       setupLocal(context, precisionMatrix, vars);
     else
-      context.registerBPSPotential(bpsPotential(precisionMatrix, vars));
+      context.registerBPSPotential(potential(precisionMatrix, vars));
   }
   
   private static void initializeToStationary(List<ContinuouslyEvolving> vars, Matrix precisionMatrix, Random random)
@@ -88,7 +88,7 @@ public class FixedPrecisionNormalModel implements Model
         List<ContinuouslyEvolving> varSubset = new ArrayList<>();
         varSubset.add(variables.get(row));
         varSubset.add(variables.get(col));
-        context.registerBPSPotential(bpsPotential(subMatrix, varSubset));
+        context.registerBPSPotential(potential(subMatrix, varSubset));
       }
     });
     // remaining diagonals
@@ -99,11 +99,11 @@ public class FixedPrecisionNormalModel implements Model
         subMatrix.set(0, 0, precision.get(i, i));
         List<ContinuouslyEvolving> varSubset = new ArrayList<>();
         varSubset.add(variables.get(i));
-        context.registerBPSPotential(bpsPotential(subMatrix, varSubset));
+        context.registerBPSPotential(potential(subMatrix, varSubset));
       }
   }
   
-  public static BPSPotential bpsPotential(Matrix precision, List<ContinuouslyEvolving> variables)
+  public static BPSPotential potential(Matrix precision, List<ContinuouslyEvolving> variables)
   {
     NormalEnergy energy = new NormalEnergy(precision);
     NormalClock timer = new NormalClock(variables, precision);

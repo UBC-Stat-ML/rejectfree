@@ -9,6 +9,7 @@ import ca.ubc.bps.models.FixedPrecisionNormalModel.DiagonalPrecision
 import ca.ubc.bps.state.PiecewiseLinear
 import java.util.ArrayList
 import java.util.List
+import ca.ubc.bps.models.GeneralizedNormalModel
 
 class BPSFactoryHelpers {
   
@@ -60,6 +61,13 @@ class BPSFactoryHelpers {
       precision = new DiagonalPrecision => [
         size = dim
       ]
+    ]
+  }
+  
+  def static Model generalizedNormal(int dim, double inputAlpha) {
+    return new GeneralizedNormalModel => [
+      size = dim
+      alpha = inputAlpha
     ]
   }
   

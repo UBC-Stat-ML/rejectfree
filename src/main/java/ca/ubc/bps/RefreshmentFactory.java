@@ -1,7 +1,6 @@
 package ca.ubc.bps;
 
 import java.util.List;
-import java.util.function.Function;
 
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
@@ -9,8 +8,10 @@ import blang.inits.Implementations;
 import ca.ubc.bps.RefreshmentFactory.NormDependent;
 import ca.ubc.bps.RefreshmentFactory.Standard;
 import ca.ubc.bps.kernels.IndependentRefreshment;
+import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
-import ca.ubc.bps.timers.ConvexTimer;
+import ca.ubc.bps.timers.Intensity;
+import ca.ubc.bps.timers.UnimodalTimer;
 import ca.ubc.pdmp.JumpProcess;
 import ca.ubc.pdmp.PDMP;
 import static xlinear.MatrixExtensions.*;
@@ -51,9 +52,10 @@ public interface RefreshmentFactory
      @DefaultValue("0.5")
      public double power = 0.5;
      
-     private Function<double[], Double> normPotential() {
-       return (double[] input) -> {
-         return Double.valueOf(Math.pow(norm(denseCopy(input)), power));
+     private Intensity normPotential() {
+       return (ContinuousStateDependent state, double deltaTime) -> {
+         double [] velocity = state.extrapolateVelocity(deltaTime);
+         return Double.valueOf(Math.pow(norm(denseCopy(velocity)), power));
        };
      }
      
@@ -63,10 +65,9 @@ public interface RefreshmentFactory
            
        pdmp.jumpProcesses.add(
            new JumpProcess(
-               new ConvexTimer(
+               new UnimodalTimer( 
                    continuousCoordinates, 
-                   normPotential(), 
-                   1.0),               
+                   normPotential()),               
                new IndependentRefreshment(continuousCoordinates)));
      }
    }
