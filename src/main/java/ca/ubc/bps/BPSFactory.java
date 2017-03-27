@@ -26,7 +26,6 @@ import blang.inits.Arg;
 import blang.inits.Creator;
 import blang.inits.DefaultValue;
 import blang.inits.DesignatedConstructor;
-import blang.inits.Implementations;
 import blang.inits.InitService;
 import blang.inits.Input;
 import blang.inits.experiments.Experiment;
@@ -34,7 +33,6 @@ import blang.inits.experiments.ExperimentResults;
 import blang.inits.providers.CollectionsProviders;
 import briefj.BriefIO;
 import ca.ubc.bps.bounces.BounceFactory;
-import ca.ubc.bps.models.FixedPrecisionNormalModel;
 import ca.ubc.bps.processors.IntegrateTrajectory;
 import ca.ubc.bps.processors.IntegrateTrajectory.SegmentIntegrator;
 import ca.ubc.bps.processors.MemorizeTrajectory;
@@ -93,12 +91,6 @@ public class BPSFactory extends Experiment
   public static enum InitializationStrategy
   {
     ZERO, STATIONARY;
-  }
-  
-  @Implementations({FixedPrecisionNormalModel.class})
-  public static interface Model
-  {
-    public void setup(ModelBuildingContext context, boolean initializeStatesFromStationary);
   }
   
   public class ModelBuildingContext

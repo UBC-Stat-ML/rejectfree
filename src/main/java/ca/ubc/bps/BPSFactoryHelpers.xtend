@@ -1,11 +1,11 @@
 package ca.ubc.bps
 
-import ca.ubc.bps.BPSFactory.Model
+import ca.ubc.bps.Model
 import ca.ubc.bps.BPSFactory.MonitoredIndices
 import ca.ubc.bps.RefreshmentFactory.Standard
 import ca.ubc.bps.bounces.BounceFactory
 import ca.ubc.bps.models.FixedPrecisionNormalModel
-import ca.ubc.bps.models.FixedPrecisionNormalModel.DiagonalPrecision
+import ca.ubc.bps.models.DiagonalPrecision
 import ca.ubc.bps.state.PiecewiseLinear
 import java.util.ArrayList
 import java.util.List

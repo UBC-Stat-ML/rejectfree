@@ -6,11 +6,10 @@ import java.util.Random;
 
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
-import blang.inits.Implementations;
-import ca.ubc.bps.BPSFactory.Model;
 import ca.ubc.bps.BPSFactory.ModelBuildingContext;
 import ca.ubc.bps.energies.NormalEnergy;
 import ca.ubc.bps.BPSPotential;
+import ca.ubc.bps.Model;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.NormalClock;
 import xlinear.DenseMatrix;
@@ -28,24 +27,6 @@ public class FixedPrecisionNormalModel implements Model
   @Arg @DefaultValue("true")
   public boolean useLocal = true;
   
-  @Implementations({DiagonalPrecision.class})
-  public static interface PrecisionBuilder
-  {
-    public Matrix build();
-  }
-  
-  public static class DiagonalPrecision implements PrecisionBuilder
-  {
-    @Arg @DefaultValue("2")
-    public int size = 2;
-
-    @Override
-    public Matrix build()
-    {
-      return MatrixOperations.identity(size);
-    }
-  }
-
   @Override
   public void setup(ModelBuildingContext context, boolean initializeToStationary)
   {

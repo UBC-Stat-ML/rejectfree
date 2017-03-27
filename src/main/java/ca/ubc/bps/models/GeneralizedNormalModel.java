@@ -5,7 +5,7 @@ import java.util.List;
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
 import ca.ubc.bps.BPSPotential;
-import ca.ubc.bps.BPSFactory.Model;
+import ca.ubc.bps.Model;
 import ca.ubc.bps.BPSFactory.ModelBuildingContext;
 import ca.ubc.bps.energies.GeneralizedNormalEnergy;
 import ca.ubc.bps.state.ContinuouslyEvolving;
