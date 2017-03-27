@@ -286,12 +286,12 @@ public class PDMPSimulator
     if (queue.containsTime(proposedTime))
     {
       System.err.println("The sampler has hit an event of probability zero: "
-          + "two collisions scheduled exactly at the same time.");
+          + "two events scheduled exactly at the same time.");
       System.err.println("Because of numerical precision, this could possibly "
           + "happen, but very rarely.");
       
       System.err.println("For internal implementation reasons, one of the "
-          + "collisions at time " + proposedTime + " was moved to " + (proposedTime + epsilon));
+          + "events at time " + proposedTime + " was moved to " + (proposedTime + epsilon));
       proposedTime += epsilon;
     }
     return proposedTime;

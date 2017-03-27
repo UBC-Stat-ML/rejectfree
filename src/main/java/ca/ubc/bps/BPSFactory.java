@@ -200,11 +200,11 @@ public class BPSFactory extends Experiment
     public final Table<ContinuouslyEvolving, String, IntegrateTrajectory> summarizedTrajectories 
       = Tables.newCustomTable(new LinkedHashMap<>(), LinkedHashMap::new);
     private final ModelBuildingContext modelContext;
-    private final int nRefreshmentProcesses;
+    private final int nBounceProcesses;
     
-    public boolean isRefreshment(int jumpCoordinate)
+    public boolean isBounce(int jumpCoordinate)
     {
-      return jumpCoordinate < nRefreshmentProcesses;
+      return jumpCoordinate < nBounceProcesses;
     }
     
     public BPS()
@@ -213,7 +213,7 @@ public class BPSFactory extends Experiment
       
       // setup bounces and variables
       PDMP pdmp = setupVariablesAndBounces();
-      nRefreshmentProcesses = pdmp.jumpProcesses.size();
+      nBounceProcesses = pdmp.jumpProcesses.size();
       
       // refreshments
       refreshment.addRefreshment(pdmp);

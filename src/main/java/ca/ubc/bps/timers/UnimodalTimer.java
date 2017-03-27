@@ -19,7 +19,10 @@ import ca.ubc.pdmp.DeltaTime;
  */
 public class UnimodalTimer extends ContinuousStateDependent implements Clock
 {
-  private double currentInitialStepSize = INITIAL_STEP;
+  // Jitter is used to avoid having several event with exact same time in the queue
+  private static final Random jitterRandom = new Random(1);
+  
+  private double currentInitialStepSize = INITIAL_STEP + jitterRandom.nextDouble();
   private Intensity intensity;
   
   public UnimodalTimer(Collection<? extends Coordinate> requiredVariables, Intensity intensity)

@@ -9,9 +9,7 @@ class NormDepRefTest {
   def static public void main(String [] arg) {
     
     val factory = new BPSFactory => [
-      refreshment = 
-        global(1.0)
-//        new NormDependentRefreshment
+      refreshment = normDependent
       stoppingRule = StoppingCriterion.byStochasticProcessTime(10_000)
       model = isotropicGlobal(100)
       write = none

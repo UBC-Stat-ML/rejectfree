@@ -13,12 +13,14 @@ class GeneralizedNormalTest {
   @Test
   def public void test() {
     
-    for (var double alpha = 0.1; alpha < 2.0; alpha += 0.1) {
+    for (var double alpha = 0.0; alpha < 2.0; alpha += 0.1) {
       println("alpha = " + alpha)
       val curAlpha = alpha
       val factory = new BPSFactory => [
-        refreshment = global(1.0)
-        stoppingRule = StoppingCriterion.byStochasticProcessTime(100_000)
+        refreshment = 
+//          normDependent
+          global(1.0)
+        stoppingRule = StoppingCriterion.byStochasticProcessTime(1_000_000)
         model = generalizedNormal(1, curAlpha)
         write = none
         summarize = none

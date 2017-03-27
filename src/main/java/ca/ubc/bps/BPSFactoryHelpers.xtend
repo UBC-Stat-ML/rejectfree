@@ -11,6 +11,8 @@ import java.util.ArrayList
 import java.util.List
 import ca.ubc.bps.models.GeneralizedNormalModel
 
+import ca.ubc.bps.RefreshmentFactory.NormDependent
+
 class BPSFactoryHelpers {
   
   
@@ -27,6 +29,9 @@ class BPSFactoryHelpers {
       local = false
       rate = globalRate
     ]
+  }
+  def static NormDependent normDependent() {
+    return new NormDependent
   }
 
   

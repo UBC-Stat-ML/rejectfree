@@ -55,7 +55,7 @@ public interface RefreshmentFactory
      private Intensity normPotential() {
        return (ContinuousStateDependent state, double deltaTime) -> {
          double [] velocity = state.extrapolateVelocity(deltaTime);
-         return Double.valueOf(Math.pow(norm(denseCopy(velocity)), power));
+         return 1.0 + Math.pow(norm(denseCopy(velocity)), power);
        };
      }
      
