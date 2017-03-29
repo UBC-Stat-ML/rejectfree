@@ -24,8 +24,10 @@ public class GeneralizedNormalModel implements Model
   @Override
   public void setup(ModelBuildingContext context, boolean initializeStatesFromStationary)
   {
+    if (alpha < 0.0)
+      throw new RuntimeException("No solver currently supported for alpha < 0.0");
     if (initializeStatesFromStationary)
-      throw new RuntimeException();
+      throw new RuntimeException("Not yet supported");
     List<ContinuouslyEvolving> vars = context.buildAndRegisterContinuouslyEvolvingStates(size);
     GeneralizedNormalEnergy energy = new GeneralizedNormalEnergy(alpha);
     

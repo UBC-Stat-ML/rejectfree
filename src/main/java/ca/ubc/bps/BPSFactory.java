@@ -223,13 +223,23 @@ public class BPSFactory extends Experiment
     
     public void writeResults()
     {
-      if (summarizedTrajectories.isEmpty())
-        return;
-      StringBuilder result = new StringBuilder();
-      result.append(VARIABLE_KEY + ",moment,value\n");
-      for (Cell<ContinuouslyEvolving, String, IntegrateTrajectory> cell : summarizedTrajectories.cellSet())
-        result.append("" + cell.getRowKey().key + "," + cell.getColumnKey() + "," + cell.getValue().integrate() + "\n");
-      BriefIO.write(results.getFileInResultFolder("summaryStatistics.csv"), result);
+      if (!summarizedTrajectories.isEmpty())
+      {
+        StringBuilder result = new StringBuilder();
+        result.append(VARIABLE_KEY + ",moment,value\n");
+        for (Cell<ContinuouslyEvolving, String, IntegrateTrajectory> cell : summarizedTrajectories.cellSet())
+          result.append("" + cell.getRowKey().key + "," + cell.getColumnKey() + "," + cell.getValue().integrate() + "\n");
+        BriefIO.write(results.getFileInResultFolder("summaryStatistics.csv"), result);
+      }
+      if (!memorizedTrajectories.isEmpty())
+      {
+        StringBuilder result = new StringBuilder();
+        result.append(VARIABLE_KEY + ",moment,value\n");
+        for (int degree : summarizedMomentDegrees)
+          for (ContinuouslyEvolving variable : memorizedTrajectories.keySet())
+            result.append("" + variable.key + "," + degree + "," + memorizedTrajectories.get(variable).getTrajectory().momentEss(degree) + "\n");
+        BriefIO.write(results.getFileInResultFolder("ess.csv"), result);
+      }
     }
     
     public static final String CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME =  "continuouslyEvolvingSamples";
