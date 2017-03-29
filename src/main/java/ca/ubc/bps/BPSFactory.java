@@ -88,6 +88,9 @@ public class BPSFactory extends Experiment
   @Arg @DefaultValue("ZERO")
   public InitializationStrategy initialization = InitializationStrategy.ZERO;
   
+  @Arg @DefaultValue("false")
+  public boolean forbidOutputFiles = true; // Note: programmatic initialization intentionally different
+  
   public static enum InitializationStrategy
   {
     ZERO, STATIONARY;
@@ -223,6 +226,8 @@ public class BPSFactory extends Experiment
     
     public void writeResults()
     {
+      if (forbidOutputFiles)
+        return;
       if (!summarizedTrajectories.isEmpty())
       {
         StringBuilder result = new StringBuilder();
@@ -249,6 +254,9 @@ public class BPSFactory extends Experiment
         MonitorType type
         )
     {
+      if (type == MonitorType.WRITE && forbidOutputFiles)
+        return;
+      
       ExperimentResults results = null;
       MonitoredIndices requested = null;
       
