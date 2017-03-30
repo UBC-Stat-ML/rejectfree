@@ -85,10 +85,6 @@ artifacts {
     archives javadocJar
 }
 
-configurations.archives.with {
-    artifacts.remove artifacts.find { it.archiveTask.is distZip }
-}
-
 
 buildscript {
   repositories {
@@ -116,7 +112,11 @@ if (JavaVersion.current().isJava8Compatible()) {
 // use 'gradle startScripts' to create script
 // use 'gradle distZip' to create deployable zip
 // use 'gradle installApp' to copy it somewhere
-apply plugin:'application'  
+apply plugin:'application'
+
+configurations.archives.with {
+    artifacts.remove artifacts.find { it.archiveTask.is distZip }
+}  
 
 // Creates scripts for entry points
 // Subproject must apply application plugin to be able to call this method.
