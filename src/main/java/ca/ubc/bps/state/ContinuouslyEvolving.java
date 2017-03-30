@@ -2,7 +2,6 @@ package ca.ubc.bps.state;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import ca.ubc.pdmp.Coordinate;
 
@@ -46,8 +45,8 @@ public class ContinuouslyEvolving implements Coordinate
               new MutableDoubleImplementation(), 
               dynamics,
               i
-              )
-          );
+          )
+      );
     return result;
   }
   

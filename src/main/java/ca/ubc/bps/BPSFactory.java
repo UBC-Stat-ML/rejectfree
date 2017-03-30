@@ -45,6 +45,7 @@ import ca.ubc.pdmp.JumpKernel;
 import ca.ubc.pdmp.JumpProcess;
 import ca.ubc.pdmp.PDMP;
 import ca.ubc.pdmp.PDMPSimulator;
+import ca.ubc.pdmp.Processor;
 import ca.ubc.pdmp.StoppingCriterion;
 
 public class BPSFactory extends Experiment
@@ -73,6 +74,9 @@ public class BPSFactory extends Experiment
   @Arg @DefaultValue({"1", "2"})
   public List<Integer> summarizedMomentDegrees = Arrays.asList(1, 2);
   
+  @Arg @DefaultValue("EXPONENTIALLY_SPACED")
+  public PartialSumOutputMode partialSumOutputMode = PartialSumOutputMode.EXPONENTIALLY_SPACED;
+  
   @Arg @DefaultValue("false")
   public boolean stationaryInitialization = false;
   
@@ -82,7 +86,7 @@ public class BPSFactory extends Experiment
   @Arg @DefaultValue("1")
   public Random initializationRandom = new Random(1);
   
-  @Arg @DefaultValue({"--stochasticProcessTime", "10000"})
+  @Arg @DefaultValue({"--stochasticProcessTime", "10_000"})
   public StoppingCriterion stoppingRule = StoppingCriterion.byStochasticProcessTime(10_000);
   
   @Arg @DefaultValue("ZERO")
@@ -94,6 +98,11 @@ public class BPSFactory extends Experiment
   public static enum InitializationStrategy
   {
     ZERO, STATIONARY;
+  }
+  
+  public static enum PartialSumOutputMode
+  {
+    OFF, EXPONENTIALLY_SPACED, ALL;
   }
   
   public class ModelBuildingContext
@@ -157,12 +166,17 @@ public class BPSFactory extends Experiment
           piecewiseConstantStates.add((PiecewiseConstant<?>) c);
     }
   }
+  
+  public BPS buildBPS()
+  {
+    return new BPS();
+  }
 
   public BPS buildAndRun() 
   {
-    BPS result = new BPS();
-    result.simulator.simulate(simulationRandom, stoppingRule);
-    result.writeResults();
+    BPS result = buildBPS();
+    result.run();
+    result.writeRequestedResults();
     return result;
   }
   
@@ -190,12 +204,17 @@ public class BPSFactory extends Experiment
   
   public class BPS
   {
-    public final PDMPSimulator simulator;
+    private final PDMP pdmp;
     public final Map<ContinuouslyEvolving, MemorizeTrajectory> memorizedTrajectories = new LinkedHashMap<>();
     public final Table<ContinuouslyEvolving, String, IntegrateTrajectory> summarizedTrajectories 
       = Tables.newCustomTable(new LinkedHashMap<>(), LinkedHashMap::new);
     private final ModelBuildingContext modelContext;
     private final int nBounceProcesses;
+    
+    public Collection<ContinuouslyEvolving> continuouslyEvolvingStates()
+    {
+      return modelContext.continuouslyEvolvingStates;
+    }
     
     public boolean isBounce(int jumpCoordinate)
     {
@@ -207,7 +226,7 @@ public class BPSFactory extends Experiment
       modelContext = new ModelBuildingContext(initializationRandom);
       
       // setup bounces and variables
-      PDMP pdmp = setupVariablesAndBounces();
+      pdmp = setupVariablesAndBounces();
       nBounceProcesses = pdmp.jumpProcesses.size();
       
       // refreshments
@@ -220,11 +239,28 @@ public class BPSFactory extends Experiment
       // initializations 
       initializeVelocities(modelContext.continuouslyEvolvingStates);
       initializePositions(modelContext.continuouslyEvolvingStates);
-      
-      simulator = new PDMPSimulator(pdmp);
     }
     
-    public void writeResults()
+    public void addProcessor(Processor processor)
+    {
+      if (isRun())
+        throw new RuntimeException();
+      pdmp.processors.add(processor);
+    }
+    
+    private PDMPSimulator simulator = null;
+    public void run()
+    {
+      simulator = new PDMPSimulator(pdmp);
+      simulator.simulate(simulationRandom, stoppingRule);
+    }
+    
+    public boolean isRun()
+    {
+      return simulator != null;
+    }
+    
+    public void writeRequestedResults()
     {
       if (forbidOutputFiles)
         return;
@@ -247,7 +283,9 @@ public class BPSFactory extends Experiment
       }
     }
     
-    public static final String CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME =  "continuouslyEvolvingSamples";
+    public static final String 
+      CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME =  "continuouslyEvolvingSamples",
+      CONTINUOUSLY_EVOLVING_PARTIAL_SUMS_DIR_NAME = "continuouslyEvolvingPartialSums";
     
     private void setupMonitors(
         PDMP pdmp, 
@@ -284,6 +322,13 @@ public class BPSFactory extends Experiment
             IntegrateTrajectory processor = new IntegrateTrajectory(variable, integrator); 
             summarizedTrajectories.put(variable, momentKey(degree), processor);
             pdmp.processors.add(processor);
+            if (!forbidOutputFiles && partialSumOutputMode != PartialSumOutputMode.OFF)
+            {
+              if (results == null)
+                results = BPSFactory.this.results.child(CONTINUOUSLY_EVOLVING_PARTIAL_SUMS_DIR_NAME);
+              ExperimentResults variableResults = results.child(MOMENT_KEY, degree).child(VARIABLE_KEY, index);
+              processor.setOutput(variableResults.getAutoClosedBufferedWriter("data.csv"), partialSumOutputMode == PartialSumOutputMode.EXPONENTIALLY_SPACED);
+            }
           }
         else if (type == MonitorType.WRITE)
         {
@@ -323,6 +368,7 @@ public class BPSFactory extends Experiment
   }
   
   public static final String VARIABLE_KEY = "variable";
+  public static final String MOMENT_KEY = "momentDegree";
   
   private static enum MonitorType { MEMORIZE, WRITE, SUMMARIZE }
   

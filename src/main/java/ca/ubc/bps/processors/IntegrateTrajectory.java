@@ -1,6 +1,10 @@
 package ca.ubc.bps.processors;
 
+import java.io.Writer;
 import java.util.Collections;
+
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.RombergIntegrator;
 
 import bayonet.math.SpecialFunctions;
 import ca.ubc.bps.Trajectory;
@@ -8,6 +12,7 @@ import ca.ubc.bps.TrajectorySegment;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.Dynamics;
+import ca.ubc.bps.state.MutableDouble;
 import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.pdmp.Processor;
 
@@ -34,6 +39,7 @@ public class IntegrateTrajectory extends ContinuousStateDependent implements Pro
   {
     super(Collections.singletonList(variable));
     this.variable = variable;
+    integral.setup(variable.dynamics);
     this.integrator = new TrajectoryIntegrator(integral);
   }
 
@@ -41,6 +47,33 @@ public class IntegrateTrajectory extends ContinuousStateDependent implements Pro
   public void process(double deltaTime, int jumpProcessIndex)
   {
     integrator.process(deltaTime, variable.position.get(), variable.velocity.get());
+    if (out != null)
+      write();
+  }
+  
+  private void write()
+  {
+    if (!exponentiallySpaced || counter == next)
+    {
+      try { 
+        out.append("" + counter + "," + integrate() + "\n"); 
+        if (exponentiallySpaced && counter > 1000)
+          out.flush();
+      } catch (Exception e) { throw new RuntimeException(e); }
+      next *= 2;
+    }
+    counter++;
+  }
+
+  private Writer out = null;
+  private boolean exponentiallySpaced = false;
+  private int counter = 0, next = 1;
+  public void setOutput(Writer out, boolean exponentiallySpaced)
+  {
+    this.out = out;
+    this.exponentiallySpaced = exponentiallySpaced;
+    try { out.append("eventIndex,currentAverage\n"); }
+    catch (Exception e) { throw new RuntimeException(e); }
   }
   
   private static class TrajectoryIntegrator
@@ -68,6 +101,41 @@ public class IntegrateTrajectory extends ContinuousStateDependent implements Pro
   {
     void setup(Dynamics dynamics);
     double evaluate(double x, double v, double deltaT);
+  }
+  
+  public static class NumericalIntegrator implements SegmentIntegrator
+  {
+    public int maxIntegrationSteps = 100;
+    private final UnivariateFunction testFunction;
+    private Dynamics dynamics = null;
+    private final MutableDouble 
+      dummyPosition = new ContinuouslyEvolving.MutableDoubleImplementation(),
+      dummyVelocity = new ContinuouslyEvolving.MutableDoubleImplementation();
+    
+    public NumericalIntegrator(UnivariateFunction testFunction)
+    {
+      this.testFunction = testFunction;
+    }
+
+    @Override
+    public void setup(Dynamics dynamics)
+    {
+      this.dynamics = dynamics;
+    }
+
+    @Override
+    public double evaluate(double x0, double v0, double deltaT)
+    {
+      final UnivariateFunction f = (double currentT) -> {
+        dummyPosition.set(x0);
+        dummyVelocity.set(v0);
+        dynamics.extrapolateInPlace(currentT, dummyPosition, dummyVelocity);
+        double currentX = dummyPosition.get();
+        return testFunction.value(currentX);
+      };
+      return new RombergIntegrator().integrate(maxIntegrationSteps, f, 0, deltaT);
+    }
+    
   }
   
   public static class MomentIntegrator implements SegmentIntegrator
