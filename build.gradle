@@ -65,14 +65,7 @@ dependencies {
 //  compile group: 'org.apache.spark', name: 'spark-sql_2.10', version: '2.1.0'
 }
 
-task(tutorialj, dependsOn: ['build','testClasses'], type: JavaExec) {
-  main = 'tutorialj.Main'
-  classpath {
-    configurations.compile
-    sourceSets.main.runtimeClasspath
-    sourceSets.test.runtimeClasspath
-  }
-}
+
 
 apply plugin: 'versions'
 
@@ -90,6 +83,10 @@ artifacts {
     archives jar
     archives sourcesJar
     archives javadocJar
+}
+
+configurations.archives.with {
+    artifacts.remove artifacts.find { it.archiveTask.is distZip }
 }
 
 
