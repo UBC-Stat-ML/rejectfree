@@ -23,6 +23,11 @@ public class ContinuouslyEvolving implements Coordinate
     this.dynamics = dynamics;
     this.key = key;
   }
+  
+  public ContinuouslyEvolving(Dynamics dynamics, Object key)
+  {
+    this(new MutableDoubleImplementation(), new MutableDoubleImplementation(), dynamics, key);
+  }
 
   @Override
   public void extrapolateInPlace(double deltaTime)
@@ -39,14 +44,7 @@ public class ContinuouslyEvolving implements Coordinate
   {
     List<ContinuouslyEvolving> result = new ArrayList<>(size);
     for (int i = 0; i < size; i++)
-      result.add(
-          new ContinuouslyEvolving(
-              new MutableDoubleImplementation(), 
-              new MutableDoubleImplementation(), 
-              dynamics,
-              i
-          )
-      );
+      result.add(new ContinuouslyEvolving(dynamics,i));
     return result;
   }
   

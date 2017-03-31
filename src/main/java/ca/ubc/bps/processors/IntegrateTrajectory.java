@@ -105,7 +105,7 @@ public class IntegrateTrajectory extends ContinuousStateDependent implements Pro
   
   public static class NumericalIntegrator implements SegmentIntegrator
   {
-    public int maxIntegrationSteps = 100;
+    public int maxIntegrationSteps = Integer.MAX_VALUE;
     private final UnivariateFunction testFunction;
     private Dynamics dynamics = null;
     private final MutableDouble 
