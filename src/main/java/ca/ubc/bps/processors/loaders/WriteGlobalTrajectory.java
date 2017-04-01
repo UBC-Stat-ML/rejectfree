@@ -1,0 +1,42 @@
+package ca.ubc.bps.processors.loaders;
+
+import java.io.BufferedWriter;
+import java.io.File;
+
+import com.google.common.base.Joiner;
+
+import blang.inits.ConstructorArg;
+import briefj.BriefIO;
+import ca.ubc.bps.BPSFactory.BPS;
+import ca.ubc.bps.processors.ConvertToGlobalProcessor.GlobalProcessor;
+import ca.ubc.bps.processors.ConvertToGlobalProcessor.GlobalProcessorContext;
+import ca.ubc.bps.state.ContinuouslyEvolving;
+
+public class WriteGlobalTrajectory extends GlobalTrajectoryLoader
+{
+  public WriteGlobalTrajectory(@ConstructorArg("bpsExecFolder") File bpsExecFolder)
+  {
+    super(bpsExecFolder);
+  }
+
+  public static String GLOBAL_TRAJ_FILE_NAME = "globalTrajectory.csv";
+
+  @Override
+  public GlobalProcessor createGlobalProcessor(BPS bps)
+  {
+    BufferedWriter writer = results.getAutoClosedBufferedWriter(GLOBAL_TRAJ_FILE_NAME);
+    BriefIO.println(writer, "delta," + Joiner.on(",").join(indices()));
+    String [] stringArray = new String[indices().size()];
+    return new GlobalProcessor()
+    {
+      @Override
+      public void process(GlobalProcessorContext context)
+      {
+        int i = 0;
+        for (ContinuouslyEvolving var : context.allVariables())
+          stringArray[i++] = String.valueOf(var.position.get());
+        BriefIO.println(writer, String.valueOf(context.getGlobalDelta()) + "," + Joiner.on(",").join(stringArray));
+      }
+    };
+  }
+}

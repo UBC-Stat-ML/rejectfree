@@ -1,8 +1,7 @@
 package ca.ubc.bps.processors;
 
-import java.util.Collection;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.common.collect.TreeMultimap;
 
@@ -14,7 +13,7 @@ import ca.ubc.bps.state.ContinuouslyEvolving;
 public class ConvertToGlobalProcessor
 {
   final TreeMultimap<Double, LabeledSegment> sortedSegments = TreeMultimap.create();
-  final SortedSet<ContinuouslyEvolving> allVariables = new TreeSet<>();
+  final List<ContinuouslyEvolving> allVariables = new ArrayList<>();
   final GlobalProcessor processor;
   
   public ConvertToGlobalProcessor(GlobalProcessor processor)
@@ -63,7 +62,7 @@ public class ConvertToGlobalProcessor
     {
       return globalDelta;
     }
-    Collection<ContinuouslyEvolving> allVariables()
+    public List<ContinuouslyEvolving> allVariables()
     {
       return allVariables;
     }

@@ -7,6 +7,7 @@ import static ca.ubc.bps.BPSFactoryHelpers.linear;
 import static ca.ubc.bps.BPSFactoryHelpers.local;
 import static ca.ubc.bps.BPSFactoryHelpers.standard;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,9 +28,12 @@ import blang.inits.Creator;
 import blang.inits.DefaultValue;
 import blang.inits.DesignatedConstructor;
 import blang.inits.InitService;
+import blang.inits.Inits;
 import blang.inits.Input;
 import blang.inits.experiments.Experiment;
 import blang.inits.experiments.ExperimentResults;
+import blang.inits.parsing.Arguments;
+import blang.inits.parsing.CSVFile;
 import blang.inits.providers.CollectionsProviders;
 import briefj.BriefIO;
 import ca.ubc.bps.bounces.BounceFactory;
@@ -71,14 +75,11 @@ public class BPSFactory extends Experiment
   @Arg @DefaultValue("all")
   public MonitoredIndices summarize = all;
   
-  @Arg @DefaultValue({"1", "2"})
-  public List<Integer> summarizedMomentDegrees = Arrays.asList(1, 2);
+  @Arg @DefaultValue({"1", "2", "3", "4"})
+  public List<Integer> summarizedMomentDegrees = Arrays.asList(1, 2, 3, 4);
   
   @Arg @DefaultValue("EXPONENTIALLY_SPACED")
   public PartialSumOutputMode partialSumOutputMode = PartialSumOutputMode.EXPONENTIALLY_SPACED;
-  
-  @Arg @DefaultValue("false")
-  public boolean stationaryInitialization = false;
   
   @Arg @DefaultValue("1")
   public Random simulationRandom = new Random(1);
@@ -89,7 +90,7 @@ public class BPSFactory extends Experiment
   @Arg @DefaultValue({"--stochasticProcessTime", "10_000"})
   public StoppingCriterion stoppingRule = StoppingCriterion.byStochasticProcessTime(10_000);
   
-  @Arg @DefaultValue("ZERO")
+  @Arg @DefaultValue("ZERO") // TODO: make this a factory
   public InitializationStrategy initialization = InitializationStrategy.ZERO;
   
   @Arg @DefaultValue("false")
@@ -103,6 +104,12 @@ public class BPSFactory extends Experiment
   public static enum PartialSumOutputMode
   {
     OFF, EXPONENTIALLY_SPACED, ALL;
+  }
+  
+  public static BPSFactory loadBPSFactory(File bpsExecFolder)
+  {
+    Arguments arguments = CSVFile.parseCSV(new File(bpsExecFolder, Experiment.CSV_ARGUMENT_FILE));
+    return Inits.parseAndRun(BPSFactory.class, arguments);
   }
   
   public class ModelBuildingContext
@@ -270,7 +277,7 @@ public class BPSFactory extends Experiment
         result.append(VARIABLE_KEY + ",moment,value\n");
         for (Cell<ContinuouslyEvolving, String, IntegrateTrajectory> cell : summarizedTrajectories.cellSet())
           result.append("" + cell.getRowKey().key + "," + cell.getColumnKey() + "," + cell.getValue().integrate() + "\n");
-        BriefIO.write(results.getFileInResultFolder("summaryStatistics.csv"), result);
+        BriefIO.write(results.getFileInResultFolder(SUMMARY_STATS_FILE_NAME), result);
       }
       if (!memorizedTrajectories.isEmpty())
       {
@@ -279,13 +286,16 @@ public class BPSFactory extends Experiment
         for (int degree : summarizedMomentDegrees)
           for (ContinuouslyEvolving variable : memorizedTrajectories.keySet())
             result.append("" + variable.key + "," + degree + "," + memorizedTrajectories.get(variable).getTrajectory().momentEss(degree) + "\n");
-        BriefIO.write(results.getFileInResultFolder("ess.csv"), result);
+        BriefIO.write(results.getFileInResultFolder(ESS_FILE_NAME), result);
       }
     }
     
     public static final String 
-      CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME =  "continuouslyEvolvingSamples",
-      CONTINUOUSLY_EVOLVING_PARTIAL_SUMS_DIR_NAME = "continuouslyEvolvingPartialSums";
+      CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME      =  "continuouslyEvolvingSamples",
+      CONTINUOUSLY_EVOLVING_PARTIAL_SUMS_DIR_NAME = "continuouslyEvolvingPartialSums",
+      SUMMARY_STATS_FILE_NAME                     = "summaryStatistics.csv",
+      ESS_FILE_NAME                               = "ess.csv",
+      DATA_FILE_NAME                              = "data.csv";
     
     private void setupMonitors(
         PDMP pdmp, 
@@ -327,7 +337,7 @@ public class BPSFactory extends Experiment
               if (results == null)
                 results = BPSFactory.this.results.child(CONTINUOUSLY_EVOLVING_PARTIAL_SUMS_DIR_NAME);
               ExperimentResults variableResults = results.child(MOMENT_KEY, degree).child(VARIABLE_KEY, index);
-              processor.setOutput(variableResults.getAutoClosedBufferedWriter("data.csv"), partialSumOutputMode == PartialSumOutputMode.EXPONENTIALLY_SPACED);
+              processor.setOutput(variableResults.getAutoClosedBufferedWriter(DATA_FILE_NAME), partialSumOutputMode == PartialSumOutputMode.EXPONENTIALLY_SPACED);
             }
           }
         else if (type == MonitorType.WRITE)
@@ -335,13 +345,15 @@ public class BPSFactory extends Experiment
           if (results == null)
             results = BPSFactory.this.results.child(CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME);
           ExperimentResults variableResults = results.child(VARIABLE_KEY, index);
-          WriteTrajectory processor = new WriteTrajectory(variable, variableResults.getAutoClosedBufferedWriter("data.csv"));
+          WriteTrajectory processor = new WriteTrajectory(variable, variableResults.getAutoClosedBufferedWriter(DATA_FILE_NAME));
           pdmp.processors.add(processor);
         }
         else
           throw new RuntimeException();
       }
     }
+    
+    
 
     private PDMP setupVariablesAndBounces() 
     {
@@ -394,7 +406,7 @@ public class BPSFactory extends Experiment
     {
       this.list = list;
     }
-    private List<Integer> get(int numberItems)
+    public List<Integer> get(int numberItems)
     {
       if (list == null)
       {

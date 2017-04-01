@@ -18,20 +18,20 @@ public class WriteTrajectory extends ContinuousStateDependent implements Process
     super(Collections.singletonList(variable));
     this.variable = variable;
     this.writer = writer;
-    println("deltaTime", "initialPosition", "initialVelocity");
+    println("deltaTime", "initialPosition", "initialVelocity", "jumpProcessIndex");
   } 
   
   @Override
   public void process(double deltaTime, int jumpProcessIndex)
   {
-    println(Double.toString(deltaTime), Double.toString(variable.position.get()), Double.toString(variable.velocity.get()));
+    println(Double.toString(deltaTime), Double.toString(variable.position.get()), Double.toString(variable.velocity.get()), Integer.toString(jumpProcessIndex));
   }
   
-  private void println(Object deltaTime, Object pos, String vel)
+  private void println(Object deltaTime, Object pos, String vel, Object jumpProcessIndex)
   {
     try
     {
-      writer.append(deltaTime + "," + pos + "," + vel + "\n");
+      writer.append(deltaTime + "," + pos + "," + vel + "," + jumpProcessIndex + "\n");
     } 
     catch (IOException e)
     {

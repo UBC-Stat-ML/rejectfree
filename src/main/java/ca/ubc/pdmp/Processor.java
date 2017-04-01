@@ -9,6 +9,9 @@ public interface Processor extends StateDependent
    * The PDMPSimulator ensures that the state is set to the 
    * value at the beginning of the the deterministic segment.
    * 
+   * These are called in an order sorted by the time of the end of the 
+   * deterministic intervals.
+   * 
    * @param deltaTime
    * @param jumpProcessIndex The index of the process that triggered the end of 
    *  this deterministic segment, or -1 if the segment ended because of the end
