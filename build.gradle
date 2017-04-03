@@ -149,4 +149,4 @@ run.enabled = false
 
 // Call this for each Main class you want to expose with an app script
 createScript(project, 'ca.ubc.bps.BPSFactory', 'bps-run')
-createScript(project, 'ca.ubc.bps.processors.loaders.GlobalTrajectoryLoader', 'bps-toGlobalTraj')
+createScript(project, 'ca.ubc.bps.processors.loaders.WriteGlobalTrajectory', 'bps-toGlobalTraj')

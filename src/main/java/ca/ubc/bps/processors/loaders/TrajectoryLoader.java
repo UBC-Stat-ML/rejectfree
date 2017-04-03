@@ -27,7 +27,7 @@ public abstract class TrajectoryLoader extends Experiment
 
   public TrajectoryLoader(File bpsExecFolder, int index)
   {
-    BPSFactory bpsFactory = BPSFactory.loadBPSFactory(bpsExecFolder);
+    BPSFactory bpsFactory = BPSFactory.loadBPSFactory(bpsExecFolder, results);
     this.bps = bpsFactory.buildBPS();
     this.samples = getSampleFile(bpsExecFolder, index);
     this.index = index;

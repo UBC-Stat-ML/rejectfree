@@ -18,11 +18,12 @@ import ca.ubc.bps.processors.ConvertToGlobalProcessor.GlobalProcessor;
 public abstract class GlobalTrajectoryLoader extends Experiment
 {
   private final BPS bps;
+  private final BPSFactory bpsFactory;
   private final File bpsExecFolder;
   
   public GlobalTrajectoryLoader(File bpsExecFolder)
   {
-    BPSFactory bpsFactory = BPSFactory.loadBPSFactory(bpsExecFolder);
+    this.bpsFactory = BPSFactory.loadBPSFactory(bpsExecFolder, results);
     this.bps = bpsFactory.buildBPS();
     this.bpsExecFolder = bpsExecFolder;
   }
@@ -30,9 +31,14 @@ public abstract class GlobalTrajectoryLoader extends Experiment
   @Arg @DefaultValue("all")
   private MonitoredIndices variables = all;
   
+  /**
+   * @return The intersection of the requested indices and those that were output.
+   */
   public List<Integer> indices()
   {
-    List<Integer> indices = variables.get(bps.continuouslyEvolvingStates().size());
+    final int totalNumber = bps.continuouslyEvolvingStates().size();
+    List<Integer> indices = variables.get(totalNumber);
+    indices.retainAll(bpsFactory.write.get(totalNumber));
     Collections.sort(indices);
     return indices;
   }

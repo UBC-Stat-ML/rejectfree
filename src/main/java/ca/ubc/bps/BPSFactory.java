@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 import com.google.common.collect.Tables;
@@ -25,6 +26,7 @@ import com.google.inject.TypeLiteral;
 
 import blang.inits.Arg;
 import blang.inits.Creator;
+import blang.inits.Creators;
 import blang.inits.DefaultValue;
 import blang.inits.DesignatedConstructor;
 import blang.inits.InitService;
@@ -106,10 +108,13 @@ public class BPSFactory extends Experiment
     OFF, EXPONENTIALLY_SPACED, ALL;
   }
   
-  public static BPSFactory loadBPSFactory(File bpsExecFolder)
+  public static BPSFactory loadBPSFactory(File bpsExecFolder, ExperimentResults results)
   {
-    Arguments arguments = CSVFile.parseCSV(new File(bpsExecFolder, Experiment.CSV_ARGUMENT_FILE));
-    return Inits.parseAndRun(BPSFactory.class, arguments);
+    Arguments arguments = CSVFile.parseTSV(new File(bpsExecFolder, Experiment.CSV_ARGUMENT_FILE));
+    Creator c = Creators.conventional();
+    c.addGlobal(ExperimentResults.class, results);
+    try { return c.init(BPSFactory.class, arguments); }
+    catch (Exception e) { throw new RuntimeException("Init failure. Details: \n" + c.errorReport()); }
   }
   
   public class ModelBuildingContext
@@ -392,9 +397,9 @@ public class BPSFactory extends Experiment
         @Input(formatDescription = "all|none|space-separated indices") List<String> strings,
         @InitService final Creator creator)
     {
-      if (strings.size() == 1 && strings.get(0).trim().equals("all"))
+      if (Joiner.on("").join(strings).trim().equals("all"))
         this.list = null;
-      else if (strings.size() == 1 && strings.get(0).trim().equals("none"))
+      else if (Joiner.on("").join(strings).trim().equals("none"))
         this.list = new ArrayList<>();
       else
       {
