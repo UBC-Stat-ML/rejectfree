@@ -1,8 +1,8 @@
-package ca.ubc.bps
+package ca.ubc.bps.factory
 
-import ca.ubc.bps.Model
-import ca.ubc.bps.BPSFactory.MonitoredIndices
-import ca.ubc.bps.RefreshmentFactory.Standard
+import ca.ubc.bps.models.Model
+import ca.ubc.bps.factory.BPSFactory.MonitoredIndices
+import ca.ubc.bps.refresh.RefreshmentFactory.Standard
 import ca.ubc.bps.bounces.BounceFactory
 import ca.ubc.bps.models.FixedPrecisionNormalModel
 import ca.ubc.bps.models.DiagonalPrecision
@@ -11,9 +11,9 @@ import java.util.ArrayList
 import java.util.List
 import ca.ubc.bps.models.GeneralizedNormalModel
 
-import ca.ubc.bps.RefreshmentFactory.NormDependent
-import ca.ubc.bps.BPSFactory.Zero
-import ca.ubc.bps.BPSFactory.Stationary
+import ca.ubc.bps.refresh.RefreshmentFactory.NormDependent
+import ca.ubc.bps.factory.BPSFactory.Zero
+import ca.ubc.bps.factory.BPSFactory.Stationary
 
 class BPSFactoryHelpers {
   
@@ -62,7 +62,7 @@ class BPSFactoryHelpers {
   }
   
   // Models
-  def static Model isotropicLocal(int dim) {
+  def static Model isotropicLocal(int dim) { 
     return new FixedPrecisionNormalModel => [
       useLocal = true
       precision = new DiagonalPrecision => [

@@ -10,7 +10,6 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import com.google.common.collect.Lists;
 
-import ca.ubc.bps.Trajectory;
 import ca.ubc.bps.processors.IntegrateTrajectory.MomentIntegrator;
 import ca.ubc.bps.processors.IntegrateTrajectory.SegmentIntegrator;
 

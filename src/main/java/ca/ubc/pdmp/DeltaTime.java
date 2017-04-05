@@ -22,4 +22,12 @@ public class DeltaTime
   {
     return new DeltaTime(time, true);
   }
+
+  @Override
+  public String toString()
+  {
+    return "DeltaTime" + (isBound ? ">" : "=") + deltaTime;
+  }
+  
+  
 }

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ca.ubc.bps.Trajectory;
-import ca.ubc.bps.TrajectorySegment;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.Processor;

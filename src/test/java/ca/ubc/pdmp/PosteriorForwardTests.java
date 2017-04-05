@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Random;
 
 import blang.validation.CheckStationarity;
-import ca.ubc.bps.Bounces;
 import ca.ubc.bps.PDMPs;
-import ca.ubc.bps.Refreshments;
+import ca.ubc.bps.bounces.Bounces;
+import ca.ubc.bps.refresh.Refreshments;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import xlinear.MatrixOperations;
 

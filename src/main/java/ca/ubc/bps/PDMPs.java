@@ -3,7 +3,7 @@ package ca.ubc.bps;
 import java.util.List;
 import java.util.Random;
 
-import ca.ubc.bps.kernels.IndependentRefreshment;
+import ca.ubc.bps.refresh.IndependentRefreshment;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.pdmp.PDMP;

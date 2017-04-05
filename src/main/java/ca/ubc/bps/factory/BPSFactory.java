@@ -1,12 +1,12 @@
-package ca.ubc.bps;
+package ca.ubc.bps.factory;
 
 
-import static ca.ubc.bps.BPSFactoryHelpers.all;
-import static ca.ubc.bps.BPSFactoryHelpers.isotropicGlobal;
-import static ca.ubc.bps.BPSFactoryHelpers.linear;
-import static ca.ubc.bps.BPSFactoryHelpers.local;
-import static ca.ubc.bps.BPSFactoryHelpers.standard;
-import static ca.ubc.bps.BPSFactoryHelpers.zero;
+import static ca.ubc.bps.factory.BPSFactoryHelpers.all;
+import static ca.ubc.bps.factory.BPSFactoryHelpers.isotropicGlobal;
+import static ca.ubc.bps.factory.BPSFactoryHelpers.linear;
+import static ca.ubc.bps.factory.BPSFactoryHelpers.local;
+import static ca.ubc.bps.factory.BPSFactoryHelpers.standard;
+import static ca.ubc.bps.factory.BPSFactoryHelpers.zero;
 
 import java.io.File;
 import java.io.Writer;
@@ -40,9 +40,13 @@ import blang.inits.parsing.Arguments;
 import blang.inits.parsing.CSVFile;
 import blang.inits.providers.CollectionsProviders;
 import briefj.BriefIO;
+import ca.ubc.bps.BPSPotential;
+import ca.ubc.bps.StaticUtils;
 import ca.ubc.bps.bounces.BounceFactory;
+import ca.ubc.bps.models.Model;
 import ca.ubc.bps.processors.IntegrateTrajectory;
 import ca.ubc.bps.processors.IntegrateTrajectory.SegmentIntegrator;
+import ca.ubc.bps.refresh.RefreshmentFactory;
 import ca.ubc.bps.processors.MemorizeTrajectory;
 import ca.ubc.bps.processors.WriteTrajectory;
 import ca.ubc.bps.state.ContinuouslyEvolving;
@@ -443,8 +447,6 @@ public class BPSFactory extends Experiment
           throw new RuntimeException();
       }
     }
-    
-    
 
     private PDMP setupVariablesAndBounces() 
     {

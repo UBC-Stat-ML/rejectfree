@@ -1,4 +1,4 @@
-package ca.ubc.bps;
+package ca.ubc.bps.processors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,8 +8,6 @@ import java.util.List;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import bayonet.math.NumericalUtils;
-import ca.ubc.bps.processors.EffectiveSampleSize;
-import ca.ubc.bps.processors.IntegrateTrajectory;
 import ca.ubc.bps.processors.IntegrateTrajectory.SegmentIntegrator;
 import ca.ubc.bps.state.Dynamics;
 

@@ -7,8 +7,6 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.RombergIntegrator;
 
 import bayonet.math.SpecialFunctions;
-import ca.ubc.bps.Trajectory;
-import ca.ubc.bps.TrajectorySegment;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.Dynamics;

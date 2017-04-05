@@ -1,4 +1,4 @@
-package ca.ubc.bps;
+package ca.ubc.bps.processors;
 
 public class TrajectorySegment
 {

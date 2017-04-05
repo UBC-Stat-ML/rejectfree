@@ -17,14 +17,14 @@ import com.google.common.collect.ImmutableList;
 
 import bayonet.distributions.Normal;
 import bayonet.rplot.PlotLine;
-import ca.ubc.bps.Bounces;
 import ca.ubc.bps.PDMPs;
-import ca.ubc.bps.Refreshments;
+import ca.ubc.bps.bounces.Bounces;
 import ca.ubc.bps.bounces.FlipBounce;
 import ca.ubc.bps.bounces.RandomizedBounce;
 import ca.ubc.bps.energies.NormalEnergy;
 import ca.ubc.bps.processors.EffectiveSampleSize;
 import ca.ubc.bps.processors.MemorizeTrajectory;
+import ca.ubc.bps.refresh.Refreshments;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.NormalClock;
 import hmc.DataStruct;

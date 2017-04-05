@@ -1,9 +1,8 @@
-package ca.ubc.bps;
+package ca.ubc.bps.models;
 
 import blang.inits.Implementations;
-import ca.ubc.bps.BPSFactory.ModelBuildingContext;
-import ca.ubc.bps.models.FixedPrecisionNormalModel;
-import ca.ubc.bps.models.GeneralizedNormalModel;
+import ca.ubc.bps.factory.BPSFactory;
+import ca.ubc.bps.factory.BPSFactory.ModelBuildingContext;
 
 @Implementations({FixedPrecisionNormalModel.class, GeneralizedNormalModel.class})
 public interface Model

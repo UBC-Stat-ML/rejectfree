@@ -1,8 +1,8 @@
 package ca.ubc.pdmp
 
-import ca.ubc.bps.BPSFactory
+import ca.ubc.bps.factory.BPSFactory
 
-import static ca.ubc.bps.BPSFactoryHelpers.*
+import static ca.ubc.bps.factory.BPSFactoryHelpers.*
 import briefj.BriefCollections
 import org.apache.commons.math3.special.Gamma
 import org.junit.Test

@@ -2,9 +2,9 @@ package ca.ubc.bps.processors.loaders;
 
 import java.io.File;
 
-import ca.ubc.bps.BPSFactory.BPS;
+import ca.ubc.bps.factory.BPSFactory.BPS;
 import ca.ubc.bps.processors.MemorizeTrajectory;
-import ca.ubc.bps.Trajectory;
+import ca.ubc.bps.processors.Trajectory;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.Processor;
 

@@ -1,7 +1,7 @@
 package ca.ubc.pdmp
 
-import static ca.ubc.bps.BPSFactoryHelpers.*
-import ca.ubc.bps.BPSFactory
+import static ca.ubc.bps.factory.BPSFactoryHelpers.*
+import ca.ubc.bps.factory.BPSFactory
 import briefj.BriefCollections
 
 class NormDepRefTest {

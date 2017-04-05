@@ -1,11 +1,10 @@
-package ca.ubc.bps;
+package ca.ubc.bps.refresh;
 
 import java.util.Collection;
 
 import static ca.ubc.bps.StaticUtils.*;
 import static java.util.Collections.singleton;
 
-import ca.ubc.bps.kernels.IndependentRefreshment;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.HomogeneousPP;
 import ca.ubc.pdmp.JumpProcess;

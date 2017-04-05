@@ -7,8 +7,8 @@ import java.util.List;
 
 import blang.inits.experiments.Experiment;
 import briefj.BriefIO;
-import ca.ubc.bps.BPSFactory;
-import ca.ubc.bps.BPSFactory.BPS;
+import ca.ubc.bps.factory.BPSFactory;
+import ca.ubc.bps.factory.BPSFactory.BPS;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.Processor;
 

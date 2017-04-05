@@ -1,4 +1,4 @@
-package ca.ubc.bps.kernels;
+package ca.ubc.bps.refresh;
 
 import java.util.Collection;
 import java.util.Random;

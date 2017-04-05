@@ -6,8 +6,6 @@ import java.util.List;
 import com.google.common.collect.TreeMultimap;
 
 import bayonet.math.NumericalUtils;
-import ca.ubc.bps.Trajectory;
-import ca.ubc.bps.TrajectorySegment;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 
 public class ConvertToGlobalProcessor

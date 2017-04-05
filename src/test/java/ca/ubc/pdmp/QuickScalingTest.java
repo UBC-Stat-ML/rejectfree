@@ -6,12 +6,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 
-
-import ca.ubc.bps.Bounces;
 import ca.ubc.bps.PDMPs;
-import ca.ubc.bps.Refreshments;
-import ca.ubc.bps.Trajectory;
+import ca.ubc.bps.bounces.Bounces;
 import ca.ubc.bps.processors.MemorizeTrajectory;
+import ca.ubc.bps.processors.Trajectory;
+import ca.ubc.bps.refresh.Refreshments;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.BivariateNormalExperiment.MyRegression;
 import xlinear.Matrix;

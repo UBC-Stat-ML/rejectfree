@@ -1,6 +1,6 @@
 package ca.ubc.bps.processors.loaders;
 
-import static ca.ubc.bps.BPSFactoryHelpers.all;
+import static ca.ubc.bps.factory.BPSFactoryHelpers.all;
 
 import java.io.File;
 import java.util.Collections;
@@ -9,9 +9,9 @@ import java.util.List;
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
 import blang.inits.experiments.Experiment;
-import ca.ubc.bps.BPSFactory;
-import ca.ubc.bps.BPSFactory.BPS;
-import ca.ubc.bps.BPSFactory.MonitoredIndices;
+import ca.ubc.bps.factory.BPSFactory;
+import ca.ubc.bps.factory.BPSFactory.BPS;
+import ca.ubc.bps.factory.BPSFactory.MonitoredIndices;
 import ca.ubc.bps.processors.ConvertToGlobalProcessor;
 import ca.ubc.bps.processors.ConvertToGlobalProcessor.GlobalProcessor;
 
