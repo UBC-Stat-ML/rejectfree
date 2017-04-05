@@ -12,6 +12,8 @@ import java.util.List
 import ca.ubc.bps.models.GeneralizedNormalModel
 
 import ca.ubc.bps.RefreshmentFactory.NormDependent
+import ca.ubc.bps.BPSFactory.Zero
+import ca.ubc.bps.BPSFactory.Stationary
 
 class BPSFactoryHelpers {
   
@@ -85,5 +87,9 @@ class BPSFactoryHelpers {
     ]
   }
   
+  // Initializations
+  
+  public static final Zero zero = new Zero
+  public static final Stationary stationary = new Stationary
   
 }

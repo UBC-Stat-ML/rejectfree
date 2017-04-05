@@ -46,6 +46,6 @@ public class WriteGlobalTrajectory extends GlobalTrajectoryLoader
   
   public static void main(String [] args) 
   {
-    Experiment.start(args);
+    Experiment.startAutoExit(args);
   }
 }

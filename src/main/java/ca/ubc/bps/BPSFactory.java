@@ -6,8 +6,10 @@ import static ca.ubc.bps.BPSFactoryHelpers.isotropicGlobal;
 import static ca.ubc.bps.BPSFactoryHelpers.linear;
 import static ca.ubc.bps.BPSFactoryHelpers.local;
 import static ca.ubc.bps.BPSFactoryHelpers.standard;
+import static ca.ubc.bps.BPSFactoryHelpers.zero;
 
 import java.io.File;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,8 +31,8 @@ import blang.inits.Creator;
 import blang.inits.Creators;
 import blang.inits.DefaultValue;
 import blang.inits.DesignatedConstructor;
+import blang.inits.Implementations;
 import blang.inits.InitService;
-import blang.inits.Inits;
 import blang.inits.Input;
 import blang.inits.experiments.Experiment;
 import blang.inits.experiments.ExperimentResults;
@@ -92,15 +94,92 @@ public class BPSFactory extends Experiment
   @Arg @DefaultValue({"--stochasticProcessTime", "10_000"})
   public StoppingCriterion stoppingRule = StoppingCriterion.byStochasticProcessTime(10_000);
   
-  @Arg @DefaultValue("ZERO") // TODO: make this a factory
-  public InitializationStrategy initialization = InitializationStrategy.ZERO;
+  @Arg @DefaultValue("Zero") // TODO: make this a factory
+  public InitializationStrategy initialization = zero;
   
   @Arg @DefaultValue("false")
   public boolean forbidOutputFiles = true; // Note: programmatic initialization intentionally different
   
-  public static enum InitializationStrategy
+  @Implementations({Zero.class, Stationary.class, Far.class, FromCSVFile.class})
+  public static interface InitializationStrategy
   {
-    ZERO, STATIONARY;
+    public boolean requestStationarySampling();
+    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates);
+  }
+  
+  public static class FromCSVFile implements InitializationStrategy
+  {
+    @Arg(description = "CSV File with a header and two columns: first is variable index and second is position value.")
+    public File file;
+
+    @Override
+    public boolean requestStationarySampling()
+    {
+      return false;
+    }
+
+    @Override
+    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
+    {
+      List<ContinuouslyEvolving> list = new ArrayList<>(continuouslyEvolvingStates);
+      for (List<String> line : BriefIO.readLines(file).splitCSV())
+      {
+        int index = Integer.parseInt(line.get(0));
+        double value = Double.parseDouble(line.get(1));
+        list.get(index).position.set(value);
+      }
+    }
+    
+  }
+  
+  public static class Far implements InitializationStrategy
+  {
+    @Arg
+    public double valueForEachPositionCoordinate = 1.0;
+
+    @Override
+    public boolean requestStationarySampling()
+    {
+      return false;
+    }
+
+    @Override
+    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
+    {
+      for (ContinuouslyEvolving coordinate : continuouslyEvolvingStates)
+        coordinate.position.set(valueForEachPositionCoordinate);
+    }
+    
+  }
+  
+  public static class Zero implements InitializationStrategy
+  {
+    @Override 
+    public boolean requestStationarySampling()
+    {
+      return false;
+    }
+
+    @Override
+    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
+    {
+      for (ContinuouslyEvolving state : continuouslyEvolvingStates)
+        state.position.set(0.0);
+    }
+  }
+  
+  public static class Stationary implements InitializationStrategy
+  {
+    @Override
+    public boolean requestStationarySampling()
+    {
+      return true;
+    }
+    @Override
+    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
+    {
+      // nothing to do
+    }
   }
   
   public static enum PartialSumOutputMode
@@ -197,16 +276,6 @@ public class BPSFactory extends Experiment
   {
     buildAndRun();
   }
-  
-  private void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
-  {
-    if (initialization == InitializationStrategy.ZERO)
-      ; // nothing to do, this is the default
-    else if (initialization == InitializationStrategy.STATIONARY)
-      ; // nothing to do, already initialized when creating model
-    else
-      throw new RuntimeException();
-  }
 
   private void initializeVelocities(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
   {
@@ -250,7 +319,7 @@ public class BPSFactory extends Experiment
       
       // initializations 
       initializeVelocities(modelContext.continuouslyEvolvingStates);
-      initializePositions(modelContext.continuouslyEvolvingStates);
+      initialization.initializePositions(modelContext.continuouslyEvolvingStates);
     }
     
     public void addProcessor(Processor processor)
@@ -293,10 +362,20 @@ public class BPSFactory extends Experiment
             result.append("" + variable.key + "," + degree + "," + memorizedTrajectories.get(variable).getTrajectory().momentEss(degree) + "\n");
         BriefIO.write(results.getFileInResultFolder(ESS_FILE_NAME), result);
       }
+      writeFinalSamples();
     }
     
+    private void writeFinalSamples()
+    {
+      Writer out = results.getAutoClosedBufferedWriter(FINAL_SAMPLES);
+      BriefIO.println(out, VARIABLE_KEY + ",value");
+      for (ContinuouslyEvolving state : continuouslyEvolvingStates())
+        BriefIO.println(out, state.key + "," + state.position.get());
+    }
+
     public static final String 
-      CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME      =  "continuouslyEvolvingSamples",
+      FINAL_SAMPLES                               = "finalSamples.csv",
+      CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME      = "continuouslyEvolvingSamples",
       CONTINUOUSLY_EVOLVING_PARTIAL_SUMS_DIR_NAME = "continuouslyEvolvingPartialSums",
       SUMMARY_STATS_FILE_NAME                     = "summaryStatistics.csv",
       ESS_FILE_NAME                               = "ess.csv",
@@ -362,7 +441,7 @@ public class BPSFactory extends Experiment
 
     private PDMP setupVariablesAndBounces() 
     {
-      boolean modelShouldInitToStationarity = initialization == InitializationStrategy.STATIONARY;
+      boolean modelShouldInitToStationarity = initialization.requestStationarySampling();
       model.setup(modelContext, modelShouldInitToStationarity);
       checkModelCreated();
       PDMP pdmp = new PDMP(modelContext.coordinates());
@@ -427,6 +506,6 @@ public class BPSFactory extends Experiment
   
   public static void main(String [] args)
   {
-    Experiment.start(args);
+    Experiment.startAutoExit(args);
   }
 }

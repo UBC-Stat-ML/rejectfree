@@ -7,6 +7,7 @@ import blang.inits.DefaultValue;
 import blang.inits.Implementations;
 import ca.ubc.bps.RefreshmentFactory.NormDependent;
 import ca.ubc.bps.RefreshmentFactory.Standard;
+import ca.ubc.bps.RefreshmentFactory.NoRefreshment;
 import ca.ubc.bps.kernels.IndependentRefreshment;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
@@ -18,7 +19,7 @@ import static xlinear.MatrixExtensions.*;
 import static xlinear.MatrixOperations.*;
 
 
-@Implementations({NormDependent.class, Standard.class})
+@Implementations({NormDependent.class, Standard.class, NoRefreshment.class})
 @FunctionalInterface
 public interface RefreshmentFactory
 {
@@ -45,6 +46,14 @@ public interface RefreshmentFactory
          Refreshments.addGlobal(pdmp, this.rate);
        }
      }
+   }
+   
+   public static class NoRefreshment implements RefreshmentFactory {
+    @Override
+    public void addRefreshment(PDMP pdmp)
+    {
+      
+    }
    }
    
    public static class NormDependent implements RefreshmentFactory {
