@@ -21,7 +21,7 @@ public interface BounceFactory
     @Override
     public JumpKernel build(List<ContinuouslyEvolving> variables, EnergyGradient energy)
     {
-      return new Bounce(variables, energy);
+      return new StandardBounce(variables, energy);
     }
   }
   

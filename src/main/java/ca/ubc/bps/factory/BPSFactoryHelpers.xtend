@@ -1,7 +1,7 @@
 package ca.ubc.bps.factory
 
 import ca.ubc.bps.models.Model
-import ca.ubc.bps.factory.BPSFactory.MonitoredIndices
+import ca.ubc.bps.factory.MonitoredIndices
 import ca.ubc.bps.refresh.RefreshmentFactory.Standard
 import ca.ubc.bps.bounces.BounceFactory
 import ca.ubc.bps.models.FixedPrecisionNormalModel
@@ -12,8 +12,8 @@ import java.util.List
 import ca.ubc.bps.models.GeneralizedNormalModel
 
 import ca.ubc.bps.refresh.RefreshmentFactory.NormDependent
-import ca.ubc.bps.factory.BPSFactory.Zero
-import ca.ubc.bps.factory.BPSFactory.Stationary
+import ca.ubc.bps.factory.InitializationStrategy.Zero
+import ca.ubc.bps.factory.InitializationStrategy.Stationary
 
 class BPSFactoryHelpers {
   

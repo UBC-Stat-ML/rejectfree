@@ -5,7 +5,7 @@ import java.util.List;
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
 import blang.inits.Implementations;
-import ca.ubc.bps.StaticUtils;
+import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.refresh.RefreshmentFactory.NoRefreshment;
 import ca.ubc.bps.refresh.RefreshmentFactory.NormDependent;
 import ca.ubc.bps.refresh.RefreshmentFactory.Standard;
@@ -38,7 +38,7 @@ public interface RefreshmentFactory
      @Override
      public void addRefreshment(final PDMP pdmp) {
        if (this.local) {
-         List<ContinuouslyEvolving> _continuousCoordinates = StaticUtils.continuousCoordinates(pdmp.coordinates);
+         List<ContinuouslyEvolving> _continuousCoordinates = BPSStaticUtils.continuousCoordinates(pdmp.coordinates);
          int _size = _continuousCoordinates.size();
          double _divide = (this.rate / ((double) _size));
          Refreshments.addLocal(pdmp, _divide);
@@ -70,7 +70,7 @@ public interface RefreshmentFactory
      
      @Override
      public void addRefreshment(final PDMP pdmp) {
-       final List<ContinuouslyEvolving> continuousCoordinates = StaticUtils.continuousCoordinates(pdmp.coordinates);
+       final List<ContinuouslyEvolving> continuousCoordinates = BPSStaticUtils.continuousCoordinates(pdmp.coordinates);
            
        pdmp.jumpProcesses.add(
            new JumpProcess(

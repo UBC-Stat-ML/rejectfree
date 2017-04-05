@@ -3,7 +3,7 @@ package ca.ubc.bps.state;
 import java.util.Collection;
 import java.util.List;
 
-import ca.ubc.bps.StaticUtils;
+import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.StateDependentBase;
 
@@ -18,7 +18,7 @@ public abstract class ContinuousStateDependent extends StateDependentBase
     // maintain all the dependencies (some of which may not be continuously evolving)
     super(requiredVariables);
     // identify the subset that is continuously evolving (getting rid of potential duplicates at same time)
-    continuousCoordinates = StaticUtils.continuousCoordinates(requiredVariables);
+    continuousCoordinates = BPSStaticUtils.continuousCoordinates(requiredVariables);
     isPiecewiseLinear = _isPiecewiseLinear(continuousCoordinates);
   }
 
@@ -34,7 +34,7 @@ public abstract class ContinuousStateDependent extends StateDependentBase
   private static boolean _isPiecewiseLinear(Collection<ContinuouslyEvolving> continuousCoordinates)
   {
     for (ContinuouslyEvolving coordinate : continuousCoordinates)
-      if (!StaticUtils.isPiecewiseLinear(coordinate))
+      if (!BPSStaticUtils.isPiecewiseLinear(coordinate))
         return false;
     return true;
   }

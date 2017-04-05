@@ -2,7 +2,7 @@ package ca.ubc.bps.refresh;
 
 import java.util.Collection;
 
-import static ca.ubc.bps.StaticUtils.*;
+import static ca.ubc.bps.BPSStaticUtils.*;
 import static java.util.Collections.singleton;
 
 import ca.ubc.bps.state.ContinuouslyEvolving;

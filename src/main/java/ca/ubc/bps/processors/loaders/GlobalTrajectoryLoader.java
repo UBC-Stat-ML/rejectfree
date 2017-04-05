@@ -11,7 +11,7 @@ import blang.inits.DefaultValue;
 import blang.inits.experiments.Experiment;
 import ca.ubc.bps.factory.BPSFactory;
 import ca.ubc.bps.factory.BPSFactory.BPS;
-import ca.ubc.bps.factory.BPSFactory.MonitoredIndices;
+import ca.ubc.bps.factory.MonitoredIndices;
 import ca.ubc.bps.processors.ConvertToGlobalProcessor;
 import ca.ubc.bps.processors.ConvertToGlobalProcessor.GlobalProcessor;
 

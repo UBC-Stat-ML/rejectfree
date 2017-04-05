@@ -8,7 +8,7 @@ import java.util.Set;
 
 import bayonet.distributions.Bernoulli;
 import ca.ubc.bps.BPSPotential;
-import ca.ubc.bps.StaticUtils;
+import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.energies.EnergyGradient;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.pdmp.Clock;
@@ -88,6 +88,6 @@ public class Superposition extends ContinuousStateDependent implements Clock, En
 
   public static double canonicalRate(double [] velocity, double [] gradient)
   {
-    return Math.max(0.0, StaticUtils.dot(velocity, gradient));
+    return Math.max(0.0, BPSStaticUtils.dot(velocity, gradient));
   }
 }

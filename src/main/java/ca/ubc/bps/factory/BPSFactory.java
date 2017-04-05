@@ -20,28 +20,21 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Table;
 import com.google.common.collect.Table.Cell;
 import com.google.common.collect.Tables;
-import com.google.inject.TypeLiteral;
 
 import blang.inits.Arg;
 import blang.inits.Creator;
 import blang.inits.Creators;
 import blang.inits.DefaultValue;
-import blang.inits.DesignatedConstructor;
-import blang.inits.Implementations;
-import blang.inits.InitService;
-import blang.inits.Input;
 import blang.inits.experiments.Experiment;
 import blang.inits.experiments.ExperimentResults;
 import blang.inits.parsing.Arguments;
 import blang.inits.parsing.CSVFile;
-import blang.inits.providers.CollectionsProviders;
 import briefj.BriefIO;
 import ca.ubc.bps.BPSPotential;
-import ca.ubc.bps.StaticUtils;
+import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.bounces.BounceFactory;
 import ca.ubc.bps.models.Model;
 import ca.ubc.bps.processors.IntegrateTrajectory;
@@ -87,7 +80,7 @@ public class BPSFactory extends Experiment
   public List<Integer> summarizedMomentDegrees = Arrays.asList(1, 2, 3, 4);
   
   @Arg @DefaultValue("EXPONENTIALLY_SPACED")
-  public PartialSumOutputMode partialSumOutputMode = PartialSumOutputMode.EXPONENTIALLY_SPACED;
+  public PartialSumOutputMode partialSumOutputMode = PartialSumOutputMode.EXPONENTIALLY_SPACED; 
   
   @Arg @DefaultValue("1")
   public long simulationRandom = 1L;
@@ -103,93 +96,6 @@ public class BPSFactory extends Experiment
   
   @Arg @DefaultValue("false")
   public boolean forbidOutputFiles = true; // Note: programmatic initialization intentionally different
-  
-  @Implementations({Zero.class, Stationary.class, Far.class, FromCSVFile.class})
-  public static interface InitializationStrategy
-  {
-    public boolean requestStationarySampling();
-    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates);
-  }
-  
-  public static class FromCSVFile implements InitializationStrategy
-  {
-    @Arg(description = "CSV File with a header and two columns: first is variable index and second is position value.")
-    public File file;
-
-    @Override
-    public boolean requestStationarySampling()
-    {
-      return false;
-    }
-
-    @Override
-    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
-    {
-      List<ContinuouslyEvolving> list = new ArrayList<>(continuouslyEvolvingStates);
-      for (List<String> line : BriefIO.readLines(file).splitCSV())
-      {
-        int index = Integer.parseInt(line.get(0));
-        double value = Double.parseDouble(line.get(1));
-        list.get(index).position.set(value);
-      }
-    }
-    
-  }
-  
-  public static class Far implements InitializationStrategy
-  {
-    @Arg
-    public double valueForEachPositionCoordinate = 1.0;
-
-    @Override
-    public boolean requestStationarySampling()
-    {
-      return false;
-    }
-
-    @Override
-    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
-    {
-      for (ContinuouslyEvolving coordinate : continuouslyEvolvingStates)
-        coordinate.position.set(valueForEachPositionCoordinate);
-    }
-    
-  }
-  
-  public static class Zero implements InitializationStrategy
-  {
-    @Override 
-    public boolean requestStationarySampling()
-    {
-      return false;
-    }
-
-    @Override
-    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
-    {
-      for (ContinuouslyEvolving state : continuouslyEvolvingStates)
-        state.position.set(0.0);
-    }
-  }
-  
-  public static class Stationary implements InitializationStrategy
-  {
-    @Override
-    public boolean requestStationarySampling()
-    {
-      return true;
-    }
-    @Override
-    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
-    {
-      // nothing to do
-    }
-  }
-  
-  public static enum PartialSumOutputMode
-  {
-    OFF, EXPONENTIALLY_SPACED, ALL;
-  }
   
   public static BPSFactory loadBPSFactory(File bpsExecFolder, ExperimentResults results)
   {
@@ -228,7 +134,7 @@ public class BPSFactory extends Experiment
     {
       // find which variables bounce: those that are continuously evolving
       List<? extends Coordinate> allReqVars = new ArrayList<>(potential.clock.requiredVariables());
-      List<ContinuouslyEvolving> continuousCoordinates = StaticUtils.continuousCoordinates(allReqVars);
+      List<ContinuouslyEvolving> continuousCoordinates = BPSStaticUtils.continuousCoordinates(allReqVars);
       // check they form the prefix (to make correspondence with energy indices straightforward)
       if (!continuousCoordinates.equals(allReqVars.subList(0, continuousCoordinates.size())))
         throw new RuntimeException();
@@ -474,44 +380,6 @@ public class BPSFactory extends Experiment
   
   public static final String VARIABLE_KEY = "variable";
   public static final String MOMENT_KEY = "momentDegree";
-  
-  private static enum MonitorType { MEMORIZE, WRITE, SUMMARIZE }
-  
-  public static class MonitoredIndices
-  {
-    private final List<Integer> list;
-    @DesignatedConstructor
-    public MonitoredIndices(
-        @Input(formatDescription = "all|none|space-separated indices") List<String> strings,
-        @InitService final Creator creator)
-    {
-      if (Joiner.on("").join(strings).trim().equals("all"))
-        this.list = null;
-      else if (Joiner.on("").join(strings).trim().equals("none"))
-        this.list = new ArrayList<>();
-      else
-      {
-        TypeLiteral<List<Integer>> listOfInts = new TypeLiteral<List<Integer>>() {};
-        this.list = CollectionsProviders.parseList(strings, listOfInts, creator);
-      }
-    }
-    public MonitoredIndices(List<Integer> list) 
-    {
-      this.list = list;
-    }
-    public List<Integer> get(int numberItems)
-    {
-      if (list == null)
-      {
-        List<Integer> result = new ArrayList<Integer>();
-        for (int i = 0; i < numberItems; i++)
-          result.add(i);
-        return result;
-      }
-      else
-        return list;
-    }
-  }
   
   public static void main(String [] args)
   {

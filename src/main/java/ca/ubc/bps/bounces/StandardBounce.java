@@ -10,11 +10,11 @@ import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.JumpKernel;
 
-public class Bounce extends ContinuousStateDependent implements JumpKernel
+public class StandardBounce extends ContinuousStateDependent implements JumpKernel
 {
   private final EnergyGradient energy;
 
-  public Bounce(List<ContinuouslyEvolving> requiredVariables, EnergyGradient energy)
+  public StandardBounce(List<ContinuouslyEvolving> requiredVariables, EnergyGradient energy)
   {
     super(requiredVariables);
     this.energy = energy;

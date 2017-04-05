@@ -11,7 +11,7 @@ import ca.ubc.bps.state.Dynamics;
 import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.pdmp.Coordinate;
 
-public class StaticUtils
+public class BPSStaticUtils
 {
   public static boolean isPiecewiseLinear(Dynamics dynamics)
   {

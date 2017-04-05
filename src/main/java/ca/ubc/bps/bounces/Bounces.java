@@ -19,7 +19,7 @@ public class Bounces
   {
     NormalClock timer = new NormalClock(variables, precision);
     NormalEnergy energy = new NormalEnergy(precision);
-    JumpKernel bounce = new Bounce(variables, energy);
+    JumpKernel bounce = new StandardBounce(variables, energy);
     pdmp.jumpProcesses.add(new JumpProcess(timer, bounce));
   }
 }

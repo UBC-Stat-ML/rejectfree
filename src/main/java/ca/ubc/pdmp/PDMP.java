@@ -1,6 +1,6 @@
 package ca.ubc.pdmp;
 
-import static ca.ubc.bps.StaticUtils.*;
+import static ca.ubc.bps.BPSStaticUtils.*;
 
 import java.util.ArrayList;
 import java.util.List;
