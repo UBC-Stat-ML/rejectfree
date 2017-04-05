@@ -15,12 +15,13 @@ import ca.ubc.pdmp.JumpKernel
 public class RandomizedBounce extends ContinuousStateDependent implements JumpKernel  {
   
   val EnergyGradient energy
-  var boolean completelyIgnoreIncomingAngle
+  val boolean completelyIgnoreIncomingAngle
 
   new (List<ContinuouslyEvolving> requiredVariables, EnergyGradient energy, boolean completelyIgnoreIncomingAngle)
   {
-    super(requiredVariables);
-    this.energy = energy;
+    super(requiredVariables)
+    this.energy = energy
+    this.completelyIgnoreIncomingAngle = completelyIgnoreIncomingAngle
   }
 
   override simulate(Random random) {

@@ -1,6 +1,7 @@
 package ca.ubc.pdmp;
 
 import static ca.ubc.bps.StaticUtils.continuousCoordinates;
+import static xlinear.MatrixExtensions.dot;
 import static xlinear.MatrixExtensions.vectorToArray;
 import static xlinear.MatrixOperations.denseCopy;
 
@@ -9,7 +10,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.jblas.DoubleMatrix;
 
@@ -20,14 +20,11 @@ import bayonet.rplot.PlotLine;
 import ca.ubc.bps.Bounces;
 import ca.ubc.bps.PDMPs;
 import ca.ubc.bps.Refreshments;
-import ca.ubc.bps.bounces.Bounce;
 import ca.ubc.bps.bounces.FlipBounce;
 import ca.ubc.bps.bounces.RandomizedBounce;
-import ca.ubc.bps.energies.EnergyGradient;
 import ca.ubc.bps.energies.NormalEnergy;
 import ca.ubc.bps.processors.EffectiveSampleSize;
 import ca.ubc.bps.processors.MemorizeTrajectory;
-import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.NormalClock;
 import hmc.DataStruct;
@@ -36,7 +33,6 @@ import utils.Objective;
 import xlinear.DenseMatrix;
 import xlinear.Matrix;
 import xlinear.MatrixOperations;
-import static xlinear.MatrixExtensions.*;
 
 public class BivariateNormalExperiment
 {
