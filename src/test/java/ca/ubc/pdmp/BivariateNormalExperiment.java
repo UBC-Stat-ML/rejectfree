@@ -31,7 +31,6 @@ import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.NormalClock;
 import hmc.DataStruct;
-import rejfree.StaticUtils;
 import utils.MultiVariateObj;
 import utils.Objective;
 import xlinear.DenseMatrix;

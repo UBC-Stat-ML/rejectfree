@@ -9,7 +9,6 @@ import ca.ubc.bps.energies.EnergyGradient;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.JumpKernel;
-import rejfree.StaticUtils;
 
 public class Bounce extends ContinuousStateDependent implements JumpKernel
 {
@@ -26,6 +25,18 @@ public class Bounce extends ContinuousStateDependent implements JumpKernel
   {
     DoubleMatrix oldVelocity = new DoubleMatrix(currentVelocity());
     DoubleMatrix gradient = new DoubleMatrix(energy.gradient(currentPosition()));
-    setVelocity(StaticUtils.bounce(oldVelocity, gradient).data);
+    setVelocity(bounce(oldVelocity, gradient).data);
+  }
+  
+  /**
+   * 
+   * @param oldVelocity Row vector of velocities before collision
+   * @param gradient Row vector of the gradient of the energy at collision
+   * @return Row vector of updated velocities
+   */
+  public static DoubleMatrix bounce(DoubleMatrix oldVelocity, DoubleMatrix gradient)
+  {
+    final double scale = 2.0 * gradient.dot(oldVelocity) / gradient.dot(gradient);
+    return oldVelocity.sub(gradient.mul(scale)); 
   }
 }

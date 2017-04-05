@@ -16,9 +16,10 @@ Please include the following citation:
 
 The package is currently undergoing major refactoring:
 
-- Everything under package ``rejfree`` is the code used for the 
+- Everything under package ``rejfree`` (available in the git history 
+  up until April 5th) is the code used for the 
   paper above. It will stay accessible in the history of the 
-  repository for reproducibility purpose but will be deprecated. 
+  repository for reproducibility purpose but is deprecated. 
   The usage instruction below correspond to this version.
 - The refactored version is under the packages ``ca.ubc.pdmp`` 
   and ``ca.ubc.bps``. Documentation and testing is still 

@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import briefj.BriefMaps;
-import rejfree.local.EventQueue;
 
 /**
  * A simulator for Piecewise Deterministic Poisson Processes (DPMP). 

@@ -9,8 +9,6 @@ import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.pdmp.Clock;
-import rejfree.StaticUtils;
-import rejfree.models.normal.NormalFactor;
 import xlinear.DenseMatrix;
 import xlinear.Matrix;
 import xlinear.MatrixExtensions;
@@ -61,11 +59,24 @@ public class NormalClock extends ContinuousStateDependent implements Clock
       xv = dotProd(x, v);
       vv = dotProd(v, v);
     }
-    final double e = StaticUtils.generateUnitRateExponential(random);
+    final double e = generateUnitRateExponential(random);
     
-    final double delta = NormalFactor.normalCollisionTime(e, xv, vv);
+    final double delta = normalCollisionTime(e, xv, vv);
     
     return DeltaTime.isEqualTo(delta);
+  }
+  
+  public static double generateUnitRateExponential(Random random)
+  {
+    return - Math.log(random.nextDouble());
+  }
+  
+  public static double normalCollisionTime(double exponential, double xv, double vv)
+  {
+    final double s1 = xv < 0 ? - xv / vv : 0.0;
+    final double C = - exponential - s1 * (xv + vv * s1 / 2.0);
+    final double result = (- xv + Math.sqrt(xv * xv - 2.0 * vv * C)) / vv;
+    return result;
   }
   
   private double dotProd(final double [] array0, final double [] array1)
