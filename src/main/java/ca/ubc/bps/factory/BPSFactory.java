@@ -38,9 +38,10 @@ import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.bounces.BounceFactory;
 import ca.ubc.bps.models.Model;
 import ca.ubc.bps.processors.IntegrateTrajectory;
-import ca.ubc.bps.processors.IntegrateTrajectory.SegmentIntegrator;
 import ca.ubc.bps.refresh.RefreshmentFactory;
 import ca.ubc.bps.processors.MemorizeTrajectory;
+import ca.ubc.bps.processors.MomentIntegrator;
+import ca.ubc.bps.processors.SegmentIntegrator;
 import ca.ubc.bps.processors.WriteTrajectory;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.Dynamics;
@@ -329,7 +330,7 @@ public class BPSFactory extends Experiment
         else if (type == MonitorType.SUMMARIZE)
           for (int degree : summarizedMomentDegrees)
           {
-            SegmentIntegrator integrator = new IntegrateTrajectory.MomentIntegrator(degree);
+            SegmentIntegrator integrator = new MomentIntegrator(degree);
             IntegrateTrajectory processor = new IntegrateTrajectory(variable, integrator); 
             summarizedTrajectories.put(variable, momentKey(degree), processor);
             pdmp.processors.add(processor);

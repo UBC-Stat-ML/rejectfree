@@ -46,11 +46,6 @@ public class ConvertToGlobalProcessor
     }
   }
   
-  public interface GlobalProcessor
-  {
-    public void process(GlobalProcessorContext context);
-  }
-  
   public double tolerance = 10e-12;
   public class GlobalProcessorContext
   {

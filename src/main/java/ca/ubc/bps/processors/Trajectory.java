@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import bayonet.math.NumericalUtils;
-import ca.ubc.bps.processors.IntegrateTrajectory.SegmentIntegrator;
 import ca.ubc.bps.state.Dynamics;
 
 public class Trajectory
@@ -117,7 +116,7 @@ public class Trajectory
   
   public double moment(int degree)
   {
-    return integrate(new IntegrateTrajectory.MomentIntegrator(degree));
+    return integrate(new MomentIntegrator(degree));
   }
   
   public double ess(SegmentIntegrator testFunction, 

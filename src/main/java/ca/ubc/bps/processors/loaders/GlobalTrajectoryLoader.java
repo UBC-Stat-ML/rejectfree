@@ -13,7 +13,7 @@ import ca.ubc.bps.factory.BPSFactory;
 import ca.ubc.bps.factory.BPSFactory.BPS;
 import ca.ubc.bps.factory.MonitoredIndices;
 import ca.ubc.bps.processors.ConvertToGlobalProcessor;
-import ca.ubc.bps.processors.ConvertToGlobalProcessor.GlobalProcessor;
+import ca.ubc.bps.processors.GlobalProcessor;
 
 public abstract class GlobalTrajectoryLoader extends Experiment
 {

@@ -1,7 +1,6 @@
 package ca.ubc.bps.models;
 
 import blang.inits.Implementations;
-import ca.ubc.bps.factory.BPSFactory;
 import ca.ubc.bps.factory.BPSFactory.ModelBuildingContext;
 
 @Implementations({FixedPrecisionNormalModel.class, GeneralizedNormalModel.class})

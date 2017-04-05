@@ -11,8 +11,8 @@ import blang.inits.experiments.Experiment;
 import briefj.BriefIO;
 import ca.ubc.bps.factory.BPSFactory;
 import ca.ubc.bps.factory.BPSFactory.BPS;
-import ca.ubc.bps.processors.ConvertToGlobalProcessor.GlobalProcessor;
 import ca.ubc.bps.processors.ConvertToGlobalProcessor.GlobalProcessorContext;
+import ca.ubc.bps.processors.GlobalProcessor;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 
 public class WriteGlobalTrajectory extends GlobalTrajectoryLoader

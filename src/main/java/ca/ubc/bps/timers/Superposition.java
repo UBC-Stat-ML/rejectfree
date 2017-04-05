@@ -8,7 +8,6 @@ import java.util.Set;
 
 import bayonet.distributions.Bernoulli;
 import ca.ubc.bps.BPSPotential;
-import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.energies.EnergyGradient;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.pdmp.Clock;
@@ -67,8 +66,8 @@ public class Superposition extends ContinuousStateDependent implements Clock, En
     
     double denom = 0.0;
     for (BPSPotential potential : potentials)
-      denom += canonicalRate(velocity, potential.energy.gradient(position));
-    return canonicalRate(velocity, gradient(position)) / denom;
+      denom += StandardIntensity.canonicalRate(velocity, potential.energy.gradient(position));
+    return StandardIntensity.canonicalRate(velocity, gradient(position)) / denom;
   }
 
   @Override
@@ -86,8 +85,5 @@ public class Superposition extends ContinuousStateDependent implements Clock, En
     return result;
   }
 
-  public static double canonicalRate(double [] velocity, double [] gradient)
-  {
-    return Math.max(0.0, BPSStaticUtils.dot(velocity, gradient));
-  }
+
 }

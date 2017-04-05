@@ -47,22 +47,4 @@ public class ContinuouslyEvolving implements Coordinate
       result.add(new ContinuouslyEvolving(dynamics,i));
     return result;
   }
-  
-  public static class MutableDoubleImplementation implements MutableDouble
-  {
-    double value = 0.0;
-
-    @Override
-    public void set(double value)
-    {
-      this.value = value;
-    }
-
-    @Override
-    public double get()
-    {
-      return value;
-    }
-    
-  }
 }
