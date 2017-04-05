@@ -86,15 +86,15 @@ public class BPSFactory extends Experiment
   public PartialSumOutputMode partialSumOutputMode = PartialSumOutputMode.EXPONENTIALLY_SPACED;
   
   @Arg @DefaultValue("1")
-  public Random simulationRandom = new Random(1);
+  public long simulationRandom = 1L;
   
   @Arg @DefaultValue("1")
-  public Random initializationRandom = new Random(1);
+  public long initializationRandom = 1L;
   
   @Arg @DefaultValue({"--stochasticProcessTime", "10_000"})
   public StoppingCriterion stoppingRule = StoppingCriterion.byStochasticProcessTime(10_000);
   
-  @Arg @DefaultValue("Zero") // TODO: make this a factory
+  @Arg @DefaultValue("Zero") 
   public InitializationStrategy initialization = zero;
   
   @Arg @DefaultValue("false")
@@ -279,6 +279,7 @@ public class BPSFactory extends Experiment
 
   private void initializeVelocities(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
   {
+    Random initializationRandom = new Random(30284L * this.initializationRandom + 394);
     for (ContinuouslyEvolving coordinate : continuouslyEvolvingStates)
       coordinate.velocity.set(initializationRandom.nextGaussian());
   }
@@ -304,7 +305,7 @@ public class BPSFactory extends Experiment
     
     public BPS()
     {
-      modelContext = new ModelBuildingContext(initializationRandom);
+      modelContext = new ModelBuildingContext(new Random(8493L * initializationRandom + 948));
       
       // setup bounces and variables
       pdmp = setupVariablesAndBounces();
@@ -322,18 +323,24 @@ public class BPSFactory extends Experiment
       initialization.initializePositions(modelContext.continuouslyEvolvingStates);
     }
     
-    public void addProcessor(Processor processor)
+    public PDMP getPDMP()
     {
       if (isRun())
         throw new RuntimeException();
-      pdmp.processors.add(processor);
+      return pdmp;
+    }
+    
+    public void addProcessor(Processor processor)
+    {
+      
+      getPDMP().processors.add(processor);
     }
     
     private PDMPSimulator simulator = null;
     public void run()
     {
       simulator = new PDMPSimulator(pdmp);
-      simulator.simulate(simulationRandom, stoppingRule);
+      simulator.simulate(new Random(74737L * simulationRandom + 33304L), stoppingRule);
     }
     
     public boolean isRun()

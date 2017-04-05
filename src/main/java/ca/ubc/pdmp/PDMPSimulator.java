@@ -91,7 +91,7 @@ public class PDMPSimulator
   private boolean []           isBoundIndicators;
   
   private Random               random;
-  private StoppingCriterion    stoppingRule;
+  private StoppingCriterion    stoppingRule; // NOTE: for internal use only, this instance if modified by chuncking so not interpretable
   private long                 numberOfQueuePolls, 
                                numberOfJumps;  // number of jumps
   private long                 startTimeMilliSeconds;
@@ -179,8 +179,8 @@ public class PDMPSimulator
         rollBack(nd_Nd_nk_plus_nd_minus_nk[eventJumpProcessIndex]);
       }
     }
-    
     // final update on all variables
+    time = this.stoppingRule.stochasticProcessTime;
     updateAllVariables(true, -1); 
   }
   
@@ -192,6 +192,11 @@ public class PDMPSimulator
     
     if (numberOfQueuePolls > stoppingRule.numberOfQueuePolls)
       return false;
+    
+    // Note: we do not need to check process time since that 
+    //       part is taken care of in the queue (i.e. not 
+    //       inserting event that fall outside of the process 
+    //       time)
     
     return true;
   }
