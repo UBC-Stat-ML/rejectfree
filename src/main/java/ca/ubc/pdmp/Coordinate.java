@@ -11,8 +11,9 @@ package ca.ubc.pdmp;
  * Examples:
  * 
  * - For the local BPS: A single position index with its corresponding velocity.
- * - A discrete variable undergoing hold-jump behaviour. - For the non-sparse
- * Hamiltonian BPS: all variables and their velocities.
+ * - A discrete variable undergoing hold-jump behaviour. 
+ * - For the non-sparse
+ *   Hamiltonian BPS: all variables and their velocities.
  * 
  * @author bouchard
  *

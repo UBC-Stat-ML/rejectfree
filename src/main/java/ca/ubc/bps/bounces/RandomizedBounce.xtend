@@ -27,6 +27,12 @@ public class RandomizedBounce extends ContinuousStateDependent implements JumpKe
   override simulate(Random random) {
     
     var oldVelocity = denseCopy(currentVelocity)
+    
+    if (oldVelocity.nEntries == 1) {
+      velocity = (-1.0 * oldVelocity).vectorToArray
+      return
+    }
+    
     val oldNorm = oldVelocity.norm
     oldVelocity = oldVelocity / oldNorm
     val dim = oldVelocity.nEntries
@@ -45,6 +51,7 @@ public class RandomizedBounce extends ContinuousStateDependent implements JumpKe
       
     val n1 = -1.0 * gradient / gradient.norm 
     var n2 = oldVelocity - n1 * (oldVelocity.dot(n1))
+    
     n2 = n2 / n2.norm
     
     val a = random.nextDouble() ** (1.0 / (dim - 1.0))
