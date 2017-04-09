@@ -2,6 +2,7 @@ package ca.ubc.bps.factory;
 
 
 import static ca.ubc.bps.factory.BPSFactoryHelpers.all;
+import static ca.ubc.bps.factory.BPSFactoryHelpers.none;
 import static ca.ubc.bps.factory.BPSFactoryHelpers.isotropicGlobal;
 import static ca.ubc.bps.factory.BPSFactoryHelpers.linear;
 import static ca.ubc.bps.factory.BPSFactoryHelpers.local;
@@ -69,10 +70,10 @@ public class BPSFactory extends Experiment
   public RefreshmentFactory refreshment = local(1);
   
   @Arg @DefaultValue("all")
-  public MonitoredIndices write = all;
+  public MonitoredIndices write = none;
   
   @Arg @DefaultValue("all")
-  public MonitoredIndices memorize = all;
+  public MonitoredIndices memorize = none;
   
   @Arg @DefaultValue("all")
   public MonitoredIndices summarize = all;
@@ -314,7 +315,7 @@ public class BPSFactory extends Experiment
       requested = type == MonitorType.SUMMARIZE ? summarize : requested;
       requested = type == MonitorType.WRITE     ? write     : requested;
 
-      Set<Integer> savedIndices = new LinkedHashSet<>(requested.get(modelContext.continuouslyEvolvingStates.size()));
+      Set<Integer> savedIndices = new LinkedHashSet<>(requested.getIndices(modelContext.continuouslyEvolvingStates.size()));
       
       loop : for (ContinuouslyEvolving variable : modelContext.continuouslyEvolvingStates)
       {

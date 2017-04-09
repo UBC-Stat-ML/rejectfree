@@ -37,8 +37,8 @@ public abstract class GlobalTrajectoryLoader extends Experiment
   public List<Integer> indices()
   {
     final int totalNumber = bps.continuouslyEvolvingStates().size();
-    List<Integer> indices = variables.get(totalNumber);
-    indices.retainAll(bpsFactory.write.get(totalNumber));
+    List<Integer> indices = variables.getIndices(totalNumber);
+    indices.retainAll(bpsFactory.write.getIndices(totalNumber));
     Collections.sort(indices);
     return indices;
   }

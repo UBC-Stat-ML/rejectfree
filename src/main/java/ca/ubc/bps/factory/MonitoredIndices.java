@@ -15,6 +15,25 @@ import blang.inits.providers.CollectionsProviders;
 public class MonitoredIndices
 {
   private final List<Integer> list;
+  
+  public boolean isAll()
+  {
+    return list == null;
+  }
+  
+  public static MonitoredIndices all()
+  {
+    return new MonitoredIndices(null);
+  }
+  public static MonitoredIndices none() 
+  {
+    return new MonitoredIndices(new ArrayList<>());
+  }
+  public static MonitoredIndices subset(List<Integer> list) 
+  {
+    return new MonitoredIndices(list);
+  }
+  
   @DesignatedConstructor
   public MonitoredIndices(
       @Input(formatDescription = "all|none|space-separated indices") List<String> strings,
@@ -30,11 +49,11 @@ public class MonitoredIndices
       this.list = CollectionsProviders.parseList(strings, listOfInts, creator);
     }
   }
-  public MonitoredIndices(List<Integer> list) 
+  private MonitoredIndices(List<Integer> list) 
   {
     this.list = list;
   }
-  public List<Integer> get(int numberItems)
+  public List<Integer> getIndices(int numberItems)
   {
     if (list == null)
     {

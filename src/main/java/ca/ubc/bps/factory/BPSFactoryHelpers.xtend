@@ -7,7 +7,6 @@ import ca.ubc.bps.bounces.BounceFactory
 import ca.ubc.bps.models.FixedPrecisionNormalModel
 import ca.ubc.bps.models.DiagonalPrecision
 import ca.ubc.bps.state.PiecewiseLinear
-import java.util.ArrayList
 import java.util.List
 import ca.ubc.bps.models.GeneralizedNormalModel
 
@@ -55,10 +54,10 @@ class BPSFactoryHelpers {
   def static PiecewiseLinear linear() { new PiecewiseLinear }
    
   // Monitors
-  public static final MonitoredIndices all = new MonitoredIndices(null)
-  public static final MonitoredIndices none = subset(new ArrayList())
+  public static final MonitoredIndices all  = MonitoredIndices.all
+  public static final MonitoredIndices none = MonitoredIndices.none
   def static MonitoredIndices subset(List<Integer> indices) {
-  	return new MonitoredIndices(indices) 
+  	return MonitoredIndices.subset(indices) 
   }
   
   // Models
