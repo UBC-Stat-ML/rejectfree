@@ -61,9 +61,9 @@ public class ConvertToGlobalProcessor
     }
     public void interpolate(double delta)
     {
-      interpolatedDelta += delta;
+      interpolatedDelta = delta;
       if (interpolatedDelta < -tolerance || interpolatedDelta > globalDelta + tolerance)
-        throw new RuntimeException("Invalid interpolation");
+        throw new RuntimeException("Invalid interpolation: " + delta + "");
       for (ContinuouslyEvolving var : allVariables)
         var.extrapolateInPlace(delta);
     }

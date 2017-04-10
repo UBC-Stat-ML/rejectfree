@@ -69,10 +69,10 @@ public class BPSFactory extends Experiment
   @Arg @DefaultValue("Standard")
   public RefreshmentFactory refreshment = local(1);
   
-  @Arg @DefaultValue("all")
+  @Arg @DefaultValue("none")
   public MonitoredIndices write = none;
   
-  @Arg @DefaultValue("all")
+  @Arg @DefaultValue("none")
   public MonitoredIndices memorize = none;
   
   @Arg @DefaultValue("all")
