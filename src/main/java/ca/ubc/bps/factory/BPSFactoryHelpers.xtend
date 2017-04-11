@@ -11,25 +11,28 @@ import java.util.List
 import ca.ubc.bps.models.GeneralizedNormalModel
 
 import ca.ubc.bps.refresh.RefreshmentFactory.NormDependent
+import ca.ubc.bps.refresh.RefreshmentFactory.Local
 import ca.ubc.bps.factory.InitializationStrategy.Zero
 import ca.ubc.bps.factory.InitializationStrategy.Stationary
-import ca.ubc.bps.refresh.RefreshmentFactory.Local
 
-class BPSFactoryHelpers {
+class BPSFactoryHelpers { 
   
   
   // Refreshments
+  
+  
+  def static Standard global(double globalRate) {
+    return new Standard => [
+      rate = globalRate
+    ]
+  }
   
   def static Local local(double globalRate) {
     return new Local => [
       rate = globalRate
     ]
   }
-  def static Standard global(double globalRate) {
-    return new Standard => [
-      rate = globalRate
-    ]
-  }
+
   def static NormDependent normDependent() {
     return new NormDependent
   }

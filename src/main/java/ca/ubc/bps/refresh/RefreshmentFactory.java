@@ -7,7 +7,6 @@ import blang.inits.Arg;
 import blang.inits.DefaultValue;
 import blang.inits.Implementations;
 import ca.ubc.bps.BPSStaticUtils;
-import ca.ubc.bps.refresh.RefreshmentFactory.ConstantRate;
 import ca.ubc.bps.refresh.RefreshmentFactory.NoRefreshment;
 import ca.ubc.bps.refresh.RefreshmentFactory.NormDependent;
 import ca.ubc.bps.refresh.RefreshmentFactory.Standard;
@@ -20,7 +19,6 @@ import ca.ubc.pdmp.JumpProcess;
 import ca.ubc.pdmp.PDMP;
 
 import static ca.ubc.bps.BPSStaticUtils.continuousCoordinates;
-import static ca.ubc.bps.refresh.RefreshmentFactory.addLocal;
 import static java.util.Collections.singleton;
 import static xlinear.MatrixExtensions.*;
 import static xlinear.MatrixOperations.*;
@@ -31,8 +29,12 @@ public interface RefreshmentFactory
 {
   public abstract void addRefreshment(PDMP pdmp);
   
-  public static class Standard extends ConstantRate
+  public static class Standard implements RefreshmentFactory
   {
+    @Arg(description = "Global rate of refreshment")
+    @DefaultValue("1.0")
+    public double rate = 1.0;
+    
     @Arg(description = "Normalize to unit norm")
     @DefaultValue("false")
     public boolean normalized = false;
@@ -44,8 +46,12 @@ public interface RefreshmentFactory
     }
   }
   
-  public static class Local extends ConstantRate
+  public static class Local implements RefreshmentFactory
   {
+    @Arg(description = "Global rate of refreshment")
+    @DefaultValue("1.0")
+    public double rate = 1.0;
+    
     @Override
     public void addRefreshment(final PDMP pdmp) 
     {
@@ -93,13 +99,6 @@ public interface RefreshmentFactory
                   normPotential()),               
               new IndependentRefreshment(continuousCoordinates, normalized)));
     }
-  }
-  
-  static abstract class ConstantRate implements RefreshmentFactory
-  {
-    @Arg(description = "Global rate of refreshment")
-    @DefaultValue("1.0")
-    public double rate = 1.0;
   }
   
   public static void addGlobal(PDMP pdmp, double rate, boolean normalized)
