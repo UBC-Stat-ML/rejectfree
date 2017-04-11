@@ -13,21 +13,20 @@ import ca.ubc.bps.models.GeneralizedNormalModel
 import ca.ubc.bps.refresh.RefreshmentFactory.NormDependent
 import ca.ubc.bps.factory.InitializationStrategy.Zero
 import ca.ubc.bps.factory.InitializationStrategy.Stationary
+import ca.ubc.bps.refresh.RefreshmentFactory.Local
 
 class BPSFactoryHelpers {
   
   
   // Refreshments
   
-  def static Standard local(double globalRate) {
-    return new Standard => [
-      local = true
+  def static Local local(double globalRate) {
+    return new Local => [
       rate = globalRate
     ]
   }
   def static Standard global(double globalRate) {
     return new Standard => [
-      local = false
       rate = globalRate
     ]
   }

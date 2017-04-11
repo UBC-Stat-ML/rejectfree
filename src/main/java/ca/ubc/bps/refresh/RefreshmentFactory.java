@@ -7,6 +7,7 @@ import blang.inits.Arg;
 import blang.inits.DefaultValue;
 import blang.inits.Implementations;
 import ca.ubc.bps.BPSStaticUtils;
+import ca.ubc.bps.refresh.RefreshmentFactory.ConstantRate;
 import ca.ubc.bps.refresh.RefreshmentFactory.NoRefreshment;
 import ca.ubc.bps.refresh.RefreshmentFactory.NormDependent;
 import ca.ubc.bps.refresh.RefreshmentFactory.Standard;
@@ -19,49 +20,46 @@ import ca.ubc.pdmp.JumpProcess;
 import ca.ubc.pdmp.PDMP;
 
 import static ca.ubc.bps.BPSStaticUtils.continuousCoordinates;
+import static ca.ubc.bps.refresh.RefreshmentFactory.addLocal;
 import static java.util.Collections.singleton;
 import static xlinear.MatrixExtensions.*;
 import static xlinear.MatrixOperations.*;
 
 
 @Implementations({NormDependent.class, Standard.class, NoRefreshment.class})
-@FunctionalInterface
 public interface RefreshmentFactory
 {
-  public void addRefreshment(PDMP pdmp);
+  public abstract void addRefreshment(PDMP pdmp);
   
-  public static class Standard implements RefreshmentFactory 
+  public static class Standard extends ConstantRate
   {
-    @Arg(description = "Global rate of refreshment")
-    @DefaultValue("1.0")
-    public double rate = 1.0;
-  
-    @Arg(description = "Use local refreshment?")
-    @DefaultValue("true")
-    public boolean local = true;
-    
+    @Arg(description = "Normalize to unit norm")
+    @DefaultValue("false")
+    public boolean normalized = false;
+
     @Override
     public void addRefreshment(final PDMP pdmp) 
     {
-      if (this.local) 
-      {
-        List<ContinuouslyEvolving> _continuousCoordinates = BPSStaticUtils.continuousCoordinates(pdmp.coordinates);
-        int _size = _continuousCoordinates.size();
-        double _divide = (this.rate / ((double) _size));
-        addLocal(pdmp, _divide);
-      } else {
-        addGlobal(pdmp, this.rate);
-      }
+      addGlobal(pdmp, this.rate, normalized);
+    }
+  }
+  
+  public static class Local extends ConstantRate
+  {
+    @Override
+    public void addRefreshment(final PDMP pdmp) 
+    {
+      List<ContinuouslyEvolving> _continuousCoordinates = BPSStaticUtils.continuousCoordinates(pdmp.coordinates);
+      int _size = _continuousCoordinates.size();
+      double _divide = (this.rate / ((double) _size));
+      addLocal(pdmp, _divide);
     }
   }
   
   public static class NoRefreshment implements RefreshmentFactory 
   {
     @Override
-    public void addRefreshment(PDMP pdmp)
-    {
-     
-    }
+    public void addRefreshment(PDMP pdmp) {}
   }
   
   public static class NormDependent implements RefreshmentFactory 
@@ -69,6 +67,10 @@ public interface RefreshmentFactory
     @Arg
     @DefaultValue("0.5")
     public double power = 0.5;
+    
+    @Arg(description = "Normalize to unit norm")
+    @DefaultValue("false")
+    public boolean normalized = false;
     
     private Intensity normPotential() 
     {
@@ -89,29 +91,37 @@ public interface RefreshmentFactory
               new UnimodalTimer( 
                   continuousCoordinates, 
                   normPotential()),               
-              new IndependentRefreshment(continuousCoordinates)));
+              new IndependentRefreshment(continuousCoordinates, normalized)));
     }
   }
   
-  public static void addGlobal(PDMP pdmp, double rate)
+  static abstract class ConstantRate implements RefreshmentFactory
   {
-    add(pdmp, rate, continuousCoordinates(pdmp.coordinates));
+    @Arg(description = "Global rate of refreshment")
+    @DefaultValue("1.0")
+    public double rate = 1.0;
+  }
+  
+  public static void addGlobal(PDMP pdmp, double rate, boolean normalized)
+  {
+    add(pdmp, rate, continuousCoordinates(pdmp.coordinates), normalized);
   }
   
   public static void addLocal(PDMP pdmp, double rate)
   {
     for (ContinuouslyEvolving coordinate : continuousCoordinates(pdmp.coordinates))
-      add(pdmp, rate, singleton(coordinate));
+      add(pdmp, rate, singleton(coordinate), false);
   }
   
   public static void add(
       PDMP pdmp, 
       double rate, 
-      Collection<ContinuouslyEvolving> continuousCoordinates)
+      Collection<ContinuouslyEvolving> continuousCoordinates, 
+      boolean normalized)
   {
     pdmp.jumpProcesses.add(
         new JumpProcess(
             new HomogeneousPP(rate), 
-            new IndependentRefreshment(continuousCoordinates)));
+            new IndependentRefreshment(continuousCoordinates, normalized)));
   }
 }
