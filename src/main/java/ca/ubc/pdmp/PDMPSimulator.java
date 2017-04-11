@@ -93,7 +93,9 @@ public class PDMPSimulator
   private Random               random;
   private StoppingCriterion    stoppingRule; // NOTE: for internal use only, this instance if modified by chuncking so not interpretable
   private long                 numberOfQueuePolls, 
+                               numberOfUpdatedVariables,
                                numberOfJumps;  // number of jumps
+
   private long                 startTimeMilliSeconds;
   private double               totalProcessTime;
   
@@ -113,6 +115,7 @@ public class PDMPSimulator
     this.totalProcessTime = 0.0;
     this.numberOfQueuePolls = 0;
     this.numberOfJumps = 0;
+    this.numberOfUpdatedVariables = 0;
     this.startTimeMilliSeconds = System.currentTimeMillis();
     this.random = random;
     
@@ -224,6 +227,7 @@ public class PDMPSimulator
     // avoid extraneous processing calls
     if (lastUpdateTimes[variableIndex] == time)
       return;
+    numberOfUpdatedVariables++;
     
     final Coordinate coordinate = pdmp.coordinates.get(variableIndex);
     final double deltaTime = time - lastUpdateTimes[variableIndex];
@@ -451,15 +455,25 @@ public class PDMPSimulator
     this.printSummaryStatistics = value;
   }
   
+  public long getNumberOfUpdatedVariables()
+  {
+    return numberOfUpdatedVariables;
+  }
+  
+  public String summaryStatistics() 
+  {
+    return 
+        "wallClockTimeMillis\t" + (System.currentTimeMillis() - startTimeMilliSeconds) + "\n" +
+        "trajectoryLength\t" + totalProcessTime + "\n" +
+        "nJumps\t" + getNumberOfJumps() + "\n" + 
+        "nQueuePolls\t" + getNumberOfQueuePolls() + "\n" +
+        "nUpdatedVariables\t" + getNumberOfUpdatedVariables() + "\n";
+  }
+  
   private void printSummaryStatistics()
   {
     if (!printSummaryStatistics)
       return;
-    System.out.println("PDMPSimulator-summary: " + 
-      "wallClockTimeMillis=" + (System.currentTimeMillis() - startTimeMilliSeconds) + ", " +
-      "trajectoryLength=" + totalProcessTime + ", " +
-      "nJumps=" + getNumberOfJumps() + ", " + 
-      "nQueuePolls=" + getNumberOfQueuePolls()
-      );
+    System.out.println(summaryStatistics());
   }
 }

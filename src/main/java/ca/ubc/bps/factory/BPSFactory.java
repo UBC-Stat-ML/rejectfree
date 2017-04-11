@@ -282,6 +282,7 @@ public class BPSFactory extends Experiment
         BriefIO.write(results.getFileInResultFolder(ESS_FILE_NAME), result);
       }
       writeFinalSamples();
+      BriefIO.write(results.getFileInResultFolder(PDMP_SUMMARY), simulator.summaryStatistics());
     }
     
     private void writeFinalSamples()
@@ -298,7 +299,8 @@ public class BPSFactory extends Experiment
       CONTINUOUSLY_EVOLVING_PARTIAL_SUMS_DIR_NAME = "continuouslyEvolvingPartialSums",
       SUMMARY_STATS_FILE_NAME                     = "summaryStatistics.csv",
       ESS_FILE_NAME                               = "ess.csv",
-      DATA_FILE_NAME                              = "data.csv";
+      DATA_FILE_NAME                              = "data.csv",
+      PDMP_SUMMARY                                = "pdmpSummary.tsv";
     
     private void setupMonitors(
         PDMP pdmp, 
