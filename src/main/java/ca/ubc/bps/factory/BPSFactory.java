@@ -282,7 +282,7 @@ public class BPSFactory extends Experiment
         BriefIO.write(results.getFileInResultFolder(ESS_FILE_NAME), result);
       }
       writeFinalSamples();
-      BriefIO.write(results.getFileInResultFolder(PDMP_SUMMARY), simulator.summaryStatistics());
+      BriefIO.write(results.getFileInResultFolder(RUNNING_TIME_SUMMARY), simulator.summaryStatistics());
     }
     
     private void writeFinalSamples()
@@ -383,7 +383,7 @@ public class BPSFactory extends Experiment
     SUMMARY_STATS_FILE_NAME                     = "summaryStatistics.csv",
     ESS_FILE_NAME                               = "ess.csv",
     DATA_FILE_NAME                              = "data.csv",
-    PDMP_SUMMARY                                = "runningTimeSummary.tsv";
+    RUNNING_TIME_SUMMARY                        = "runningTimeSummary.tsv";
   
   public static void main(String [] args)
   {
