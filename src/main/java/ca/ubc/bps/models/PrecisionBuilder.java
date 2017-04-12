@@ -3,7 +3,7 @@ package ca.ubc.bps.models;
 import blang.inits.Implementations;
 import xlinear.Matrix;
 
-@Implementations({DiagonalPrecision.class})
+@Implementations({DiagonalPrecision.class, BrownianMotion.class})
 public interface PrecisionBuilder
 {
   public Matrix build();
