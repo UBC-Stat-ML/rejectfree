@@ -36,8 +36,8 @@ public abstract class TrajectoryLoader extends Experiment
   public static File getSampleFile(File bpsExecFolder, int index)
   {
     return new File(bpsExecFolder, 
-        BPSFactory.BPS.CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME + "/" + 
-        BPSFactory.VARIABLE_KEY + "=" + index + "/" + BPSFactory.BPS.DATA_FILE_NAME);
+        BPSFactory.CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME + "/" + 
+        BPSFactory.VARIABLE_KEY + "=" + index + "/" + BPSFactory.DATA_FILE_NAME);
   }
   
   @Override

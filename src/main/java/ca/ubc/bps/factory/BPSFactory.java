@@ -293,15 +293,6 @@ public class BPSFactory extends Experiment
         BriefIO.println(out, state.key + "," + state.position.get());
     }
 
-    public static final String 
-      FINAL_SAMPLES                               = "finalSamples.csv",
-      CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME      = "continuouslyEvolvingSamples",
-      CONTINUOUSLY_EVOLVING_PARTIAL_SUMS_DIR_NAME = "continuouslyEvolvingPartialSums",
-      SUMMARY_STATS_FILE_NAME                     = "summaryStatistics.csv",
-      ESS_FILE_NAME                               = "ess.csv",
-      DATA_FILE_NAME                              = "data.csv",
-      PDMP_SUMMARY                                = "pdmpSummary.tsv";
-    
     private void setupMonitors(
         PDMP pdmp, 
         MonitorType type
@@ -384,6 +375,15 @@ public class BPSFactory extends Experiment
   
   public static final String VARIABLE_KEY = "variable";
   public static final String MOMENT_KEY = "momentDegree";
+  
+  public static final String 
+    FINAL_SAMPLES                               = "finalSamples.csv",
+    CONTINUOUSLY_EVOLVING_SAMPLES_DIR_NAME      = "continuouslyEvolvingSamples",
+    CONTINUOUSLY_EVOLVING_PARTIAL_SUMS_DIR_NAME = "continuouslyEvolvingPartialSums",
+    SUMMARY_STATS_FILE_NAME                     = "summaryStatistics.csv",
+    ESS_FILE_NAME                               = "ess.csv",
+    DATA_FILE_NAME                              = "data.csv",
+    PDMP_SUMMARY                                = "runningTimeSummary.tsv";
   
   public static void main(String [] args)
   {
