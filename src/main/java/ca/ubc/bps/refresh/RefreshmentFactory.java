@@ -10,6 +10,7 @@ import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.refresh.RefreshmentFactory.NoRefreshment;
 import ca.ubc.bps.refresh.RefreshmentFactory.NormDependent;
 import ca.ubc.bps.refresh.RefreshmentFactory.Standard;
+import ca.ubc.bps.refresh.RefreshmentFactory.Local;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.HomogeneousPP;
@@ -24,7 +25,7 @@ import static xlinear.MatrixExtensions.*;
 import static xlinear.MatrixOperations.*;
 
 
-@Implementations({NormDependent.class, Standard.class, NoRefreshment.class})
+@Implementations({NormDependent.class, Standard.class, NoRefreshment.class, Local.class})
 public interface RefreshmentFactory
 {
   public abstract void addRefreshment(PDMP pdmp);
