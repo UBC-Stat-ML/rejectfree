@@ -75,12 +75,11 @@ public class ModelBuildingContext
   private void registerVariables(Collection<? extends Coordinate> vars)
   {
     for (Coordinate c : vars)
-      if (c instanceof ContinuouslyEvolving)
-      {
-        if (!setOfVariables.contains(c))
+    {
+      if (c instanceof ContinuouslyEvolving && !setOfVariables.contains(c))
           throw new RuntimeException();
-      }
-      else
+      if (c instanceof PiecewiseConstant)
         piecewiseConstantStates.add((PiecewiseConstant<?>) c);
+    }
   }
 }
