@@ -11,7 +11,6 @@ import static ca.ubc.bps.factory.BPSFactoryHelpers.zero;
 
 import java.io.File;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -34,8 +33,6 @@ import blang.inits.experiments.ExperimentResults;
 import blang.inits.parsing.Arguments;
 import blang.inits.parsing.CSVFile;
 import briefj.BriefIO;
-import ca.ubc.bps.BPSPotential;
-import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.bounces.BounceFactory;
 import ca.ubc.bps.models.Model;
 import ca.ubc.bps.processors.IntegrateTrajectory;
@@ -46,10 +43,6 @@ import ca.ubc.bps.processors.SegmentIntegrator;
 import ca.ubc.bps.processors.WriteTrajectory;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.Dynamics;
-import ca.ubc.bps.state.PiecewiseConstant;
-import ca.ubc.pdmp.Coordinate;
-import ca.ubc.pdmp.JumpKernel;
-import ca.ubc.pdmp.JumpProcess;
 import ca.ubc.pdmp.PDMP;
 import ca.ubc.pdmp.PDMPSimulator;
 import ca.ubc.pdmp.Processor;
@@ -108,68 +101,6 @@ public class BPSFactory extends Experiment
     catch (Exception e) { throw new RuntimeException("Init failure. Details: \n" + c.errorReport()); }
   }
   
-  public class ModelBuildingContext
-  {
-    public final Random initializationRandom;
-    private List<JumpProcess> jumpProcesses = new ArrayList<>();
-    private LinkedHashSet<ContinuouslyEvolving> continuouslyEvolvingStates = null;
-    private LinkedHashSet<PiecewiseConstant<?>> piecewiseConstantStates = new LinkedHashSet<>();
-    
-    public ModelBuildingContext(Random initializationRandom)
-    {
-      this.initializationRandom = initializationRandom;
-    }
-    public Dynamics dynamics()
-    {
-      return dynamics;
-    }
-    public List<ContinuouslyEvolving> buildAndRegisterContinuouslyEvolvingStates(int dim) 
-    {
-      if (continuouslyEvolvingStates != null)
-        throw new RuntimeException();
-      List<ContinuouslyEvolving> result = ContinuouslyEvolving.buildArray(dim, dynamics);
-      continuouslyEvolvingStates = 
-          new LinkedHashSet<>(result);
-      return result;
-    }
-    public void registerBPSPotential(BPSPotential potential)
-    {
-      // find which variables bounce: those that are continuously evolving
-      List<? extends Coordinate> allReqVars = new ArrayList<>(potential.clock.requiredVariables());
-      List<ContinuouslyEvolving> continuousCoordinates = BPSStaticUtils.continuousCoordinates(allReqVars);
-      // check they form the prefix (to make correspondence with energy indices straightforward)
-      if (!continuousCoordinates.equals(allReqVars.subList(0, continuousCoordinates.size())))
-        throw new RuntimeException();
-      JumpKernel kernel = bounce.build(continuousCoordinates, potential.energy);
-      JumpProcess process = new JumpProcess(potential.clock, kernel);
-      registerJumpProcess(process);
-    }
-    private List<Coordinate> coordinates() 
-    {
-      List<Coordinate> result = new ArrayList<>();
-      result.addAll(continuouslyEvolvingStates);
-      result.addAll(piecewiseConstantStates);
-      return result;
-    }
-    public void registerJumpProcess(JumpProcess process)
-    {
-      registerVariables(process.clock.requiredVariables());
-      registerVariables(process.kernel.requiredVariables());
-      jumpProcesses.add(process);
-    }
-    private void registerVariables(Collection<? extends Coordinate> vars)
-    {
-      for (Coordinate c : vars)
-        if (c instanceof ContinuouslyEvolving)
-        {
-          if (!continuouslyEvolvingStates.contains(c))
-            throw new RuntimeException();
-        }
-        else
-          piecewiseConstantStates.add((PiecewiseConstant<?>) c);
-    }
-  }
-  
   public BPS buildBPS()
   {
     return new BPS();
@@ -205,7 +136,7 @@ public class BPSFactory extends Experiment
     private final ModelBuildingContext modelContext;
     private final int nBounceProcesses;
     
-    public Collection<ContinuouslyEvolving> continuouslyEvolvingStates()
+    public List<ContinuouslyEvolving> continuouslyEvolvingStates()
     {
       return modelContext.continuouslyEvolvingStates;
     }
@@ -217,7 +148,7 @@ public class BPSFactory extends Experiment
     
     public BPS()
     {
-      modelContext = new ModelBuildingContext(new Random(8493L * initializationRandom + 948));
+      modelContext = new ModelBuildingContext(new Random(8493L * initializationRandom + 948), dynamics, bounce);
       
       // setup bounces and variables
       pdmp = setupVariablesAndBounces();

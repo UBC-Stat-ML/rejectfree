@@ -43,7 +43,7 @@ public abstract class TrajectoryLoader extends Experiment
   @Override
   public void run()
   {
-    List<ContinuouslyEvolving> vars = new ArrayList<>(bps.continuouslyEvolvingStates());
+    List<ContinuouslyEvolving> vars = bps.continuouslyEvolvingStates();
     ContinuouslyEvolving theVar = vars.get(index);
     Processor p = createProcessor(theVar, bps);
     

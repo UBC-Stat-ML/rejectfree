@@ -47,4 +47,46 @@ public class ContinuouslyEvolving implements Coordinate
       result.add(new ContinuouslyEvolving(dynamics,i));
     return result;
   }
+  
+  public static double [] toArray(List<ContinuouslyEvolving> continuousCoordinates, boolean forPosition)
+  {
+    double [] result = new double[continuousCoordinates.size()];
+    for (int i = 0; i < continuousCoordinates.size(); i++)
+    {
+      final ContinuouslyEvolving z = continuousCoordinates.get(i);
+      result[i] = forPosition ? z.position.get() : z.velocity.get();
+    }
+    return result;
+  }
+  
+  public static double [] positionsToArray(List<ContinuouslyEvolving> continuousCoordinates)
+  {
+    return toArray(continuousCoordinates, true);
+  }
+  
+  public static double [] velocitiesToArray(List<ContinuouslyEvolving> continuousCoordinates)
+  {
+    return toArray(continuousCoordinates, false);
+  }
+  
+  public static void set(List<ContinuouslyEvolving> continuousCoordinates, double [] vector, boolean forPosition)
+  {
+    if (vector.length != continuousCoordinates.size())
+      throw new RuntimeException();
+    for (int i = 0; i < vector.length; i++)
+    {
+      ContinuouslyEvolving coordinate = continuousCoordinates.get(i);
+      (forPosition ? coordinate.position : coordinate.velocity).set(vector[i]);
+    }
+  }
+  
+  public static void setPosition(List<ContinuouslyEvolving> continuousCoordinates, double [] position)
+  {
+    set(continuousCoordinates, position, true);
+  }
+  
+  public static void setVelocity(List<ContinuouslyEvolving> continuousCoordinates, double [] velocity)
+  {
+    set(continuousCoordinates, velocity, false);
+  }
 }

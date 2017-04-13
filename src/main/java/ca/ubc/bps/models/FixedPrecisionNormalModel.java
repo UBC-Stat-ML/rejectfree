@@ -7,7 +7,7 @@ import java.util.Random;
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
 import ca.ubc.bps.energies.NormalEnergy;
-import ca.ubc.bps.factory.BPSFactory.ModelBuildingContext;
+import ca.ubc.bps.factory.ModelBuildingContext;
 import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.NormalClock;

@@ -41,13 +41,8 @@ public abstract class ContinuousStateDependent extends StateDependentBase
 
   private double [] extrapolateVector(double deltaTime, boolean forPosition)
   {
-    double [] result = new double[continuousCoordinates.size()];
     extrapolate(deltaTime);
-    for (int i = 0; i < continuousCoordinates.size(); i++)
-    {
-      final ContinuouslyEvolving z = continuousCoordinates.get(i);
-      result[i] = forPosition ? z.position.get() : z.velocity.get();
-    }
+    double [] result = ContinuouslyEvolving.toArray(continuousCoordinates, forPosition);
     extrapolate( - deltaTime);
     return result;
   }
@@ -72,24 +67,13 @@ public abstract class ContinuousStateDependent extends StateDependentBase
     return extrapolateVector(deltaTime, true);
   }
   
-  private void set(double [] vector, boolean forPosition)
-  {
-    if (vector.length != continuousCoordinates.size())
-      throw new RuntimeException();
-    for (int i = 0; i < vector.length; i++)
-    {
-      ContinuouslyEvolving coordinate = continuousCoordinates.get(i);
-      (forPosition ? coordinate.position : coordinate.velocity).set(vector[i]);
-    }
-  }
-  
   public void setPosition(double [] position)
   {
-    set(position, true);
+    ContinuouslyEvolving.set(continuousCoordinates, position, true);
   }
   
   public void setVelocity(double [] velocity)
   {
-    set(velocity, false);
+    ContinuouslyEvolving.set(continuousCoordinates, velocity, false);
   }
 }
