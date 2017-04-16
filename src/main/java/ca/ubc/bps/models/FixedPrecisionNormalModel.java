@@ -45,8 +45,44 @@ public class FixedPrecisionNormalModel implements Model
     for (int i = 0; i < vector.nEntries(); i++)
       vars.get(i).position.set(vector.get(i));  
   }
-  public void setupLocal(ModelBuildingContext context, Matrix precision, List<ContinuouslyEvolving> variables)
+  
+  public class SparseDecomposition
   {
+    public List<Integer> 
+      edgeEndPoints1 = new ArrayList<>(),
+      edgeEndPoints2 = new ArrayList<>();
+    
+    public List<Integer>
+      singletonPoints = new ArrayList<>();
+    
+    public List<Matrix> 
+      subMatrices_2by2 = new ArrayList<>(),
+      subMatrices_1by1 = new ArrayList<>();
+    
+    public void add2by2(int row, int col, double diagonal0, double diagonal1, double offDiagonal)
+    {
+      Matrix subMatrix = MatrixOperations.dense(2, 2);
+      subMatrix.set(0, 1, offDiagonal);
+      subMatrix.set(1, 0, offDiagonal);
+      subMatrix.set(0, 0, diagonal0);
+      subMatrix.set(1, 1, diagonal1);
+      subMatrices_2by2.add(subMatrix);
+      edgeEndPoints1.add(row);
+      edgeEndPoints2.add(col);
+    }
+    
+    public void add1by1(int entry, double value)
+    {
+      Matrix subMatrix = MatrixOperations.dense(1, 1);
+      subMatrix.set(0, 0, value);
+      subMatrices_1by1.add(subMatrix);
+      singletonPoints.add(entry);
+    }
+  }
+  
+  protected SparseDecomposition sparseDecomposition(Matrix precision)
+  {
+    final SparseDecomposition result = new SparseDecomposition();
     final SparseMatrix counts = MatrixOperations.sparse(precision.nRows());
     StaticUtils.visitSkippingSomeZeros(precision, (int row, int col, double currentValue) -> 
     {
@@ -59,28 +95,31 @@ public class FixedPrecisionNormalModel implements Model
     StaticUtils.visitSkippingSomeZeros(precision, (int row, int col, double currentValue) -> 
     {
       if (currentValue != 0.0 && row < col)
-      {
-        Matrix subMatrix = MatrixOperations.dense(2, 2);
-        subMatrix.set(0, 1, currentValue);
-        subMatrix.set(1, 0, currentValue);
-        subMatrix.set(0, 0, precision.get(row, row) / counts.get(row));
-        subMatrix.set(1, 1, precision.get(col, col) / counts.get(col));
-        List<ContinuouslyEvolving> varSubset = new ArrayList<>();
-        varSubset.add(variables.get(row));
-        varSubset.add(variables.get(col));
-        context.registerBPSPotential(potential(subMatrix, varSubset));
-      }
+        result.add2by2(row, col, precision.get(row, row) / counts.get(row), precision.get(col, col) / counts.get(col), currentValue);
     });
     // remaining diagonals
     for (int i = 0; i < precision.nRows(); i++)
       if (counts.get(i) == 0.0)
-      {
-        Matrix subMatrix = MatrixOperations.dense(1, 1);
-        subMatrix.set(0, 0, precision.get(i, i));
-        List<ContinuouslyEvolving> varSubset = new ArrayList<>();
-        varSubset.add(variables.get(i));
-        context.registerBPSPotential(potential(subMatrix, varSubset));
-      }
+        result.add1by1(i, precision.get(i, i));
+    return result;
+  }
+  
+  public void setupLocal(ModelBuildingContext context, Matrix precision, List<ContinuouslyEvolving> variables)
+  {
+    SparseDecomposition decomp = sparseDecomposition(precision);
+    for (int i = 0; i < decomp.subMatrices_2by2.size(); i++)
+    {
+      List<ContinuouslyEvolving> varSubset = new ArrayList<>();
+      varSubset.add(variables.get(decomp.edgeEndPoints1.get(i)));
+      varSubset.add(variables.get(decomp.edgeEndPoints2.get(i)));
+      context.registerBPSPotential(potential(decomp.subMatrices_2by2.get(i), varSubset));
+    }
+    for (int i = 0; i < decomp.subMatrices_1by1.size(); i++)
+    {
+      List<ContinuouslyEvolving> varSubset = new ArrayList<>();
+      varSubset.add(variables.get(decomp.singletonPoints.get(i)));
+      context.registerBPSPotential(potential(decomp.subMatrices_1by1.get(i), varSubset));
+    }
   }
   
   public static BPSPotential potential(Matrix precision, List<ContinuouslyEvolving> variables)
