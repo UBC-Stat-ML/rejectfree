@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import blang.inits.Arg;
+import blang.inits.DefaultValue;
 import blang.inits.Implementations;
 import briefj.BriefIO;
 import ca.ubc.bps.state.ContinuouslyEvolving;
@@ -23,7 +24,7 @@ public interface InitializationStrategy
   
   public static class Far implements InitializationStrategy
   {
-    @Arg
+    @Arg @DefaultValue("1.0")
     public double valueForEachPositionCoordinate = 1.0;
 
     @Override

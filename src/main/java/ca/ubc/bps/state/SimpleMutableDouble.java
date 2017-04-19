@@ -1,6 +1,6 @@
 package ca.ubc.bps.state;
 
-public class MutableDoubleImplementation implements MutableDouble
+public class SimpleMutableDouble implements MutableDouble
 {
   double value = 0.0;
 

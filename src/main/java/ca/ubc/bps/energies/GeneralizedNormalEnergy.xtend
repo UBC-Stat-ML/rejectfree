@@ -6,6 +6,9 @@ import xlinear.DenseMatrix
 import static xlinear.MatrixOperations.denseCopy
 import static extension xlinear.MatrixExtensions.*
 
+/**
+ * target proportional to exp( - ||x||^{alpha + 1} )
+ */
 @Data
 class GeneralizedNormalEnergy implements EnergyGradient {
   val double alpha
@@ -17,4 +20,11 @@ class GeneralizedNormalEnergy implements EnergyGradient {
     }
     return ((alpha + 1.0) * (norm ** (alpha - 1.0)) * position).vectorToArray
   }
+  
+  override double valueAt(double[] point) {
+    val DenseMatrix position = denseCopy(point)
+    var double norm = position.norm
+    return (norm ** (alpha + 1.0))
+  }
+  
 }

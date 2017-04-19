@@ -11,7 +11,7 @@ public abstract class ContinuousStateDependent extends StateDependentBase
 {
   // we use a list here to fix an ordering for the vector representation
   protected final List<ContinuouslyEvolving> continuousCoordinates;
-  private final boolean isPiecewiseLinear;
+  protected final boolean isPiecewiseLinear;
   
   public ContinuousStateDependent(Collection<? extends Coordinate> requiredVariables)
   {

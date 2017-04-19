@@ -8,13 +8,12 @@ import java.util.Set;
 
 import bayonet.distributions.Bernoulli;
 import ca.ubc.bps.BPSPotential;
-import ca.ubc.bps.energies.EnergyGradient;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
 
-public class Superposition extends ContinuousStateDependent implements Clock, EnergyGradient
+public class Superposition extends ContinuousStateDependent implements Clock //, EnergyGradient
 {
   public final List<BPSPotential> potentials;
 
@@ -70,8 +69,8 @@ public class Superposition extends ContinuousStateDependent implements Clock, En
     return StandardIntensity.canonicalRate(velocity, gradient(position)) / denom;
   }
 
-  @Override
-  public double[] gradient(double[] point)
+//  @Override
+  private double[] gradient(double[] point)
   {
     double [] result = new double[point.length];
     
@@ -84,6 +83,15 @@ public class Superposition extends ContinuousStateDependent implements Clock, En
         
     return result;
   }
+
+//  @Override
+//  public double valueAt(double[] point)
+//  {
+//    double result = 0.0;
+//    for (BPSPotential potential : potentials)
+//      result += potential.energy.valueAt(point);
+//    return result;
+//  }
 
 
 }

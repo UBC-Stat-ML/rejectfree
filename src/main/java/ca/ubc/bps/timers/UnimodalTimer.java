@@ -11,8 +11,8 @@ import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
 
 /**
- * An adaptive thinning timer assuming that for a bounded time interval, the max of the 
- * two end-points bounds the function. This holds for example when the intensity function is 
+ * An adaptive thinning timer **assuming that for a bounded time interval, the max of the 
+ * two end-points bounds the function**. This holds for example when the intensity function is 
  * has a single global connected region of minimum intensity. 
  * @author bouchard
  *

@@ -3,6 +3,7 @@ package ca.ubc.bps.state;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.ubc.bps.state.MonitoredMutableDouble.ModCount;
 import ca.ubc.pdmp.Coordinate;
 
 public class ContinuouslyEvolving implements Coordinate
@@ -26,7 +27,18 @@ public class ContinuouslyEvolving implements Coordinate
   
   public ContinuouslyEvolving(Dynamics dynamics, Object key)
   {
-    this(new MutableDoubleImplementation(), new MutableDoubleImplementation(), dynamics, key);
+    this(dynamics, key, null);
+  }
+  
+  public ContinuouslyEvolving(Dynamics dynamics, Object key, ModCount modCount)
+  {
+    this(
+        modCount == null ? 
+            new SimpleMutableDouble() : 
+            new MonitoredMutableDouble(modCount), 
+        new SimpleMutableDouble(), 
+        dynamics, 
+        key);
   }
 
   @Override
@@ -42,9 +54,14 @@ public class ContinuouslyEvolving implements Coordinate
   
   public static List<ContinuouslyEvolving> buildArray(int size, Dynamics dynamics)
   {
+    return buildArray(size, dynamics, null);
+  }
+  
+  public static List<ContinuouslyEvolving> buildArray(int size, Dynamics dynamics, ModCount modCount)
+  {
     List<ContinuouslyEvolving> result = new ArrayList<>(size);
     for (int i = 0; i < size; i++)
-      result.add(new ContinuouslyEvolving(dynamics,i));
+      result.add(new ContinuouslyEvolving(dynamics,i, modCount));
     return result;
   }
   

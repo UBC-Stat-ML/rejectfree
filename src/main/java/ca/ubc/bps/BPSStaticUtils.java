@@ -3,6 +3,7 @@ package ca.ubc.bps;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 import com.google.common.collect.FluentIterable;
 
@@ -53,5 +54,10 @@ public class BPSStaticUtils
   public static boolean isSet(Collection<?> collection)
   {
     return collection.size() == new HashSet<>(collection).size();
+  }
+  
+  public static double sampleUnitRateExponential(Random random)
+  {
+    return - Math.log(random.nextDouble());
   }
 }

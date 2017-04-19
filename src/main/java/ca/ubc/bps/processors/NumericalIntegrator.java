@@ -5,7 +5,7 @@ import org.apache.commons.math3.analysis.integration.RombergIntegrator;
 
 import ca.ubc.bps.state.Dynamics;
 import ca.ubc.bps.state.MutableDouble;
-import ca.ubc.bps.state.MutableDoubleImplementation;
+import ca.ubc.bps.state.SimpleMutableDouble;
 
 public class NumericalIntegrator implements SegmentIntegrator
 {
@@ -13,8 +13,8 @@ public class NumericalIntegrator implements SegmentIntegrator
   private final UnivariateFunction testFunction;
   private Dynamics dynamics = null;
   private final MutableDouble 
-    dummyPosition = new MutableDoubleImplementation(),
-    dummyVelocity = new MutableDoubleImplementation();
+    dummyPosition = new SimpleMutableDouble(),
+    dummyVelocity = new SimpleMutableDouble();
   
   public NumericalIntegrator(UnivariateFunction testFunction)
   {

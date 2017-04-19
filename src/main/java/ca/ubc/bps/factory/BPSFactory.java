@@ -213,7 +213,10 @@ public class BPSFactory extends Experiment
         BriefIO.write(results.getFileInResultFolder(ESS_FILE_NAME), result);
       }
       writeFinalSamples();
-      BriefIO.write(results.getFileInResultFolder(RUNNING_TIME_SUMMARY), simulator.summaryStatistics());
+      BriefIO.write(results.getFileInResultFolder(RUNNING_TIME_SUMMARY), 
+          simulator.summaryStatistics() + 
+          "nUpdatedVariables\t" + modelContext.modCount.count + "\n"
+          );
     }
     
     private void writeFinalSamples()

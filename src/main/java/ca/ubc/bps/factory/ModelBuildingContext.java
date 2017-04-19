@@ -13,6 +13,7 @@ import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.bounces.BounceFactory;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.Dynamics;
+import ca.ubc.bps.state.MonitoredMutableDouble.ModCount;
 import ca.ubc.bps.state.PiecewiseConstant;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.JumpKernel;
@@ -25,6 +26,7 @@ public class ModelBuildingContext
   public List<ContinuouslyEvolving> continuouslyEvolvingStates = null;
   Set<ContinuouslyEvolving> setOfVariables = null;
   LinkedHashSet<PiecewiseConstant<?>> piecewiseConstantStates = new LinkedHashSet<>();
+  public ModCount modCount = new ModCount();
   
   private final Dynamics dynamics;
   private final BounceFactory bounce;
@@ -43,7 +45,7 @@ public class ModelBuildingContext
   {
     if (continuouslyEvolvingStates != null)
       throw new RuntimeException();
-    continuouslyEvolvingStates = ContinuouslyEvolving.buildArray(dim, dynamics);
+    continuouslyEvolvingStates = ContinuouslyEvolving.buildArray(dim, dynamics, modCount);
     setOfVariables = new HashSet<>(continuouslyEvolvingStates);
     return continuouslyEvolvingStates;
   }

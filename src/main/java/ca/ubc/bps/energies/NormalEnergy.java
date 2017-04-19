@@ -24,4 +24,11 @@ public class NormalEnergy implements EnergyGradient
     return vectorToArray(precision.mul(position));
   }
 
+  @Override
+  public double valueAt(double[] point)
+  {
+    DenseMatrix position = denseCopy(point); 
+    return 0.5 * position.transpose().mul(precision).mul(position).get(0);
+  }
+
 }
