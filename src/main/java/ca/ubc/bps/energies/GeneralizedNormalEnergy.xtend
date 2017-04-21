@@ -10,7 +10,7 @@ import static extension xlinear.MatrixExtensions.*
  * target proportional to exp( - ||x||^{alpha + 1} )
  */
 @Data
-class GeneralizedNormalEnergy implements EnergyGradient {
+class GeneralizedNormalEnergy implements Energy {
   val double alpha
   override double[] gradient(double[] point) {
     val DenseMatrix position = denseCopy(point)

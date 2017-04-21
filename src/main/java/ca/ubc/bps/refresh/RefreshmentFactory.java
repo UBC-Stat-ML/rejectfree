@@ -15,7 +15,7 @@ import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.HomogeneousPP;
 import ca.ubc.bps.timers.Intensity;
-import ca.ubc.bps.timers.UnimodalTimer;
+import ca.ubc.bps.timers.ConstantIntensityAdaptiveThinning;
 import ca.ubc.pdmp.JumpProcess;
 import ca.ubc.pdmp.PDMP;
 
@@ -95,7 +95,7 @@ public interface RefreshmentFactory
           
       pdmp.jumpProcesses.add(
           new JumpProcess(
-              new UnimodalTimer( 
+              new ConstantIntensityAdaptiveThinning( 
                   continuousCoordinates, 
                   normPotential()),               
               new IndependentRefreshment(continuousCoordinates, normalized)));

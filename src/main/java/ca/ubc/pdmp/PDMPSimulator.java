@@ -98,7 +98,8 @@ public class PDMPSimulator
   private long                 startTimeMilliSeconds;
   private double               totalProcessTime;
   
-  private double               maxTrajectoryLengthPerChunk = 10_000;
+  private double               maxTrajectoryLengthPerChunk = DEFAULT_CHUNK_LENGTH;
+  
   private boolean              printSummaryStatistics = true;
   
   private void init()
@@ -434,8 +435,12 @@ public class PDMPSimulator
 
   public void setMaxTrajectoryLengthPerChunk(double maxTrajectoryLengthPerChunk)
   {
+    USING_DEFAULT_CHUNK_LENGTH = false;
     this.maxTrajectoryLengthPerChunk = maxTrajectoryLengthPerChunk;
   }
+  
+  static double                DEFAULT_CHUNK_LENGTH = 10_000;
+  static boolean               USING_DEFAULT_CHUNK_LENGTH = true;
 
   public long getNumberOfQueuePolls()
   {

@@ -8,7 +8,7 @@ import xlinear.DenseMatrix;
 
 import static xlinear.MatrixExtensions.*;
 
-public class NormalEnergy implements EnergyGradient
+public class NormalEnergy implements Energy
 {
   final Matrix precision;
   

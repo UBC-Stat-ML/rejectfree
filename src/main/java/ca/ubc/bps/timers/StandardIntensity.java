@@ -1,14 +1,14 @@
 package ca.ubc.bps.timers;
 
 import ca.ubc.bps.BPSStaticUtils;
-import ca.ubc.bps.energies.EnergyGradient;
+import ca.ubc.bps.energies.Energy;
 import ca.ubc.bps.state.ContinuousStateDependent;
 
 public class StandardIntensity implements Intensity
 {
-  private final EnergyGradient gradient;
+  private final Energy gradient;
   
-  public StandardIntensity(EnergyGradient gradient)
+  public StandardIntensity(Energy gradient)
   {
     this.gradient = gradient;
   }

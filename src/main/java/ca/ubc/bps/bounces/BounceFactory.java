@@ -5,7 +5,7 @@ import java.util.List;
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
 import blang.inits.Implementations;
-import ca.ubc.bps.energies.EnergyGradient;
+import ca.ubc.bps.energies.Energy;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.pdmp.JumpKernel;
 import ca.ubc.bps.bounces.BounceFactory.*;
@@ -14,12 +14,12 @@ import ca.ubc.bps.bounces.BounceFactory.*;
 @FunctionalInterface
 public interface BounceFactory
 {
-  public JumpKernel build(List<ContinuouslyEvolving> variables, EnergyGradient energy);
+  public JumpKernel build(List<ContinuouslyEvolving> variables, Energy energy);
 
   public static class Standard implements BounceFactory
   {
     @Override
-    public JumpKernel build(List<ContinuouslyEvolving> variables, EnergyGradient energy)
+    public JumpKernel build(List<ContinuouslyEvolving> variables, Energy energy)
     {
       return new StandardBounce(variables, energy);
     }
@@ -28,7 +28,7 @@ public interface BounceFactory
   public static class Flip implements BounceFactory
   {
     @Override
-    public JumpKernel build(List<ContinuouslyEvolving> variables, EnergyGradient energy)
+    public JumpKernel build(List<ContinuouslyEvolving> variables, Energy energy)
     {
       return new FlipBounce(variables, energy);
     }
@@ -40,7 +40,7 @@ public interface BounceFactory
     public boolean ignoreIncomingAngle = false;
     
     @Override
-    public JumpKernel build(List<ContinuouslyEvolving> variables, EnergyGradient energy)
+    public JumpKernel build(List<ContinuouslyEvolving> variables, Energy energy)
     {
       return new RandomizedBounce(variables, energy, ignoreIncomingAngle);
     }

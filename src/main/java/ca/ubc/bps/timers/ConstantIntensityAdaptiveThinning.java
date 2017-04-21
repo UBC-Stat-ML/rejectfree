@@ -14,18 +14,22 @@ import ca.ubc.pdmp.DeltaTime;
  * An adaptive thinning timer **assuming that for a bounded time interval, the max of the 
  * two end-points bounds the function**. This holds for example when the intensity function is 
  * has a single global connected region of minimum intensity. 
+ * 
+ * These cases could often (always?) be solved using the more general NumericalUnimodalInversionTimer but 
+ * the present was found to be faster in the cases observed (see correctnessGeneralizedGaussian). 
+ * However there are cases where the present does not apply and the NumericalUnimodalInversionTimer solver 
+ * is needed (for example, generalized gaussians with alpha < 0).
+ * 
  * @author bouchard
  *
  */
-public class UnimodalTimer extends ContinuousStateDependent implements Clock
+public class ConstantIntensityAdaptiveThinning extends ContinuousStateDependent implements Clock
 {
-  // Jitter is used to avoid having several event with exact same time in the queue
-  private static final Random jitterRandom = new Random(1);
-  
-  private double currentInitialStepSize = INITIAL_STEP + jitterRandom.nextDouble();
+  private Random jitter = jitterProvider.get();
+  private double currentInitialStepSize = INITIAL_STEP + jitter.nextDouble();
   private Intensity intensity;
   
-  public UnimodalTimer(Collection<? extends Coordinate> requiredVariables, Intensity intensity)
+  public ConstantIntensityAdaptiveThinning(Collection<? extends Coordinate> requiredVariables, Intensity intensity)
   {
     super(requiredVariables);
     this.intensity = intensity;
@@ -95,7 +99,7 @@ public class UnimodalTimer extends ContinuousStateDependent implements Clock
     {
       this.currentPotential = currentPotential;
       this.stepSize = stepSize;
-      this.rate = Math.max(currentPotential, intensity.evaluate(UnimodalTimer.this, stepSize));
+      this.rate = Math.max(currentPotential, intensity.evaluate(ConstantIntensityAdaptiveThinning.this, stepSize));
       this.expectedNPoints = rate * stepSize;
     }
     private Bound shrink()
@@ -116,4 +120,9 @@ public class UnimodalTimer extends ContinuousStateDependent implements Clock
   private static final int MAX_INTER = 5;
   
   private static final int SHRINK_GROW_FACTOR = 2;
+  
+  private static ThreadLocal<Random> jitterProvider = new ThreadLocal<Random>() 
+  {
+    @Override protected Random initialValue() { return new Random(33844); }
+  };
 }
