@@ -63,7 +63,7 @@ public HyperbolicJacobianTimer(ContinuouslyEvolving variable)
     final double e = BPSStaticUtils.sampleUnitRateExponential(random);
     if (abs(h) > e)
       return DeltaTime.infinity();
-    return DeltaTime.isEqualTo( ( exp((h + e)/2.0) + 1 - abs(b) ) / v);
+    return DeltaTime.isEqualTo( ( exp((h + e)/2.0) + 1 - abs(b) ) / abs(v));
   }
 
   @Override

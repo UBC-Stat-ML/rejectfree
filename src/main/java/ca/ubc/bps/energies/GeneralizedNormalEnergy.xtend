@@ -22,6 +22,9 @@ class GeneralizedNormalEnergy implements Energy {
   }
   
   override double valueAt(double[] point) {
+    if (EnergyUtils::isOutOfBound(point)) {
+      return Double.POSITIVE_INFINITY;
+    }
     val DenseMatrix position = denseCopy(point)
     var double norm = position.norm
     return (norm ** (alpha + 1.0))

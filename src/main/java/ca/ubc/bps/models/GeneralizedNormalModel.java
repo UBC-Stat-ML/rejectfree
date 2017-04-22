@@ -1,5 +1,6 @@
 package ca.ubc.bps.models;
 
+import java.util.Arrays;
 import java.util.List;
 
 import blang.inits.Arg;
@@ -13,6 +14,8 @@ import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.bps.timers.NumericalUnimodalInversionTimer;
 import ca.ubc.bps.timers.NumericalUnimodalInversionTimer.Optimizer;
 import ca.ubc.bps.timers.StandardIntensity;
+import ca.ubc.bps.timers.BruteForceTimer;
+import ca.ubc.bps.timers.CompareTimers;
 import ca.ubc.bps.timers.ConstantIntensityAdaptiveThinning;
 import ca.ubc.bps.timers.HyperbolicJacobianTimer;
 import ca.ubc.pdmp.Clock;
@@ -53,8 +56,11 @@ public class GeneralizedNormalModel implements Model
     } 
     else if (context.dynamics() instanceof Hyperbolic)
     {
-      Clock timer = new NumericalUnimodalInversionTimer(vars, energy, optimizer);
+      Clock timer0 = new BruteForceTimer(vars, 1e-5, energy);
+      Clock timer1 = new NumericalUnimodalInversionTimer(vars, energy, optimizer);
+      Clock timer = new CompareTimers(Arrays.asList(timer0, timer1), 1e-4);
       context.registerBPSPotential(new BPSPotential(energy, timer));
+      System.out.println("WARNING!!!!!!!");
       HyperbolicJacobianTimer.addLocal(context);
     } 
     else

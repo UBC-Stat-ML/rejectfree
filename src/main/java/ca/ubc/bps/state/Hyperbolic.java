@@ -3,18 +3,12 @@ package ca.ubc.bps.state;
 public class Hyperbolic implements Dynamics
 {
   @Override
-  public void extrapolateInPlace(double deltaTime, MutableDouble position, MutableDouble velocity)
+  public void extrapolateInPlace(double deltaTime, MutableDouble _position, MutableDouble velocity)
   {
-    double updatedBd = toBdCoord(position.get()) + deltaTime * velocity.get();
-    if (updatedBd <= -1 || updatedBd >= 1)
-      throw new InvalidExtrapolationException();
-    position.set(toUnbCoord(updatedBd));
+    TransformedMutableDouble position = (TransformedMutableDouble) _position;
+    double updatedBd = position.getBounded() + deltaTime * velocity.get();
+    position.setBoundedCoordinate(updatedBd);
   } 
-  
-  public static class InvalidExtrapolationException extends RuntimeException
-  {
-    private static final long serialVersionUID = 1L;
-  }
     
   public static double toBdCoord(double unb)
   {
@@ -24,6 +18,8 @@ public class Hyperbolic implements Dynamics
   
   public static double toUnbCoord(double bd)
   {
+    if (bd <= -1.0 || bd >= 1.0)
+      return Double.NaN;
     final double abs = Math.abs(bd);
     return - Math.signum(bd) * abs / (abs - 1.0); 
   }

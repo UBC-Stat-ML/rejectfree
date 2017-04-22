@@ -17,7 +17,7 @@ public class ContinuouslyEvolving implements Coordinate
   
   public final Object key;
   
-  public ContinuouslyEvolving(MutableDouble position, MutableDouble velocity, Dynamics dynamics, Object key)
+  private ContinuouslyEvolving(MutableDouble position, MutableDouble velocity, Dynamics dynamics, Object key)
   {
     this.position = position;
     this.velocity = velocity;
@@ -33,12 +33,23 @@ public class ContinuouslyEvolving implements Coordinate
   public ContinuouslyEvolving(Dynamics dynamics, Object key, ModCount modCount)
   {
     this(
-        modCount == null ? 
-            new SimpleMutableDouble() : 
-            new MonitoredMutableDouble(modCount), 
+        position(modCount, dynamics), 
         new SimpleMutableDouble(), 
         dynamics, 
         key);
+  }
+  
+  private static MutableDouble position(ModCount modCount, Dynamics dynamics)
+  {
+    MutableDouble core = modCount == null ? 
+        new SimpleMutableDouble() : 
+        new MonitoredMutableDouble(modCount);
+    if (dynamics instanceof PiecewiseLinear)
+      return core;
+    else if (dynamics instanceof Hyperbolic)
+      return TransformedMutableDouble.hyperbolicPosition(core);
+    else
+      throw new RuntimeException();
   }
 
   @Override
