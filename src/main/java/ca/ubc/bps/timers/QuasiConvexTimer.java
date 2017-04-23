@@ -143,7 +143,7 @@ public class QuasiConvexTimer extends ContinuousStateDependent implements Clock
       if (lineRestricted.derivativeAt(new double[]{0})[0] >= 0.0)
         return 0.0;
       
-      double minTime = new LBFGSMinimizer().minimize(lineRestricted, new double[]{0}, 1e-10)[0];
+      double minTime = new LBFGSMinimizer(100).minimize(lineRestricted, new double[]{0}, 1e-10)[0];
       double minValue = lineRestricted.value(minTime);
       double valuePlusDelta = lineRestricted.value(minTime + DELTA);
       if (valuePlusDelta < minValue) // this subcase is used for improper factor in the local algorithm

@@ -2,7 +2,6 @@ package ca.ubc.bps.models;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
@@ -15,6 +14,7 @@ import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.bps.timers.QuasiConvexTimer;
 import ca.ubc.bps.timers.QuasiConvexTimer.Optimizer;
 import ca.ubc.bps.timers.StandardIntensity;
+import ca.ubc.bps.timers.BruteForceTimer;
 import ca.ubc.bps.timers.CompareTimers;
 import ca.ubc.bps.timers.ConstantIntensityAdaptiveThinning;
 import ca.ubc.bps.timers.HyperbolicJacobianTimer;
@@ -34,8 +34,8 @@ public class GeneralizedNormalModel implements Model
   @Arg                               @DefaultValue("BRENT")
   public Optimizer quasiConvexOptimizer = Optimizer.BRENT;
   
-  @Arg
-  public Optional<Optimizer> testAgainstOtherOptimizer = Optional.empty();
+  @Arg                   @DefaultValue("false")
+  public boolean testAgainsBruteForce = false;
 
   @Override
   public void setup(ModelBuildingContext context, boolean initializeStatesFromStationary)
@@ -60,10 +60,10 @@ public class GeneralizedNormalModel implements Model
     else if (context.dynamics() instanceof Hyperbolic)
     {
       Clock timer = new QuasiConvexTimer(vars, energy, quasiConvexOptimizer);
-      if (testAgainstOtherOptimizer.isPresent())
+      if (testAgainsBruteForce)
         timer = new CompareTimers(
             Arrays.asList(
-                new QuasiConvexTimer(vars, energy, testAgainstOtherOptimizer.get()), 
+                new BruteForceTimer(vars, 1e-4, energy), 
                 timer), 
             1e-4);
       context.registerBPSPotential(new BPSPotential(energy, timer));
