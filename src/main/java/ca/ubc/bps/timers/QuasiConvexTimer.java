@@ -1,6 +1,5 @@
 package ca.ubc.bps.timers;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 
@@ -19,7 +18,6 @@ import bayonet.opt.LBFGSMinimizer;
 import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.energies.Energy;
 import ca.ubc.bps.state.ContinuousStateDependent;
-import ca.ubc.bps.state.TransformedMutableDouble;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
@@ -29,13 +27,12 @@ import ca.ubc.pdmp.DeltaTime;
  * (1) strictly increasing
  * (2) strictly decreasing until a unique minimum is reached, after which the potential is monotone increasing.
  * 
- * This is guaranteed to hold for example if U(x) is strictly convex and the trajectories 
- * are linear. This may also apply in certain non-convex cases too, e.g. quasi convex functions.
+ * This is guaranteed to hold for example if U(x) is a quasi convex functions.
  * 
  * @author bouchard
  *
  */
-public class NumericalUnimodalInversionTimer extends ContinuousStateDependent implements Clock
+public class QuasiConvexTimer extends ContinuousStateDependent implements Clock
 {
   private final PegasusSolver solver = new PegasusSolver();
   private final Energy energy;
@@ -45,15 +42,17 @@ public class NumericalUnimodalInversionTimer extends ContinuousStateDependent im
   { 
     LBFGS,  // Only if convex; requires slightly less variable updates, but overall a bit slower because of overhead
     BRENT,  
-    ROBUST_LINE_SEARCH
+    NAIVE_LINE_SEARCH
   }
   
-  public NumericalUnimodalInversionTimer(
+  public QuasiConvexTimer(
       Collection<? extends Coordinate> requiredVariables,
       Energy energy,
       Optimizer optimizer)
   {
     super(requiredVariables);
+    if (!BPSStaticUtils.isPiecewiseLinear(continuousCoordinates.get(0)) && optimizer == Optimizer.LBFGS)
+      throw new RuntimeException("Current derivative computations assume linear dynamics.");
     this.energy = energy;
     this.optimizer = optimizer;
   }
@@ -74,25 +73,9 @@ public class NumericalUnimodalInversionTimer extends ContinuousStateDependent im
     if (minTime == Double.POSITIVE_INFINITY)
       return DeltaTime.infinity();
     
-//    {
-//      System.err.println("--");
-//      LineMinimizationObjective lineRestricted = new LineMinimizationObjective();
-//      System.err.println("at " + minTime + " " + lineRestricted.value(minTime));
-//      System.err.println("at 0.23 " + lineRestricted.value(0.23));
-//    }
-//    {
-//      //
-//      double [] position = extrapolatePosition(0);
-//      System.out.println(Arrays.toString(position));
-//    }
-    
     final double initialEnergy = energy.valueAt(extrapolatePosition(minTime));
-    
     if (initialEnergy == Double.POSITIVE_INFINITY)
-    {
-      lineMinimize();
       throw new RuntimeException();
-    }
     
     final double exponential = BPSStaticUtils.sampleUnitRateExponential(random);
     final UnivariateFunction lineSolvingFunction = new UnivariateFunction() {
@@ -102,22 +85,11 @@ public class NumericalUnimodalInversionTimer extends ContinuousStateDependent im
         final double candidateEnergy = energy.valueAt(extrapolatePosition(time + minTime));
         final double delta = candidateEnergy - initialEnergy; 
         if (delta < - NumericalUtils.THRESHOLD)
-        {
-//          System.err.println("minTime:" + minTime);
-//          for (int i = 0; i < continuousCoordinates.size(); i++)
-//          {
-//            System.err.println("dim " + i);
-//            System.err.println("pos " + ((TransformedMutableDouble) (continuousCoordinates.get(i).position)).getBounded());
-//            System.err.println("unb " + continuousCoordinates.get(i).position.get());
-//            System.err.println("vel " + continuousCoordinates.get(i).velocity.get());
-//          }
           throw new RuntimeException(
             "Did not expect negative delta. " +
               "Delta=" + delta + ", " + 
               "time=" + time);
-        }
-        final double result =  exponential - delta;
-        return result;
+        return exponential - delta;
       }
     };
     double upperBound = findUpperBound2(lineSolvingFunction);
@@ -125,93 +97,7 @@ public class NumericalUnimodalInversionTimer extends ContinuousStateDependent im
       upperBound = shrinkUpperBound2(upperBound, lineSolvingFunction);
     
     double time2 = solver.solve(10_000, lineSolvingFunction, 0.0, upperBound);
-//    System.out.println("-=-=->" + Arrays.toString(extrapolatePosition(minTime + time2)));
     return DeltaTime.isEqualTo(minTime + time2);
-  }
-  
-  private static final int maxNIterations = Double.MAX_EXPONENT - 1;
-
-  private static double findUpperBound1(LineMinimizationObjective lineSolvingFunction)
-  {
-    double result = 2.0e-4;
-    for (int i = 0; i < maxNIterations; i++)
-    {
-      double value = lineSolvingFunction.value(result);
-      if (value == Double.POSITIVE_INFINITY || lineSolvingFunction.value(result + 1e-5) > value)
-        return result;
-      else
-        result *= 2.0;
-    }
-    return Double.NaN;
-  }
-  
-  private static double findUpperBound2(UnivariateFunction lineSolvingFunction)
-  {
-    double result = 2.0e-4;
-    for (int i = 0; i < maxNIterations; i++)
-    {
-      double value = lineSolvingFunction.value(result) ;
-      if (value < 0.0)
-        return result;
-      else
-        result *= 2.0;
-    }
-//    result = 2.0e-4;
-//    for (int i = 0; i < maxNIterations; i++)
-//    {
-//      double value = lineSolvingFunction.value(result) ;
-//      if (value < 0.0)
-//        return result;
-//      else
-//        result *= 2.0;
-//    }
-    throw new RuntimeException();
-  }
-  
-  private double shrinkUpperBound2(double upperBound, UnivariateFunction lineSolvingFunction)
-  {
-    double lowerBound = upperBound/2.0;
-    if (!Double.isFinite(lineSolvingFunction.value(lowerBound)) || lineSolvingFunction.value(lowerBound) < 0.0)
-      throw new RuntimeException();
-    // bisect b/w lowerBound and upperBound
-    for (int i = 0; i < maxNIterations; i++)
-    {
-      double middle = lowerBound + (upperBound - lowerBound) / 2.0;
-      boolean isFinite = Double.isFinite(lineSolvingFunction.value(middle));
-      boolean isPos    = lineSolvingFunction.value(middle) >= 0.0;
-      if (isFinite && !isPos)
-        return middle;
-      if (isFinite && isPos)
-        lowerBound = middle;
-      else if (!isFinite)
-        upperBound = middle;
-      else
-        throw new RuntimeException();
-    }
-    throw new RuntimeException();
-  }
-  
-  private double robustLineSearchForMin(double lowerBound, double upperBound, LineMinimizationObjective lineSolvingFunction)
-  {
-    for (int i = 0; i < maxNIterations; i++)
-    {
-      double middle = lowerBound + (upperBound - lowerBound) / 2.0;
-      double left  = lineSolvingFunction.value(middle - 1e-5);
-      double value = lineSolvingFunction.value(middle);
-      double right = lineSolvingFunction.value(middle + 1e-5);
-//      double derivative = lineSolvingFunction.derivativeAt(middle);
-      if (value == Double.POSITIVE_INFINITY)
-        upperBound = middle;
-      else if (value <= left && value <= right)
-        return middle;
-      else if (left >= value && value >= right)
-        lowerBound = middle;
-      else if (left <= value && value <= right)
-        upperBound = middle;
-      else
-        throw new RuntimeException("" + left + ' ' + value + ' ' + right);
-    }
-    throw new RuntimeException();
   }
   
   private class LineMinimizationObjective implements DifferentiableFunction, UnivariateFunction
@@ -238,18 +124,7 @@ public class NumericalUnimodalInversionTimer extends ContinuousStateDependent im
       double directionalDeriv = fullDerivative.dot(new DoubleMatrix(extrapolateVelocity(time)));
       return new double[]{directionalDeriv};
     }
-    
-    public double derivativeAt(double _time)
-    {
-      return derivativeAt(new double[]{_time})[0];
-    }
-    
-//    private final double FINITE_DIFF_DELTA = 1e-10;
-//    public double finDiffFwd(double time)
-//    {
-//      return (value(time + FINITE_DIFF_DELTA) - value(time)) / FINITE_DIFF_DELTA;
-//    }
-//
+
     @Override
     public double value(double time)
     {
@@ -269,7 +144,6 @@ public class NumericalUnimodalInversionTimer extends ContinuousStateDependent im
         return 0.0;
       
       double minTime = new LBFGSMinimizer().minimize(lineRestricted, new double[]{0}, 1e-10)[0];
-//      System.out.println("--> " + lineRestricted.derivativeAt(minTime));
       double minValue = lineRestricted.value(minTime);
       double valuePlusDelta = lineRestricted.value(minTime + DELTA);
       if (valuePlusDelta < minValue) // this subcase is used for improper factor in the local algorithm
@@ -279,25 +153,23 @@ public class NumericalUnimodalInversionTimer extends ContinuousStateDependent im
     }
     else if (optimizer == Optimizer.BRENT)
     {
-//      if (true)
-//        throw new RuntimeException();
+      if (lineRestricted.value(1e-5) > lineRestricted.value(0.0))
+        return 0.0;
       
       double upperBound = findUpperBound1(lineRestricted);
-      
       if (upperBound == Double.POSITIVE_INFINITY)
         return Double.POSITIVE_INFINITY;
-      BrentOptimizer optimizer = new BrentOptimizer(1e-15, 1e-15);
       
+      BrentOptimizer optimizer = new BrentOptimizer(1e-10, 1e-10);
       SearchInterval interval = new SearchInterval(0.0, upperBound, 0.0);
       final double result = optimizer.optimize(
           GoalType.MINIMIZE, 
           new UnivariateObjectiveFunction(lineRestricted), 
           interval, 
           new MaxEval(10_000)).getPoint();
-//      System.out.println("--> " + lineRestricted.derivativeAt(result));
       return result;
     }
-    else if (optimizer == Optimizer.ROBUST_LINE_SEARCH)
+    else if (optimizer == Optimizer.NAIVE_LINE_SEARCH)
     {
       if (lineRestricted.value(1e-5) > lineRestricted.value(0.0))
         return 0.0;
@@ -306,8 +178,7 @@ public class NumericalUnimodalInversionTimer extends ContinuousStateDependent im
       if (Double.isNaN(upperBound))
         return Double.POSITIVE_INFINITY;
       
-      double result = robustLineSearchForMin(0.0, upperBound, lineRestricted);
-//      System.out.println("--> " + lineRestricted.derivativeAt(result));
+      double result = naiveLineSearchForMin(0.0, upperBound, lineRestricted);
       return result;
     }
     else 
@@ -315,5 +186,83 @@ public class NumericalUnimodalInversionTimer extends ContinuousStateDependent im
   }
   
   private static final double DELTA = 1.0;
+  private static final int maxNIterations = Double.MAX_EXPONENT - 1;
 
+  private static double findUpperBound1(UnivariateFunction lineSolvingFunction)
+  {
+    double result = 2.0e-4;
+    for (int i = 0; i < maxNIterations; i++)
+    {
+      double value = lineSolvingFunction.value(result);
+      if (value == Double.POSITIVE_INFINITY || 
+          lineSolvingFunction.value(result + 1e-5) > value) // Not using derivative here to handle not linear dynamics
+        return result;
+      else
+        result *= 2.0;
+    }
+    return Double.NaN;
+  }
+  
+  private static double findUpperBound2(UnivariateFunction lineSolvingFunction)
+  {
+    double result = 2.0e-4;
+    for (int i = 0; i < maxNIterations; i++)
+    {
+      double value = lineSolvingFunction.value(result) ;
+      if (value < 0.0)
+        return result;
+      else
+        result *= 2.0;
+    }
+    throw new RuntimeException();
+  }
+  
+  /**
+   * If the bound went beyond the region where the function is finite, shrink the bound back to the region 
+   * where the function is finite and still guaranteed to contain the zero.
+   */
+  private static double shrinkUpperBound2(double upperBound, UnivariateFunction lineSolvingFunction)
+  {
+    double lowerBound = upperBound/2.0;
+    if (!Double.isFinite(lineSolvingFunction.value(lowerBound)) || lineSolvingFunction.value(lowerBound) < 0.0)
+      throw new RuntimeException();
+    // bisect b/w lowerBound and upperBound
+    for (int i = 0; i < maxNIterations; i++)
+    {
+      double middle = lowerBound + (upperBound - lowerBound) / 2.0;
+      boolean isFinite = Double.isFinite(lineSolvingFunction.value(middle));
+      boolean isPos    = lineSolvingFunction.value(middle) >= 0.0;
+      if (isFinite && !isPos)
+        return middle;
+      if (isFinite && isPos)
+        lowerBound = middle;
+      else if (!isFinite)
+        upperBound = middle;
+      else
+        throw new RuntimeException();
+    }
+    throw new RuntimeException();
+  }
+
+  private static double naiveLineSearchForMin(double lowerBound, double upperBound, LineMinimizationObjective lineSolvingFunction)
+  {
+    for (int i = 0; i < maxNIterations; i++)
+    {
+      double middle = lowerBound + (upperBound - lowerBound) / 2.0;
+      double left  = lineSolvingFunction.value(middle - 1e-5);
+      double value = lineSolvingFunction.value(middle);
+      double right = lineSolvingFunction.value(middle + 1e-5);
+      if (value == Double.POSITIVE_INFINITY)
+        upperBound = middle;
+      else if (value <= left && value <= right)
+        return middle;
+      else if (left >= value && value >= right)
+        lowerBound = middle;
+      else if (left <= value && value <= right)
+        upperBound = middle;
+      else
+        throw new RuntimeException("" + left + ' ' + value + ' ' + right);
+    }
+    throw new RuntimeException();
+  }
 }
