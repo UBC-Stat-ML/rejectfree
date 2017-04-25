@@ -85,10 +85,13 @@ public class QuasiConvexTimer extends ContinuousStateDependent implements Clock
         final double candidateEnergy = energy.valueAt(extrapolatePosition(time + minTime));
         final double delta = candidateEnergy - initialEnergy; 
         if (delta < - NumericalUtils.THRESHOLD)
-          throw new RuntimeException(
-            "Did not expect negative delta. " +
+        {
+          System.err.println(
+//          throw new RuntimeException(
+            "Did not expect negative delta. If the following values are small this could be just a numerical issue: " +
               "Delta=" + delta + ", " + 
               "time=" + time);
+        }
         return exponential - delta;
       }
     };
@@ -153,7 +156,7 @@ public class QuasiConvexTimer extends ContinuousStateDependent implements Clock
     }
     else if (optimizer == Optimizer.BRENT)
     {
-      if (lineRestricted.value(1e-5) > lineRestricted.value(0.0))
+      if (lineRestricted.value(1e-8) > lineRestricted.value(0.0) + 1e-14)
         return 0.0;
       
       double upperBound = findUpperBound1(lineRestricted);
@@ -206,6 +209,11 @@ public class QuasiConvexTimer extends ContinuousStateDependent implements Clock
   private static double findUpperBound2(UnivariateFunction lineSolvingFunction)
   {
     double result = 2.0e-4;
+    
+    // need to make sure the first step is ok
+    while (Double.isInfinite(lineSolvingFunction.value(result))) // b/c we use the modified objective
+      result /= 2.0;
+    
     for (int i = 0; i < maxNIterations; i++)
     {
       double value = lineSolvingFunction.value(result) ;
@@ -225,7 +233,7 @@ public class QuasiConvexTimer extends ContinuousStateDependent implements Clock
   {
     double lowerBound = upperBound/2.0;
     if (!Double.isFinite(lineSolvingFunction.value(lowerBound)) || lineSolvingFunction.value(lowerBound) < 0.0)
-      throw new RuntimeException();
+      throw new RuntimeException("" + lineSolvingFunction.value(lowerBound));
     // bisect b/w lowerBound and upperBound
     for (int i = 0; i < maxNIterations; i++)
     {
