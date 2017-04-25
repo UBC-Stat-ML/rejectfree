@@ -50,7 +50,7 @@ public class ConvertToGlobalProcessor
   public class GlobalProcessorContext
   {
     private double globalDelta;
-    private double interpolatedDelta;
+    private double interpolatedDelta = 0.0;
     public double getGlobalDelta()
     {
       return globalDelta;
@@ -61,7 +61,7 @@ public class ConvertToGlobalProcessor
     }
     public void interpolate(double delta)
     {
-      interpolatedDelta = delta;
+      interpolatedDelta += delta;
       if (interpolatedDelta < -tolerance || interpolatedDelta > globalDelta + tolerance)
         throw new RuntimeException("Invalid interpolation: " + delta + "");
       for (ContinuouslyEvolving var : allVariables)
@@ -87,6 +87,7 @@ public class ConvertToGlobalProcessor
       // move all the variables 
       for (ContinuouslyEvolving var : allVariables)
         var.extrapolateInPlace(context.globalDelta - context.interpolatedDelta);
+      context.interpolatedDelta = 0.0;
       
       // update the variables involved
       for (LabeledSegment alteredSegment : sortedSegments.get(globalTime))

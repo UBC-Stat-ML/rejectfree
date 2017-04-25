@@ -58,12 +58,12 @@ public HyperbolicJacobianTimer(ContinuouslyEvolving variable)
     final double b = Hyperbolic.toBdCoord(variable.position.get());
     final double v = variable.velocity.get();
     if (b * v >= 0.0)
-      return DeltaTime.infinity(); 
+      return DeltaTime.infinity(); // isEqualTo(((v >= 0 ? +1 : -1) - b) / v - 1e-5);
     final double h = 2.0 * log(1.0 - abs(b));
     final double e = BPSStaticUtils.sampleUnitRateExponential(random);
     if (e > abs(h))
-      return DeltaTime.infinity(); 
-    final double hPrime = h + e;
+      return DeltaTime.infinity(); // isEqualTo(((v >= 0 ? +1 : -1) - b) / v - 1e-5);
+    final double hPrime = h + e; 
     final double bPrimeAbs = 1.0 - exp(hPrime / 2.0);
     final double deltaXAbs = abs(b) - bPrimeAbs;
     final double result = deltaXAbs / abs(v);

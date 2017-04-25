@@ -130,7 +130,7 @@ public class PDMPSimulator
           inputStoppingRule.numberOfQueuePolls
           );
       simulateChunk();
-      totalProcessTime += processIncrementTime;
+      totalProcessTime += time;
       
       if (!computeBudgetPositive())
         break loop;
@@ -146,7 +146,8 @@ public class PDMPSimulator
     for (int jumpProcessIndex = 0; jumpProcessIndex < pdmp.jumpProcesses.size(); jumpProcessIndex++)
       simulateNextEventDeltaTime(jumpProcessIndex);
     
-    while (computeBudgetPositive() && !queue.isEmpty())
+    boolean computeBudgetPositive;
+    while ((computeBudgetPositive = computeBudgetPositive()) && !queue.isEmpty())
     {
       // retrieve info about event
       final Entry<Double, Integer> event = queue.pollEvent();
@@ -181,8 +182,9 @@ public class PDMPSimulator
         rollBack(nd_Nd_nk_plus_nd_minus_nk[eventJumpProcessIndex]);
       }
     }
-    // final update on all variables
-    time = this.stoppingRule.stochasticProcessTime;
+    if (computeBudgetPositive)
+      time = this.stoppingRule.stochasticProcessTime;
+    // final update on all variables 
     updateAllVariables(true, -1); 
   }
   
