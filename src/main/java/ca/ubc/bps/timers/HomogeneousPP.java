@@ -21,8 +21,7 @@ public class HomogeneousPP implements Clock
   @Override
   public DeltaTime next(Random random)
   {
-    double time = BPSStaticUtils.sampleUnitRateExponential(random) / rate;
-    return DeltaTime.isEqualTo(time);
+    return DeltaTime.isEqualTo(BPSStaticUtils.sampleExponential(random, rate));
   }
 
   @Override

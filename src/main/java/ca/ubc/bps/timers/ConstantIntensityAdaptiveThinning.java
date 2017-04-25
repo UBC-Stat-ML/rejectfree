@@ -3,8 +3,7 @@ package ca.ubc.bps.timers;
 import java.util.Collection;
 import java.util.Random;
 
-import bayonet.distributions.Bernoulli;
-import bayonet.distributions.Exponential;
+import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
@@ -50,11 +49,11 @@ public class ConstantIntensityAdaptiveThinning extends ContinuousStateDependent 
     final double stepSize = bound.stepSize;
     if (boundRate == 0.0)
       return DeltaTime.isGreaterThan(stepSize);
-    double sample = Exponential.generate(random, boundRate);
+    double sample = BPSStaticUtils.sampleExponential(random, boundRate);
     if (sample > stepSize)
       return DeltaTime.isGreaterThan(stepSize);
     double ratio = intensity.evaluate(this, sample) / boundRate;
-    if (Bernoulli.generate(random, ratio))
+    if (BPSStaticUtils.sampleBernoulli(random, ratio))
       return DeltaTime.isEqualTo(sample);
     else
       return DeltaTime.isGreaterThan(sample);

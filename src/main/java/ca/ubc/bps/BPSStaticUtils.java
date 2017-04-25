@@ -60,4 +60,14 @@ public class BPSStaticUtils
   {
     return - Math.log(random.nextDouble());
   }
+  
+  public static double sampleExponential(Random random, double rate)
+  {
+    return sampleUnitRateExponential(random) / rate;
+  }
+  
+  public static boolean sampleBernoulli(Random random, double probabilityToBeTrue)
+  {
+    return random.nextDouble() < probabilityToBeTrue;
+  }
 }
