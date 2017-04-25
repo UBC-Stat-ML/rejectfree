@@ -44,7 +44,7 @@ public class ContinuouslyEvolving implements Coordinate
     MutableDouble core = modCount == null ? 
         new SimpleMutableDouble() : 
         new MonitoredMutableDouble(modCount);
-    if (dynamics instanceof PiecewiseLinear)
+    if (dynamics == null || dynamics instanceof PiecewiseLinear)
       return core;
     else if (dynamics instanceof Hyperbolic)
       return TransformedMutableDouble.hyperbolicPosition(core);
