@@ -6,7 +6,9 @@ import java.util.List;
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
 import ca.ubc.bps.BPSPotential;
+import ca.ubc.bps.energies.EnergyComposedWithHyperbolic;
 import ca.ubc.bps.energies.GeneralizedNormalEnergy;
+import ca.ubc.bps.energies.HyperbolicJacobianEnergy;
 import ca.ubc.bps.factory.ModelBuildingContext;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.Hyperbolic;
@@ -35,7 +37,7 @@ public class GeneralizedNormalModel implements Model
   public Optimizer quasiConvexOptimizer = Optimizer.BRENT;
   
   @Arg                   @DefaultValue("false")
-  public boolean testAgainsBruteForce = false;
+  public boolean testAgainstBruteForce = false;
 
   @Override
   public void setup(ModelBuildingContext context, boolean initializeStatesFromStationary)
@@ -60,17 +62,16 @@ public class GeneralizedNormalModel implements Model
     else if (context.dynamics() instanceof Hyperbolic)
     {
       Clock timer = new QuasiConvexTimer(vars, energy, quasiConvexOptimizer);
-      if (testAgainsBruteForce)
+      if (testAgainstBruteForce)
         timer = new CompareTimers(
             Arrays.asList(
-                new BruteForceTimer(vars, 1e-4, energy), 
+                new BruteForceTimer(vars, 1e-5, energy), 
                 timer), 
             1e-4);
-      context.registerBPSPotential(new BPSPotential(energy, timer));
-      HyperbolicJacobianTimer.addLocal(context);
+      context.registerBPSPotential(new BPSPotential(new EnergyComposedWithHyperbolic(energy), timer));
+      HyperbolicJacobianTimer.addLocal(context, testAgainstBruteForce);
     } 
     else
       throw new RuntimeException();
   }
-
 }

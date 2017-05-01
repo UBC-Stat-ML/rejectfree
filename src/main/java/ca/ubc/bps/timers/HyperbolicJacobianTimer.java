@@ -4,12 +4,14 @@ import static java.lang.Math.abs;
 import static java.lang.Math.exp;
 import static java.lang.Math.log;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Random;
 
 import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.BPSStaticUtils;
+import ca.ubc.bps.energies.Energy;
 import ca.ubc.bps.energies.HyperbolicJacobianEnergy;
 import ca.ubc.bps.factory.ModelBuildingContext;
 import ca.ubc.bps.state.ContinuouslyEvolving;
@@ -29,28 +31,25 @@ public HyperbolicJacobianTimer(ContinuouslyEvolving variable)
     this.variable = variable;
   }
   
-  public static void addLocal(ModelBuildingContext context)
+  public static void addLocal(ModelBuildingContext context, boolean testAgainstBruteForce)
   {
+    
     for (ContinuouslyEvolving var : context.continuouslyEvolvingStates)
+    {
+      Energy energy = new HyperbolicJacobianEnergy();
+      Clock timer = new HyperbolicJacobianTimer(var);
+      if (testAgainstBruteForce)
+        timer = new CompareTimers(
+            Arrays.asList(
+                new BruteForceTimer(Collections.singleton(var), 1e-5, energy), 
+                timer), 
+            1e-4);
       context.registerBPSPotential(
           new BPSPotential(
-              new HyperbolicJacobianEnergy(), 
-              new HyperbolicJacobianTimer(var)));
+              energy, 
+              timer));
+    }
   }
-  
-//  public static void addGlobal(ModelBuildingContext context)
-//  {
-//    START WITH LOCAL!
-//    
-//    // First, prepare a superposition clock
-//    List<BPSPotential> potentials = new ArrayList<>();
-//    for (ContinuouslyEvolving var : context.continuouslyEvolvingStates)
-//      potentials.add(new BPSPotential(energy, new HyperbolicJacobianTimer(var)))
-//      
-//      
-//    StandardBounce bounce = new StandardBounce(context.continuouslyEvolvingStates, new HyperbolicJacobianEnergy());
-//    Superposition superposition = new Superposition(potentials)
-//  }
 
   @Override
   public DeltaTime next(Random random)

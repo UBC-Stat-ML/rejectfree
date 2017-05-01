@@ -34,6 +34,8 @@ public class BruteForceTimer extends ContinuousStateDependent implements Clock
     {
       t += delta;
       double curHeight = eval(t);
+      if (Double.isNaN(curHeight))
+        return DeltaTime.infinity();
       if (curHeight >= prevHeight)
       {
         if (accumulated + (curHeight - refHeight) >= e)
