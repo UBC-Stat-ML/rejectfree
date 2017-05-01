@@ -30,7 +30,7 @@ public interface BounceFactory
     @Override
     public JumpKernel build(List<ContinuouslyEvolving> variables, Energy energy)
     {
-      return new FlipBounce(variables, energy);
+      return new FlipBounce(variables);
     }
   }
   

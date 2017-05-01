@@ -4,21 +4,20 @@ import static java.lang.Math.abs;
 import static java.lang.Math.exp;
 import static java.lang.Math.log;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Random;
 
-import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.BPSStaticUtils;
-import ca.ubc.bps.energies.Energy;
-import ca.ubc.bps.energies.HyperbolicJacobianEnergy;
+import ca.ubc.bps.bounces.FlipBounce;
 import ca.ubc.bps.factory.ModelBuildingContext;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.Hyperbolic;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
+import ca.ubc.pdmp.JumpKernel;
+import ca.ubc.pdmp.JumpProcess;
 
 public class HyperbolicJacobianTimer implements Clock
 {
@@ -31,23 +30,14 @@ public HyperbolicJacobianTimer(ContinuouslyEvolving variable)
     this.variable = variable;
   }
   
-  public static void addLocal(ModelBuildingContext context, boolean testAgainstBruteForce)
+  public static void addLocal(ModelBuildingContext context)
   {
-    
     for (ContinuouslyEvolving var : context.continuouslyEvolvingStates)
     {
-      Energy energy = new HyperbolicJacobianEnergy();
       Clock timer = new HyperbolicJacobianTimer(var);
-      if (testAgainstBruteForce)
-        timer = new CompareTimers(
-            Arrays.asList(
-                new BruteForceTimer(Collections.singleton(var), 1e-5, energy), 
-                timer), 
-            1e-4);
-      context.registerBPSPotential(
-          new BPSPotential(
-              energy, 
-              timer));
+      JumpKernel kernel = new FlipBounce(Collections.singletonList(var));
+      JumpProcess process = new JumpProcess(timer, kernel);
+      context.registerJumpProcess(process);
     }
   }
 

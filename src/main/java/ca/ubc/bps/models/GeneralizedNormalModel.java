@@ -8,7 +8,6 @@ import blang.inits.DefaultValue;
 import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.energies.EnergyComposedWithHyperbolic;
 import ca.ubc.bps.energies.GeneralizedNormalEnergy;
-import ca.ubc.bps.energies.HyperbolicJacobianEnergy;
 import ca.ubc.bps.factory.ModelBuildingContext;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.Hyperbolic;
@@ -69,7 +68,7 @@ public class GeneralizedNormalModel implements Model
                 timer), 
             1e-4);
       context.registerBPSPotential(new BPSPotential(new EnergyComposedWithHyperbolic(energy), timer));
-      HyperbolicJacobianTimer.addLocal(context, testAgainstBruteForce);
+      HyperbolicJacobianTimer.addLocal(context);
     } 
     else
       throw new RuntimeException();
