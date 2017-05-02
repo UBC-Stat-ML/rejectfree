@@ -9,10 +9,13 @@ public class DiagonalPrecision implements PrecisionBuilder
 {
   @Arg @DefaultValue("2")
   public int size = 2;
+  
+  @Arg               @DefaultValue("1.0")
+  public double diagonalPrecision = 1.0;
 
   @Override
   public Matrix build()
   {
-    return MatrixOperations.identity(size);
+    return MatrixOperations.identity(size).mul(diagonalPrecision); 
   }
 }

@@ -20,6 +20,7 @@ import ca.ubc.bps.timers.CompareTimers;
 import ca.ubc.bps.timers.ConstantIntensityAdaptiveThinning;
 import ca.ubc.bps.timers.HyperbolicJacobianTimer;
 import ca.ubc.pdmp.Clock;
+import xlinear.Matrix;
 
 public class GeneralizedNormalModel implements Model
 {
@@ -52,11 +53,23 @@ public class GeneralizedNormalModel implements Model
     
     if (context.dynamics() instanceof PiecewiseLinear)
     {
-      Clock timer = 
-          alpha < 1.0 || forceQuasiConvexSolver ? 
-            new QuasiConvexTimer(vars, energy, quasiConvexOptimizer) :
-            new ConstantIntensityAdaptiveThinning(vars, new StandardIntensity(energy));
-      context.registerBPSPotential(new BPSPotential(energy, timer));
+      if (alpha == 1.0) 
+      {
+        // special case: normal
+        DiagonalPrecision dp = new DiagonalPrecision();
+        dp.size = size;
+        dp.diagonalPrecision = 2.0;
+        Matrix precisionMatrix = dp.build();
+        context.registerBPSPotential(FixedPrecisionNormalModel.potential(precisionMatrix, vars));
+      }
+      else 
+      {
+        Clock timer = 
+            alpha < 1.0 || forceQuasiConvexSolver ? 
+              new QuasiConvexTimer(vars, energy, quasiConvexOptimizer) :
+              new ConstantIntensityAdaptiveThinning(vars, new StandardIntensity(energy));
+        context.registerBPSPotential(new BPSPotential(energy, timer));
+      }
     } 
     else if (context.dynamics() instanceof Hyperbolic)
     {
