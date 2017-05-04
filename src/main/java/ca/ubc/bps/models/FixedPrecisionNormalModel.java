@@ -10,6 +10,7 @@ import ca.ubc.bps.energies.NormalEnergy;
 import ca.ubc.bps.factory.ModelBuildingContext;
 import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.bps.timers.NormalClock;
 import xlinear.DenseMatrix;
 import xlinear.Matrix;
@@ -20,15 +21,20 @@ import xlinear.StaticUtils;
 
 public class FixedPrecisionNormalModel implements Model
 {
-  @Arg @DefaultValue("DiagonalPrecision")
+  @Arg                     @DefaultValue("DiagonalPrecision")
   public PrecisionBuilder precision = new DiagonalPrecision();
   
-  @Arg @DefaultValue("true")
+  @Arg       @DefaultValue("true")
   public boolean useLocal = true;
+  
+  @Arg                       @DefaultValue("none")
+  public Likelihood likelihood = Likelihood.none;
   
   @Override
   public void setup(ModelBuildingContext context, boolean initializeToStationary)
   {
+    if (!(context.dynamics() instanceof PiecewiseLinear))
+      throw new RuntimeException();
     Matrix precisionMatrix = precision.build();
     List<ContinuouslyEvolving> vars = context.buildAndRegisterContinuouslyEvolvingStates(precisionMatrix.nCols());
     if (initializeToStationary)
@@ -37,6 +43,7 @@ public class FixedPrecisionNormalModel implements Model
       setupLocal(context, precisionMatrix, vars);
     else
       context.registerBPSPotential(potential(precisionMatrix, vars));
+    likelihood.setup(context, vars); 
   }
   
   private static void initializeToStationary(List<ContinuouslyEvolving> vars, Matrix precisionMatrix, Random random)

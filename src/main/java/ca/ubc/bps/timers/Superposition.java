@@ -6,18 +6,25 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import bayonet.distributions.Bernoulli;
 import ca.ubc.bps.BPSPotential;
+import ca.ubc.bps.BPSStaticUtils;
+import ca.ubc.bps.energies.Energy;
 import ca.ubc.bps.state.ContinuousStateDependent;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
 
-public class Superposition extends ContinuousStateDependent implements Clock //, EnergyGradient
+public class Superposition extends ContinuousStateDependent implements Clock, Energy
 {
   public final List<BPSPotential> potentials;
+  
+  public static BPSPotential createSuperpositionBPSPotential(List<BPSPotential> potentials)
+  {
+    Superposition superposition = new Superposition(potentials);
+    return new BPSPotential(superposition, superposition);
+  }
 
-  public Superposition(List<BPSPotential> potentials)
+  private Superposition(List<BPSPotential> potentials)
   {
     super(unionOfRequiredVariables(potentials));
     if (potentials.isEmpty())
@@ -52,7 +59,7 @@ public class Superposition extends ContinuousStateDependent implements Clock //,
     if (isMinBound)
       return DeltaTime.isGreaterThan(min);
     
-    if (Bernoulli.generate(random, acceptanceRate(min)))
+    if (BPSStaticUtils.sampleBernoulli(random, acceptanceRate(min)))
       return DeltaTime.isEqualTo(min);
     else
       return DeltaTime.isGreaterThan(min);
@@ -69,8 +76,8 @@ public class Superposition extends ContinuousStateDependent implements Clock //,
     return StandardIntensity.canonicalRate(velocity, gradient(position)) / denom;
   }
 
-//  @Override
-  private double[] gradient(double[] point)
+  @Override
+  public double[] gradient(double[] point)
   {
     double [] result = new double[point.length];
     
@@ -84,14 +91,12 @@ public class Superposition extends ContinuousStateDependent implements Clock //,
     return result;
   }
 
-//  @Override
-//  public double valueAt(double[] point)
-//  {
-//    double result = 0.0;
-//    for (BPSPotential potential : potentials)
-//      result += potential.energy.valueAt(point);
-//    return result;
-//  }
-
-
+  @Override
+  public double valueAt(double[] point)
+  {
+    double result = 0.0;
+    for (BPSPotential potential : potentials)
+      result += potential.energy.valueAt(point);
+    return result;
+  }
 }

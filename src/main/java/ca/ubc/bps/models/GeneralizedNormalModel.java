@@ -38,6 +38,9 @@ public class GeneralizedNormalModel implements Model
   
   @Arg                   @DefaultValue("false")
   public boolean testAgainstBruteForce = false;
+  
+  @Arg                       @DefaultValue("none")
+  public Likelihood likelihood = Likelihood.none;
 
   @Override
   public void setup(ModelBuildingContext context, boolean initializeStatesFromStationary)
@@ -49,8 +52,8 @@ public class GeneralizedNormalModel implements Model
     if (initializeStatesFromStationary)
       throw new RuntimeException("Not yet supported");
     List<ContinuouslyEvolving> vars = context.buildAndRegisterContinuouslyEvolvingStates(size);
+    likelihood.setup(context, vars);
     GeneralizedNormalEnergy energy = new GeneralizedNormalEnergy(alpha);
-    
     if (context.dynamics() instanceof PiecewiseLinear)
     {
       if (alpha == 1.0) 

@@ -39,9 +39,10 @@ public class MonitoredIndices
       @Input(formatDescription = "all|none|space-separated indices") List<String> strings,
       @InitService final Creator creator)
   {
-    if (Joiner.on("").join(strings).trim().equals("all"))
+    String joined = Joiner.on("").join(strings).trim();
+    if (joined.equals("all"))
       this.list = null;
-    else if (Joiner.on("").join(strings).trim().equals("none"))
+    else if (joined.equals("none"))
       this.list = new ArrayList<>();
     else
     {
