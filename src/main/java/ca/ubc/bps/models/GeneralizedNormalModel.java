@@ -39,7 +39,7 @@ public class GeneralizedNormalModel implements Model
   @Arg                   @DefaultValue("false")
   public boolean testAgainstBruteForce = false;
   
-  @Arg                       @DefaultValue("none")
+  @Arg                       @DefaultValue("None")
   public Likelihood likelihood = Likelihood.none;
 
   @Override

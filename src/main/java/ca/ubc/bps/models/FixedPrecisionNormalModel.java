@@ -27,7 +27,7 @@ public class FixedPrecisionNormalModel implements Model
   @Arg       @DefaultValue("true")
   public boolean useLocal = true;
   
-  @Arg                       @DefaultValue("none")
+  @Arg                       @DefaultValue("None")
   public Likelihood likelihood = Likelihood.none;
   
   @Override
