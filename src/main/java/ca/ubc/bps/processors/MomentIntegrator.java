@@ -8,6 +8,8 @@ public class MomentIntegrator implements SegmentIntegrator
 {
   final int degree;
   
+  private SegmentIntegrator numericalDelegate = null;
+  
   public MomentIntegrator(int degree)
   {
     if (degree < 0)
@@ -19,12 +21,15 @@ public class MomentIntegrator implements SegmentIntegrator
   public void setup(Dynamics dynamics)
   {
     if (!(dynamics instanceof PiecewiseLinear))
-      throw new RuntimeException("Other dynamics not yet implemented");
+      numericalDelegate = new NumericalIntegrator(d -> Math.pow(d, degree));
   }
 
   @Override
   public double evaluate(double x, double v, double deltaT)
   {
+    if (numericalDelegate != null)
+      return numericalDelegate.evaluate(x, v, deltaT);
+    
     double sum = 0.0;
     for (int k = 0; k <= degree; k++) 
       sum += 

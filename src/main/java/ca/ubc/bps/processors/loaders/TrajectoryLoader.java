@@ -2,7 +2,6 @@ package ca.ubc.bps.processors.loaders;
 
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import blang.inits.experiments.Experiment;
