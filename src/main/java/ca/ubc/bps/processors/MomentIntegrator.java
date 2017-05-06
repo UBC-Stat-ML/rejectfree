@@ -21,7 +21,10 @@ public class MomentIntegrator implements SegmentIntegrator
   public void setup(Dynamics dynamics)
   {
     if (!(dynamics instanceof PiecewiseLinear))
+    {
       numericalDelegate = new NumericalIntegrator(d -> Math.pow(d, degree));
+      numericalDelegate.setup(dynamics);
+    }
   }
 
   @Override
