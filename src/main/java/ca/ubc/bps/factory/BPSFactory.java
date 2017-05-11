@@ -43,6 +43,7 @@ import ca.ubc.bps.processors.SegmentIntegrator;
 import ca.ubc.bps.processors.WriteTrajectory;
 import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.state.Dynamics;
+import ca.ubc.bps.state.IsotropicHamiltonian;
 import ca.ubc.pdmp.PDMP;
 import ca.ubc.pdmp.PDMPSimulator;
 import ca.ubc.pdmp.Processor;
@@ -295,7 +296,8 @@ public class BPSFactory extends Experiment
 
     private void checkModelCreated()
     {
-      if (modelContext.jumpProcesses.isEmpty())
+      if (modelContext.jumpProcesses.isEmpty() &&
+          !(dynamics instanceof IsotropicHamiltonian)) // with HMC it is possible to have no bounce in full Gaussian case
         throw new RuntimeException("No bounce added by the model.");
       if (modelContext.continuouslyEvolvingStates.isEmpty() && modelContext.piecewiseConstantStates.isEmpty())
         throw new RuntimeException("No variables added by the model.");
