@@ -38,7 +38,7 @@ public class ConstantIntensityAdaptiveThinning extends ContinuousStateDependent 
   public DeltaTime next(Random random)
   {
     // compute the adaptive bound
-    Bound bound = new Bound(currentInitialStepSize, intensity.evaluate(this, 0.0));
+    Bound bound = new Bound(currentInitialStepSize, intensity.evaluate(0.0));
     if      (bound.expectedNPoints < LOW_THRESHOLD)
       bound = tryIterativeGrow(bound);
     else if (bound.expectedNPoints > HIGH_THRESHOLD)
@@ -52,7 +52,7 @@ public class ConstantIntensityAdaptiveThinning extends ContinuousStateDependent 
     double sample = BPSStaticUtils.sampleExponential(random, boundRate);
     if (sample > stepSize)
       return DeltaTime.isGreaterThan(stepSize);
-    double ratio = intensity.evaluate(this, sample) / boundRate;
+    double ratio = intensity.evaluate(sample) / boundRate;
     if (BPSStaticUtils.sampleBernoulli(random, ratio))
       return DeltaTime.isEqualTo(sample);
     else
@@ -98,7 +98,7 @@ public class ConstantIntensityAdaptiveThinning extends ContinuousStateDependent 
     {
       this.currentPotential = currentPotential;
       this.stepSize = stepSize;
-      this.rate = Math.max(currentPotential, intensity.evaluate(ConstantIntensityAdaptiveThinning.this, stepSize));
+      this.rate = Math.max(currentPotential, intensity.evaluate(stepSize));
       this.expectedNPoints = rate * stepSize;
     }
     private Bound shrink()

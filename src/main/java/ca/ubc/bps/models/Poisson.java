@@ -12,8 +12,13 @@ import bayonet.distributions.Random2RandomGenerator;
 import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.energies.Energy;
+import ca.ubc.bps.energies.EnergySum;
 import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.IsotropicHamiltonian;
+import ca.ubc.bps.state.PiecewiseLinear;
+import ca.ubc.bps.timers.PoissonProcess;
 import ca.ubc.bps.timers.Superposition;
+import ca.ubc.bps.timers.ThinningTimer;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
@@ -33,10 +38,68 @@ public class Poisson extends SimpleLikelihood<Integer>
   @Override
   public BPSPotential createLikelihoodPotential(ContinuouslyEvolving latentVariable, Integer observation)
   {
-    List<BPSPotential> potentials = new ArrayList<>(); 
-    potentials.add(linearPotential(latentVariable, -observation));
-    potentials.add(new BPSPotential(new PoissonLogNormEnergy(), new PoissonLogNormTimer(latentVariable)));
-    return Superposition.createSuperpositionBPSPotential(potentials);
+    if (latentVariable.dynamics instanceof PiecewiseLinear)
+    {
+      List<BPSPotential> potentials = new ArrayList<>(); 
+      potentials.add(linearPotential(latentVariable, -observation));
+      potentials.add(new BPSPotential(new PoissonLogNormEnergy(), new PoissonLogNormTimer(latentVariable)));
+      return Superposition.createSuperpositionBPSPotential(potentials);
+    } 
+    else if (latentVariable.dynamics instanceof IsotropicHamiltonian)
+    {
+      List<Energy> energies = new ArrayList<>();
+      energies.add(new LinearUnivariateEnergy(-observation));
+      energies.add(new PoissonLogNormEnergy());
+      Energy sum = new EnergySum(energies);
+      HamiltonianPoissonBound bound = new HamiltonianPoissonBound(latentVariable, observation);
+      ThinningTimer timer = new ThinningTimer(Collections.singleton(latentVariable), sum, bound);
+      return new BPSPotential(sum, timer);
+    }
+    else
+      throw new RuntimeException();
+  }
+  
+  public static class HamiltonianPoissonBound implements PoissonProcess
+  {
+    private final ContinuouslyEvolving variable;
+    private final double precision;
+    private final int observation;
+    
+    public HamiltonianPoissonBound(ContinuouslyEvolving variable, int observation)
+    {
+      this.variable = variable;
+      this.observation = observation;
+      this.precision = ((IsotropicHamiltonian) (variable.dynamics)).getPrecision();
+    }
+
+    @Override
+    public DeltaTime next(Random random)
+    {
+      return DeltaTime.isEqualTo(BPSStaticUtils.sampleExponential(random, rate()));
+    }
+    
+    private double B(double xi) 
+    {
+      return Math.exp(xi) + observation;
+    }
+
+    @Override
+    public double evaluate(double delta)
+    {
+      return rate();
+    }
+    
+    public double rate()
+    {
+      double x = variable.position.get();
+      double v = variable.velocity.get();
+      double a = - precision * x;
+      double b = v;
+      double c = v / precision;
+      double d = x;
+      return Math.sqrt(a*a + b*b) * B(Math.sqrt(c*c + d * d));
+    }
+    
   }
   
   public static BPSPotential linearPotential(ContinuouslyEvolving latentVariable, double coefficient)

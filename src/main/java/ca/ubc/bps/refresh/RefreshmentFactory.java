@@ -16,6 +16,7 @@ import ca.ubc.bps.state.ContinuouslyEvolving;
 import ca.ubc.bps.timers.HomogeneousPP;
 import ca.ubc.bps.timers.Intensity;
 import ca.ubc.bps.timers.ConstantIntensityAdaptiveThinning;
+import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.JumpProcess;
 import ca.ubc.pdmp.PDMP;
 
@@ -79,15 +80,6 @@ public interface RefreshmentFactory
     @DefaultValue("false")
     public boolean normalized = false;
     
-    private Intensity normPotential() 
-    {
-      return (ContinuousStateDependent state, double deltaTime) -> 
-      {
-        double [] velocity = state.extrapolateVelocity(deltaTime);
-        return 1.0 + Math.pow(norm(denseCopy(velocity)), power);
-      };
-    }
-    
     @Override
     public void addRefreshment(final PDMP pdmp) 
     {
@@ -97,8 +89,22 @@ public interface RefreshmentFactory
           new JumpProcess(
               new ConstantIntensityAdaptiveThinning( 
                   continuousCoordinates, 
-                  normPotential()),               
+                  new NormPotential(continuousCoordinates)),               
               new IndependentRefreshment(continuousCoordinates, normalized)));
+    }
+    
+    private class NormPotential extends ContinuousStateDependent implements Intensity
+    {
+      private NormPotential(Collection<? extends Coordinate> requiredVariables)
+      {
+        super(requiredVariables);
+      }
+      @Override
+      public double evaluate(double delta)
+      {
+        double [] velocity = extrapolateVelocity(delta);
+        return 1.0 + Math.pow(norm(denseCopy(velocity)), power);
+      }
     }
   }
   

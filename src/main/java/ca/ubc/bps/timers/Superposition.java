@@ -5,31 +5,34 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import ca.ubc.bps.BPSPotential;
-import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.energies.Energy;
+import ca.ubc.bps.energies.EnergySum;
 import ca.ubc.bps.state.ContinuousStateDependent;
-import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
 
-public class Superposition extends ContinuousStateDependent implements Clock, Energy
+public class Superposition extends ContinuousStateDependent implements PoissonProcess
 {
   public final List<BPSPotential> potentials;
   
-  public static BPSPotential createSuperpositionBPSPotential(List<BPSPotential> potentials)
-  {
-    Superposition superposition = new Superposition(potentials);
-    return new BPSPotential(superposition, superposition);
-  }
-
-  private Superposition(List<BPSPotential> potentials)
+  public Superposition(List<BPSPotential> potentials)
   {
     super(unionOfRequiredVariables(potentials));
-    if (potentials.isEmpty())
-      throw new RuntimeException();
     this.potentials = potentials;
+  }
+
+  public static BPSPotential createSuperpositionBPSPotential(List<BPSPotential> potentials)
+  {
+    List<Energy> energies = potentials.stream().map(p -> p.energy).collect(Collectors.toList());
+    EnergySum energySum = new EnergySum(energies);
+    ThinningTimer thinning = new ThinningTimer(
+        unionOfRequiredVariables(potentials), 
+        energySum, 
+        new Superposition(potentials));
+    return new BPSPotential(energySum, thinning); 
   }
 
   private static Collection<Coordinate> unionOfRequiredVariables(List<BPSPotential> potentials)
@@ -41,10 +44,21 @@ public class Superposition extends ContinuousStateDependent implements Clock, En
   }
 
   @Override
+  public double evaluate(double deltaT)
+  {
+    double [] velocity = extrapolateVelocity(deltaT);
+    double [] position = extrapolatePosition(deltaT); 
+    double intensity = 0.0;
+    for (BPSPotential potential : potentials)
+      intensity += StandardIntensity.canonicalRate(velocity, potential.energy.gradient(position));
+    return intensity;
+  }
+
+  @Override
   public DeltaTime next(Random random)
   {
+    DeltaTime result = null;
     double min = Double.POSITIVE_INFINITY;
-    boolean isMinBound = false;
     
     for (BPSPotential potential : potentials)
     {
@@ -52,51 +66,11 @@ public class Superposition extends ContinuousStateDependent implements Clock, En
       if (current.deltaTime < min)
       {
         min = current.deltaTime;
-        isMinBound = current.isBound;
+        result = current;
       }
     }
-    
-    if (isMinBound)
-      return DeltaTime.isGreaterThan(min);
-    
-    if (BPSStaticUtils.sampleBernoulli(random, acceptanceRate(min)))
-      return DeltaTime.isEqualTo(min);
-    else
-      return DeltaTime.isGreaterThan(min);
-  }
-
-  private double acceptanceRate(double deltaT)
-  {
-    double [] velocity = extrapolateVelocity(deltaT);
-    double [] position = extrapolatePosition(deltaT);
-    
-    double denom = 0.0;
-    for (BPSPotential potential : potentials)
-      denom += StandardIntensity.canonicalRate(velocity, potential.energy.gradient(position));
-    return StandardIntensity.canonicalRate(velocity, gradient(position)) / denom;
-  }
-
-  @Override
-  public double[] gradient(double[] point)
-  {
-    double [] result = new double[point.length];
-    
-    for (BPSPotential potential : potentials)
-    {
-      double [] currentGradient = potential.energy.gradient(point);
-      for (int i = 0; i < point.length; i++)
-        result[i] += currentGradient[i];
-    }
-        
-    return result;
-  }
-
-  @Override
-  public double valueAt(double[] point)
-  {
-    double result = 0.0;
-    for (BPSPotential potential : potentials)
-      result += potential.energy.valueAt(point);
+    if (result == null)
+      throw new RuntimeException();
     return result;
   }
 }

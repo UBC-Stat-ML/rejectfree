@@ -10,6 +10,7 @@ import ca.ubc.bps.energies.NormalEnergy;
 import ca.ubc.bps.factory.ModelBuildingContext;
 import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.IsotropicHamiltonian;
 import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.bps.timers.NormalClock;
 import xlinear.DenseMatrix;
@@ -33,16 +34,26 @@ public class FixedPrecisionNormalModel implements Model
   @Override
   public void setup(ModelBuildingContext context, boolean initializeToStationary)
   {
-    if (!(context.dynamics() instanceof PiecewiseLinear))
+    if (!(context.dynamics() instanceof PiecewiseLinear) && 
+        !(context.dynamics() instanceof IsotropicHamiltonian))
       throw new RuntimeException();
     Matrix precisionMatrix = precision.build();
     List<ContinuouslyEvolving> vars = context.buildAndRegisterContinuouslyEvolvingStates(precisionMatrix.nCols());
     if (initializeToStationary)
       initializeToStationary(vars, precisionMatrix, context.initializationRandom);
-    if (useLocal && precisionMatrix.nCols() > 2)
-      setupLocal(context, precisionMatrix, vars);
+    
+    if (context.dynamics() instanceof PiecewiseLinear)
+    {
+      if (useLocal && precisionMatrix.nCols() > 2)
+        setupLocal(context, precisionMatrix, vars);
+      else
+        context.registerBPSPotential(potential(precisionMatrix, vars));
+    }
+    else if (context.dynamics() instanceof IsotropicHamiltonian)
+      ((IsotropicHamiltonian) (context.dynamics())).setPrecision(((DiagonalPrecision) precision).diagonalPrecision);
     else
-      context.registerBPSPotential(potential(precisionMatrix, vars));
+      throw new RuntimeException();
+    
     likelihood.setup(context, vars); 
   }
   

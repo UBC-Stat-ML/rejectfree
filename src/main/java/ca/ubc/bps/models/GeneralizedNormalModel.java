@@ -30,13 +30,13 @@ public class GeneralizedNormalModel implements Model
   @Arg @DefaultValue("2")
   public   int size = 2;
   
-  @Arg                    @DefaultValue("false")
+  @Arg                     @DefaultValue("false")
   public boolean forceQuasiConvexSolver = false;
   
   @Arg                               @DefaultValue("BRENT")
   public Optimizer quasiConvexOptimizer = Optimizer.BRENT;
   
-  @Arg                   @DefaultValue("false")
+  @Arg                    @DefaultValue("false")
   public boolean testAgainstBruteForce = false;
   
   @Arg                       @DefaultValue("None")
@@ -70,7 +70,7 @@ public class GeneralizedNormalModel implements Model
         Clock timer = 
             alpha < 1.0 || forceQuasiConvexSolver ? 
               new QuasiConvexTimer(vars, energy, quasiConvexOptimizer) :
-              new ConstantIntensityAdaptiveThinning(vars, new StandardIntensity(energy));
+              new ConstantIntensityAdaptiveThinning(vars, new StandardIntensity(vars, energy));
         context.registerBPSPotential(new BPSPotential(energy, timer));
       }
     } 

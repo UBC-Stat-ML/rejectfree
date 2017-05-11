@@ -1,23 +1,27 @@
 package ca.ubc.bps.timers;
 
+import java.util.Collection;
+
 import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.energies.Energy;
 import ca.ubc.bps.state.ContinuousStateDependent;
+import ca.ubc.pdmp.Coordinate;
 
-public class StandardIntensity implements Intensity
+public class StandardIntensity extends ContinuousStateDependent implements Intensity
 {
   private final Energy gradient;
   
-  public StandardIntensity(Energy gradient)
+  public StandardIntensity(Collection<? extends Coordinate> requiredVariables, Energy gradient)
   {
+    super(requiredVariables);
     this.gradient = gradient;
   }
 
   @Override
-  public double evaluate(ContinuousStateDependent state, double delta)
+  public double evaluate(double delta)
   {
-    double [] velocity = state.extrapolateVelocity(delta);
-    double [] curGradient = gradient.gradient(state.extrapolatePosition(delta));
+    double [] velocity = extrapolateVelocity(delta);
+    double [] curGradient = gradient.gradient(extrapolatePosition(delta));
     return canonicalRate(velocity, curGradient);
   }
   
