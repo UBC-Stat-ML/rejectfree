@@ -4,6 +4,8 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Random;
 
+import blang.inits.Arg;
+import blang.inits.DefaultValue;
 import blang.inits.GlobalArg;
 import blang.inits.experiments.ExperimentResults;
 import briefj.BriefIO;
@@ -28,6 +30,10 @@ public abstract class SimpleLikelihood<T> implements Likelihood
   
   @GlobalArg
   public ExperimentResults results = new ExperimentResults();
+  
+  @Arg(description = "If 1, generate one data point per latent, otherwise, skip ever n")
+                      @DefaultValue("1")
+  public int generatedDataSparsity = 1;
 
   @Override
   public void setup(ModelBuildingContext context, List<ContinuouslyEvolving> vars)
@@ -37,9 +43,13 @@ public abstract class SimpleLikelihood<T> implements Likelihood
     int i = 0;
     for (ContinuouslyEvolving latent : vars)
     {
-      T sampledObservations = sampleDatapoint(latent.position.get(), context.initializationRandom);
-      context.registerBPSPotential(createLikelihoodPotential(latent, sampledObservations));
-      BriefIO.println(writer, "" + (i++) + "," + sampledObservations);
+      if (i % generatedDataSparsity == 0)
+      {
+        T sampledObservations = sampleDatapoint(latent.position.get(), context.initializationRandom);
+        context.registerBPSPotential(createLikelihoodPotential(latent, sampledObservations));
+        BriefIO.println(writer, "" + (i) + "," + sampledObservations);
+      }
+      i++;
     }
   }
   

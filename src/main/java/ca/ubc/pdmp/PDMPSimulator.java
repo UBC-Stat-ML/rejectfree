@@ -357,10 +357,13 @@ public class PDMPSimulator
       this.pdmp = pdmp;
       // index the variables and create variable nodes
       for (int variableIndex = 0; variableIndex < pdmp.coordinates.size(); variableIndex++)
+      {
+        _Nds.put(variableIndex, new LinkedHashSet<>());
         variable2Index.put(pdmp.coordinates.get(variableIndex), variableIndex);
+      }
       for (int factorIndex = 0; factorIndex < pdmp.jumpProcesses.size(); factorIndex++)
         for (Object var : pdmp.jumpProcesses.get(factorIndex).clock.requiredVariables())
-          BriefMaps.getOrPutSet(_Nds, variable2Index.get(var)).add(factorIndex);
+          _Nds.get(variable2Index.get(var)).add(factorIndex);
     }
     
     private Set<Integer> nd(int j)
