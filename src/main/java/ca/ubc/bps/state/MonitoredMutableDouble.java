@@ -25,7 +25,7 @@ public class MonitoredMutableDouble implements MutableDouble
   
   public static class ModCount
   {
-    public int count = 0;
+    public long count = 0;
   }
   
 }
