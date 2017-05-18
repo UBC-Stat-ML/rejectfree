@@ -5,7 +5,7 @@ import java.io.File;
 import ca.ubc.bps.factory.BPSFactory.BPS;
 import ca.ubc.bps.processors.MemorizeTrajectory;
 import ca.ubc.bps.processors.Trajectory;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.pdmp.Processor;
 
 public class MemorizeTrajectoryLoader extends TrajectoryLoader
@@ -24,7 +24,7 @@ public class MemorizeTrajectoryLoader extends TrajectoryLoader
   }
 
   @Override
-  public Processor createProcessor(ContinuouslyEvolving variable, BPS bps)
+  public Processor createProcessor(PositionVelocity variable, BPS bps)
   {
     return processor = new MemorizeTrajectory(variable);
   }

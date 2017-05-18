@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ca.ubc.bps.state.ContinuousStateDependent;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocityDependent;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.pdmp.Processor;
 
-public class MemorizeTrajectory extends ContinuousStateDependent implements Processor
+public class MemorizeTrajectory extends PositionVelocityDependent implements Processor
 {
   final List<TrajectorySegment> trajectory = new ArrayList<>();
-  final ContinuouslyEvolving variable;
+  final PositionVelocity variable;
   
-  public MemorizeTrajectory(ContinuouslyEvolving variable)
+  public MemorizeTrajectory(PositionVelocity variable)
   {
     super(Collections.singletonList(variable));
     this.variable = variable;

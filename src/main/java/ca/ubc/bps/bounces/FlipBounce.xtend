@@ -1,18 +1,18 @@
 package ca.ubc.bps.bounces
 
 import java.util.List
-import ca.ubc.bps.state.ContinuouslyEvolving
 import java.util.Random
-import ca.ubc.bps.state.ContinuousStateDependent
 
 import static extension xlinear.MatrixExtensions.*
 import static xlinear.MatrixOperations.*
 
 import ca.ubc.pdmp.JumpKernel
+import ca.ubc.bps.state.PositionVelocity
+import ca.ubc.bps.state.PositionVelocityDependent
 
-public class FlipBounce extends ContinuousStateDependent implements JumpKernel  {
+public class FlipBounce extends PositionVelocityDependent implements JumpKernel  {
   
-  new (List<ContinuouslyEvolving> requiredVariables)
+  new (List<PositionVelocity> requiredVariables)
   {
     super(requiredVariables);
   }

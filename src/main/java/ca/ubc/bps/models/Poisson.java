@@ -13,7 +13,7 @@ import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.energies.Energy;
 import ca.ubc.bps.energies.EnergySum;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.bps.state.IsotropicHamiltonian;
 import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.bps.timers.PoissonProcess;
@@ -36,7 +36,7 @@ public class Poisson extends SimpleLikelihood<Integer>
   }
 
   @Override
-  public BPSPotential createLikelihoodPotential(ContinuouslyEvolving latentVariable, Integer observation)
+  public BPSPotential createLikelihoodPotential(PositionVelocity latentVariable, Integer observation)
   {
     if (latentVariable.dynamics instanceof PiecewiseLinear)
     {
@@ -61,11 +61,11 @@ public class Poisson extends SimpleLikelihood<Integer>
   
   public static class HamiltonianPoissonBound implements PoissonProcess
   {
-    private final ContinuouslyEvolving variable;
+    private final PositionVelocity variable;
     private final double precision;
     private final int observation;
     
-    public HamiltonianPoissonBound(ContinuouslyEvolving variable, int observation)
+    public HamiltonianPoissonBound(PositionVelocity variable, int observation)
     {
       this.variable = variable;
       this.observation = observation;
@@ -102,7 +102,7 @@ public class Poisson extends SimpleLikelihood<Integer>
     
   }
   
-  public static BPSPotential linearPotential(ContinuouslyEvolving latentVariable, double coefficient)
+  public static BPSPotential linearPotential(PositionVelocity latentVariable, double coefficient)
   {
     return new BPSPotential(new LinearUnivariateEnergy(coefficient), new LinearUnivariateTimer(latentVariable, coefficient));
   }
@@ -128,9 +128,9 @@ public class Poisson extends SimpleLikelihood<Integer>
   
   private static class PoissonLogNormTimer implements Clock
   {
-    private final ContinuouslyEvolving variable;
+    private final PositionVelocity variable;
     
-    public PoissonLogNormTimer(ContinuouslyEvolving variable)
+    public PoissonLogNormTimer(PositionVelocity variable)
     {
       this.variable = variable;
     }
@@ -185,10 +185,10 @@ public class Poisson extends SimpleLikelihood<Integer>
   
   public static class LinearUnivariateTimer implements Clock
   {
-    private final ContinuouslyEvolving variable;
+    private final PositionVelocity variable;
     private final double coefficient;
     
-    public LinearUnivariateTimer(ContinuouslyEvolving variable, double coefficient)
+    public LinearUnivariateTimer(PositionVelocity variable, double coefficient)
     {
       this.variable = variable;
       this.coefficient = coefficient;

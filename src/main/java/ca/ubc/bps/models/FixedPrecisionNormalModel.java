@@ -9,7 +9,7 @@ import blang.inits.DefaultValue;
 import ca.ubc.bps.energies.NormalEnergy;
 import ca.ubc.bps.factory.ModelBuildingContext;
 import ca.ubc.bps.BPSPotential;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.bps.state.IsotropicHamiltonian;
 import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.bps.timers.NormalClock;
@@ -38,7 +38,7 @@ public class FixedPrecisionNormalModel implements Model
         !(context.dynamics() instanceof IsotropicHamiltonian))
       throw new RuntimeException();
     Matrix precisionMatrix = precision.build();
-    List<ContinuouslyEvolving> vars = context.buildAndRegisterContinuouslyEvolvingStates(precisionMatrix.nCols());
+    List<PositionVelocity> vars = context.buildAndRegisterPositionVelocityCoordinates(precisionMatrix.nCols());
     if (initializeToStationary)
       initializeToStationary(vars, precisionMatrix, context.initializationRandom);
     
@@ -57,7 +57,7 @@ public class FixedPrecisionNormalModel implements Model
     likelihood.setup(context, vars); 
   }
   
-  private static void initializeToStationary(List<ContinuouslyEvolving> vars, Matrix precisionMatrix, Random random)
+  private static void initializeToStationary(List<PositionVelocity> vars, Matrix precisionMatrix, Random random)
   {
     DenseMatrix vector = MatrixOperations.sampleNormalByPrecision(random, precisionMatrix);
     for (int i = 0; i < vector.nEntries(); i++)
@@ -122,25 +122,25 @@ public class FixedPrecisionNormalModel implements Model
     return result;
   }
   
-  public void setupLocal(ModelBuildingContext context, Matrix precision, List<ContinuouslyEvolving> variables)
+  public void setupLocal(ModelBuildingContext context, Matrix precision, List<PositionVelocity> variables)
   {
     SparseDecomposition decomp = sparseDecomposition(precision);
     for (int i = 0; i < decomp.subMatrices_2by2.size(); i++)
     {
-      List<ContinuouslyEvolving> varSubset = new ArrayList<>();
+      List<PositionVelocity> varSubset = new ArrayList<>();
       varSubset.add(variables.get(decomp.edgeEndPoints1.get(i)));
       varSubset.add(variables.get(decomp.edgeEndPoints2.get(i)));
       context.registerBPSPotential(potential(decomp.subMatrices_2by2.get(i), varSubset));
     }
     for (int i = 0; i < decomp.subMatrices_1by1.size(); i++)
     {
-      List<ContinuouslyEvolving> varSubset = new ArrayList<>();
+      List<PositionVelocity> varSubset = new ArrayList<>();
       varSubset.add(variables.get(decomp.singletonPoints.get(i)));
       context.registerBPSPotential(potential(decomp.subMatrices_1by1.get(i), varSubset));
     }
   }
   
-  public static BPSPotential potential(Matrix precision, List<ContinuouslyEvolving> variables)
+  public static BPSPotential potential(Matrix precision, List<PositionVelocity> variables)
   {
     NormalEnergy energy = new NormalEnergy(precision);
     NormalClock timer = new NormalClock(variables, precision);

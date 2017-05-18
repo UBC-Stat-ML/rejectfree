@@ -9,7 +9,7 @@ import blang.inits.Arg;
 import blang.inits.DefaultValue;
 import blang.inits.Implementations;
 import briefj.BriefIO;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 
 import ca.ubc.bps.factory.InitializationStrategy.Zero;
 import ca.ubc.bps.factory.InitializationStrategy.Stationary;
@@ -20,7 +20,7 @@ import ca.ubc.bps.factory.InitializationStrategy.FromCSVFile;
 public interface InitializationStrategy
 {
   public boolean requestStationarySampling();
-  public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates);
+  public void initializePositions(Collection<PositionVelocity> positionVelocityCoordinates);
   
   public static class Far implements InitializationStrategy
   {
@@ -34,9 +34,9 @@ public interface InitializationStrategy
     }
 
     @Override
-    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
+    public void initializePositions(Collection<PositionVelocity> positionVelocityCoordinates)
     {
-      for (ContinuouslyEvolving coordinate : continuouslyEvolvingStates)
+      for (PositionVelocity coordinate : positionVelocityCoordinates)
         coordinate.position.set(valueForEachPositionCoordinate);
     }
     
@@ -54,9 +54,9 @@ public interface InitializationStrategy
     }
 
     @Override
-    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
+    public void initializePositions(Collection<PositionVelocity> positionVelocityCoordinates)
     {
-      List<ContinuouslyEvolving> list = new ArrayList<>(continuouslyEvolvingStates);
+      List<PositionVelocity> list = new ArrayList<>(positionVelocityCoordinates);
       for (List<String> line : BriefIO.readLines(file).splitCSV())
       {
         int index = Integer.parseInt(line.get(0));
@@ -76,9 +76,9 @@ public interface InitializationStrategy
     }
 
     @Override
-    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
+    public void initializePositions(Collection<PositionVelocity> positionVelocityCoordinates)
     {
-      for (ContinuouslyEvolving state : continuouslyEvolvingStates)
+      for (PositionVelocity state : positionVelocityCoordinates)
         state.position.set(0.0);
     }
   }
@@ -91,7 +91,7 @@ public interface InitializationStrategy
       return true;
     }
     @Override
-    public void initializePositions(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
+    public void initializePositions(Collection<PositionVelocity> positionVelocityCoordinates)
     {
       // nothing to do
     }

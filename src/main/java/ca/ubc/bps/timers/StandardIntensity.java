@@ -4,10 +4,10 @@ import java.util.Collection;
 
 import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.energies.Energy;
-import ca.ubc.bps.state.ContinuousStateDependent;
+import ca.ubc.bps.state.PositionVelocityDependent;
 import ca.ubc.pdmp.Coordinate;
 
-public class StandardIntensity extends ContinuousStateDependent implements Intensity
+public class StandardIntensity extends PositionVelocityDependent implements Intensity
 {
   private final Energy gradient;
   

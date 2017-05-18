@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Random;
 
 import ca.ubc.bps.BPSStaticUtils;
-import ca.ubc.bps.state.ContinuousStateDependent;
+import ca.ubc.bps.state.PositionVelocityDependent;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
@@ -22,7 +22,7 @@ import ca.ubc.pdmp.DeltaTime;
  * @author bouchard
  *
  */
-public class ConstantIntensityAdaptiveThinning extends ContinuousStateDependent implements Clock
+public class ConstantIntensityAdaptiveThinning extends PositionVelocityDependent implements Clock
 {
   private Random jitter = jitterProvider.get();
   private double currentInitialStepSize = INITIAL_STEP + jitter.nextDouble();

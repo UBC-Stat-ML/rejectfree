@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.energies.Energy;
 import ca.ubc.bps.energies.EnergySum;
-import ca.ubc.bps.state.ContinuousStateDependent;
+import ca.ubc.bps.state.PositionVelocityDependent;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
 
-public class Superposition extends ContinuousStateDependent implements PoissonProcess
+public class Superposition extends PositionVelocityDependent implements PoissonProcess
 {
   public final List<BPSPotential> potentials;
   

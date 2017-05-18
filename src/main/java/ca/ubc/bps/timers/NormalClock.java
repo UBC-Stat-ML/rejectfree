@@ -5,8 +5,8 @@ import java.util.Random;
 
 import bayonet.math.NumericalUtils;
 import ca.ubc.pdmp.DeltaTime;
-import ca.ubc.bps.state.ContinuousStateDependent;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocityDependent;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.pdmp.Clock;
 import xlinear.DenseMatrix;
@@ -14,7 +14,7 @@ import xlinear.Matrix;
 import xlinear.MatrixExtensions;
 import xlinear.MatrixOperations;
 
-public class NormalClock extends ContinuousStateDependent implements Clock
+public class NormalClock extends PositionVelocityDependent implements Clock
 {
   final Matrix precision;
   
@@ -23,7 +23,7 @@ public class NormalClock extends ContinuousStateDependent implements Clock
   final boolean cachedBinary;
   final double p0, p1, d;
 
-  public NormalClock(List<ContinuouslyEvolving> requiredVariables, Matrix precision)
+  public NormalClock(List<PositionVelocity> requiredVariables, Matrix precision)
   {
     super(requiredVariables);
     this.precision = precision;

@@ -6,7 +6,7 @@ import java.util.List;
 import ca.ubc.bps.state.MonitoredMutableDouble.ModCount;
 import ca.ubc.pdmp.Coordinate;
 
-public class ContinuouslyEvolving implements Coordinate
+public class PositionVelocity implements Coordinate
 {
   public final MutableDouble position;
   
@@ -17,7 +17,7 @@ public class ContinuouslyEvolving implements Coordinate
   
   public final Object key;
   
-  private ContinuouslyEvolving(MutableDouble position, MutableDouble velocity, Dynamics dynamics, Object key)
+  private PositionVelocity(MutableDouble position, MutableDouble velocity, Dynamics dynamics, Object key)
   {
     this.position = position;
     this.velocity = velocity;
@@ -25,12 +25,12 @@ public class ContinuouslyEvolving implements Coordinate
     this.key = key;
   }
   
-  public ContinuouslyEvolving(Dynamics dynamics, Object key)
+  public PositionVelocity(Dynamics dynamics, Object key)
   {
     this(dynamics, key, null);
   }
   
-  public ContinuouslyEvolving(Dynamics dynamics, Object key, ModCount modCount)
+  public PositionVelocity(Dynamics dynamics, Object key, ModCount modCount)
   {
     this(
         position(modCount, dynamics), 
@@ -65,57 +65,57 @@ public class ContinuouslyEvolving implements Coordinate
     return key.toString();
   }
   
-  public static List<ContinuouslyEvolving> buildArray(int size, Dynamics dynamics)
+  public static List<PositionVelocity> buildArray(int size, Dynamics dynamics)
   {
     return buildArray(size, dynamics, null);
   }
   
-  public static List<ContinuouslyEvolving> buildArray(int size, Dynamics dynamics, ModCount modCount)
+  public static List<PositionVelocity> buildArray(int size, Dynamics dynamics, ModCount modCount)
   {
-    List<ContinuouslyEvolving> result = new ArrayList<>(size);
+    List<PositionVelocity> result = new ArrayList<>(size);
     for (int i = 0; i < size; i++)
-      result.add(new ContinuouslyEvolving(dynamics,i, modCount));
+      result.add(new PositionVelocity(dynamics,i, modCount));
     return result;
   }
   
-  public static double [] toArray(List<ContinuouslyEvolving> continuousCoordinates, boolean forPosition)
+  public static double [] toArray(List<PositionVelocity> continuousCoordinates, boolean forPosition)
   {
     double [] result = new double[continuousCoordinates.size()];
     for (int i = 0; i < continuousCoordinates.size(); i++)
     {
-      final ContinuouslyEvolving z = continuousCoordinates.get(i);
+      final PositionVelocity z = continuousCoordinates.get(i);
       result[i] = forPosition ? z.position.get() : z.velocity.get();
     }
     return result;
   }
   
-  public static double [] positionsToArray(List<ContinuouslyEvolving> continuousCoordinates)
+  public static double [] positionsToArray(List<PositionVelocity> continuousCoordinates)
   {
     return toArray(continuousCoordinates, true);
   }
   
-  public static double [] velocitiesToArray(List<ContinuouslyEvolving> continuousCoordinates)
+  public static double [] velocitiesToArray(List<PositionVelocity> continuousCoordinates)
   {
     return toArray(continuousCoordinates, false);
   }
   
-  public static void set(List<ContinuouslyEvolving> continuousCoordinates, double [] vector, boolean forPosition)
+  public static void set(List<PositionVelocity> continuousCoordinates, double [] vector, boolean forPosition)
   {
     if (vector.length != continuousCoordinates.size())
       throw new RuntimeException();
     for (int i = 0; i < vector.length; i++)
     {
-      ContinuouslyEvolving coordinate = continuousCoordinates.get(i);
+      PositionVelocity coordinate = continuousCoordinates.get(i);
       (forPosition ? coordinate.position : coordinate.velocity).set(vector[i]);
     }
   }
   
-  public static void setPosition(List<ContinuouslyEvolving> continuousCoordinates, double [] position)
+  public static void setPosition(List<PositionVelocity> continuousCoordinates, double [] position)
   {
     set(continuousCoordinates, position, true);
   }
   
-  public static void setVelocity(List<ContinuouslyEvolving> continuousCoordinates, double [] velocity)
+  public static void setVelocity(List<PositionVelocity> continuousCoordinates, double [] velocity)
   {
     set(continuousCoordinates, velocity, false);
   }

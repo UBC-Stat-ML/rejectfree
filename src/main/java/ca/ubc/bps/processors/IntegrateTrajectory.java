@@ -3,13 +3,13 @@ package ca.ubc.bps.processors;
 import java.io.Writer;
 import java.util.Collections;
 
-import ca.ubc.bps.state.ContinuousStateDependent;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocityDependent;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.pdmp.Processor;
 
-public class IntegrateTrajectory extends ContinuousStateDependent implements Processor
+public class IntegrateTrajectory extends PositionVelocityDependent implements Processor
 {
-  final ContinuouslyEvolving variable;
+  final PositionVelocity variable;
   final TrajectoryIntegrator integrator;
   
   public static double integrate(Trajectory trajectory, SegmentIntegrator integral)
@@ -26,7 +26,7 @@ public class IntegrateTrajectory extends ContinuousStateDependent implements Pro
     return integrator.integrate();
   }
   
-  public IntegrateTrajectory(ContinuouslyEvolving variable, SegmentIntegrator integral)
+  public IntegrateTrajectory(PositionVelocity variable, SegmentIntegrator integral)
   {
     super(Collections.singletonList(variable));
     this.variable = variable;

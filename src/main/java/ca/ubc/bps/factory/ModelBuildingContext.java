@@ -11,7 +11,7 @@ import java.util.Set;
 import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.bounces.BounceFactory;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.bps.state.Dynamics;
 import ca.ubc.bps.state.MonitoredMutableDouble.ModCount;
 import ca.ubc.bps.state.PiecewiseConstant;
@@ -23,8 +23,8 @@ public class ModelBuildingContext
 {
   public final Random initializationRandom;
   List<JumpProcess> jumpProcesses = new ArrayList<>();
-  public List<ContinuouslyEvolving> continuouslyEvolvingStates = null;
-  Set<ContinuouslyEvolving> setOfVariables = null;
+  public List<PositionVelocity> positionVelocityCoordinates = null;
+  Set<PositionVelocity> setOfVariables = null;
   LinkedHashSet<PiecewiseConstant<?>> piecewiseConstantStates = new LinkedHashSet<>();
   public ModCount modCount = new ModCount();
   
@@ -41,19 +41,19 @@ public class ModelBuildingContext
   {
     return dynamics;
   }
-  public List<ContinuouslyEvolving> buildAndRegisterContinuouslyEvolvingStates(int dim) 
+  public List<PositionVelocity> buildAndRegisterPositionVelocityCoordinates(int dim) 
   {
-    if (continuouslyEvolvingStates != null)
+    if (positionVelocityCoordinates != null)
       throw new RuntimeException();
-    continuouslyEvolvingStates = ContinuouslyEvolving.buildArray(dim, dynamics, modCount);
-    setOfVariables = new HashSet<>(continuouslyEvolvingStates);
-    return continuouslyEvolvingStates;
+    positionVelocityCoordinates = PositionVelocity.buildArray(dim, dynamics, modCount);
+    setOfVariables = new HashSet<>(positionVelocityCoordinates);
+    return positionVelocityCoordinates;
   }
   public void registerBPSPotential(BPSPotential potential)
   {
     // find which variables bounce: those that are continuously evolving
     List<? extends Coordinate> allReqVars = new ArrayList<>(potential.clock.requiredVariables());
-    List<ContinuouslyEvolving> continuousCoordinates = BPSStaticUtils.continuousCoordinates(allReqVars);
+    List<PositionVelocity> continuousCoordinates = BPSStaticUtils.continuousCoordinates(allReqVars);
     // check they form the prefix (to make correspondence with energy indices straightforward)
     if (!continuousCoordinates.equals(allReqVars.subList(0, continuousCoordinates.size())))
       throw new RuntimeException();
@@ -64,7 +64,7 @@ public class ModelBuildingContext
   List<Coordinate> coordinates() 
   {
     List<Coordinate> result = new ArrayList<>();
-    result.addAll(continuouslyEvolvingStates);
+    result.addAll(positionVelocityCoordinates);
     result.addAll(piecewiseConstantStates);
     return result;
   }
@@ -78,7 +78,7 @@ public class ModelBuildingContext
   {
     for (Coordinate c : vars)
     {
-      if (c instanceof ContinuouslyEvolving && !setOfVariables.contains(c))
+      if (c instanceof PositionVelocity && !setOfVariables.contains(c))
           throw new RuntimeException();
       if (c instanceof PiecewiseConstant)
         piecewiseConstantStates.add((PiecewiseConstant<?>) c);

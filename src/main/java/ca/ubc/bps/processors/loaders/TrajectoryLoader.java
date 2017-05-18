@@ -8,7 +8,7 @@ import blang.inits.experiments.Experiment;
 import briefj.BriefIO;
 import ca.ubc.bps.factory.BPSFactory;
 import ca.ubc.bps.factory.BPSFactory.BPS;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.pdmp.Processor;
 
 public abstract class TrajectoryLoader extends Experiment
@@ -42,8 +42,8 @@ public abstract class TrajectoryLoader extends Experiment
   @Override
   public void run()
   {
-    List<ContinuouslyEvolving> vars = bps.continuouslyEvolvingStates();
-    ContinuouslyEvolving theVar = vars.get(index);
+    List<PositionVelocity> vars = bps.positionVelocityCoordinates();
+    PositionVelocity theVar = vars.get(index);
     Processor p = createProcessor(theVar, bps);
     
     for (List<String> line : BriefIO.readLines(samples).splitCSV().skip(1))
@@ -59,5 +59,5 @@ public abstract class TrajectoryLoader extends Experiment
     }
   }
 
-  public abstract Processor createProcessor(ContinuouslyEvolving variable, BPS bps);
+  public abstract Processor createProcessor(PositionVelocity variable, BPS bps);
 }

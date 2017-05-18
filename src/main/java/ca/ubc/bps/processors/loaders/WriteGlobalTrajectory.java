@@ -13,7 +13,7 @@ import ca.ubc.bps.factory.BPSFactory;
 import ca.ubc.bps.factory.BPSFactory.BPS;
 import ca.ubc.bps.processors.ConvertToGlobalProcessor.GlobalProcessorContext;
 import ca.ubc.bps.processors.GlobalProcessor;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 
 public class WriteGlobalTrajectory extends GlobalTrajectoryLoader
 {
@@ -37,7 +37,7 @@ public class WriteGlobalTrajectory extends GlobalTrajectoryLoader
       public void process(GlobalProcessorContext context)
       {
         int i = 0;
-        for (ContinuouslyEvolving var : context.allVariables())
+        for (PositionVelocity var : context.allVariables())
           stringArray[i++] = String.valueOf(var.position.get());
         BriefIO.println(writer, String.valueOf(context.getGlobalDelta()) + "," + Joiner.on(",").join(stringArray));
       }

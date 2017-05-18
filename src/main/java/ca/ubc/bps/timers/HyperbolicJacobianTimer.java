@@ -11,7 +11,7 @@ import java.util.Random;
 import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.bounces.FlipBounce;
 import ca.ubc.bps.factory.ModelBuildingContext;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.bps.state.Hyperbolic;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
@@ -21,9 +21,9 @@ import ca.ubc.pdmp.JumpProcess;
 
 public class HyperbolicJacobianTimer implements Clock
 {
-  private final ContinuouslyEvolving variable;
+  private final PositionVelocity variable;
   
-public HyperbolicJacobianTimer(ContinuouslyEvolving variable)
+public HyperbolicJacobianTimer(PositionVelocity variable)
   {
     if (!(variable.dynamics instanceof Hyperbolic))
       throw new RuntimeException();
@@ -32,7 +32,7 @@ public HyperbolicJacobianTimer(ContinuouslyEvolving variable)
   
   public static void addLocal(ModelBuildingContext context)
   {
-    for (ContinuouslyEvolving var : context.continuouslyEvolvingStates)
+    for (PositionVelocity var : context.positionVelocityCoordinates)
     {
       Clock timer = new HyperbolicJacobianTimer(var);
       JumpKernel kernel = new FlipBounce(Collections.singletonList(var));

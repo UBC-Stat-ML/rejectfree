@@ -27,8 +27,8 @@ class PDMPSimulatorTest {
     println("Running dense")
     val BPS bpsDense  = run(factory, true)
     println("---")
-    val Trajectory sparseTraj = bpsSparse.memorizedTrajectories.get(bpsSparse.continuouslyEvolvingStates.get(0)).trajectory
-    val Trajectory denseTraj =  bpsDense. memorizedTrajectories.get(bpsDense. continuouslyEvolvingStates.get(0)).trajectory
+    val Trajectory sparseTraj = bpsSparse.memorizedTrajectories.get(bpsSparse.positionVelocityCoordinates.get(0)).trajectory
+    val Trajectory denseTraj =  bpsDense. memorizedTrajectories.get(bpsDense. positionVelocityCoordinates.get(0)).trajectory
     val List<Trajectory> trajectories = #[sparseTraj, denseTraj]
     for (var int degree = 1; degree < 5; degree++) {
       for (Trajectory traj : trajectories) {
@@ -36,9 +36,6 @@ class PDMPSimulatorTest {
       }
       println("--")
     }
-    
-//    println(bpsDense. continuouslyEvolvingStates.get(0).position.get)
-//    println(bpsSparse.continuouslyEvolvingStates.get(0).position.get)
   }
   
   def static BPS run(BPSFactory factory, boolean forceToDense) {

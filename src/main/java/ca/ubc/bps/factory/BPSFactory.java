@@ -41,7 +41,7 @@ import ca.ubc.bps.processors.MemorizeTrajectory;
 import ca.ubc.bps.processors.MomentIntegrator;
 import ca.ubc.bps.processors.SegmentIntegrator;
 import ca.ubc.bps.processors.WriteTrajectory;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.bps.state.Dynamics;
 import ca.ubc.bps.state.IsotropicHamiltonian;
 import ca.ubc.pdmp.PDMP;
@@ -121,25 +121,25 @@ public class BPSFactory extends Experiment
     buildAndRun();
   }
 
-  private void initializeVelocities(Collection<ContinuouslyEvolving> continuouslyEvolvingStates)
+  private void initializeVelocities(Collection<PositionVelocity> coordinates)
   {
     Random initializationRandom = new Random(30284L * this.initializationRandom + 394);
-    for (ContinuouslyEvolving coordinate : continuouslyEvolvingStates)
+    for (PositionVelocity coordinate : coordinates)
       coordinate.velocity.set(initializationRandom.nextGaussian());
   }
   
   public class BPS
   {
     private final PDMP pdmp;
-    public final Map<ContinuouslyEvolving, MemorizeTrajectory> memorizedTrajectories = new LinkedHashMap<>();
-    public final Table<ContinuouslyEvolving, String, IntegrateTrajectory> summarizedTrajectories 
+    public final Map<PositionVelocity, MemorizeTrajectory> memorizedTrajectories = new LinkedHashMap<>();
+    public final Table<PositionVelocity, String, IntegrateTrajectory> summarizedTrajectories 
       = Tables.newCustomTable(new LinkedHashMap<>(), LinkedHashMap::new);
     private final ModelBuildingContext modelContext;
     private final int nBounceProcesses;
     
-    public List<ContinuouslyEvolving> continuouslyEvolvingStates()
+    public List<PositionVelocity> positionVelocityCoordinates()
     {
-      return modelContext.continuouslyEvolvingStates;
+      return modelContext.positionVelocityCoordinates;
     }
     
     public boolean isBounce(int jumpCoordinate)
@@ -163,8 +163,8 @@ public class BPSFactory extends Experiment
         setupMonitors(pdmp, type);
       
       // initializations 
-      initializeVelocities(modelContext.continuouslyEvolvingStates);
-      initialization.initializePositions(modelContext.continuouslyEvolvingStates);
+      initializeVelocities(modelContext.positionVelocityCoordinates);
+      initialization.initializePositions(modelContext.positionVelocityCoordinates);
     }
     
     public PDMP getPDMP()
@@ -200,7 +200,7 @@ public class BPSFactory extends Experiment
       {
         StringBuilder result = new StringBuilder();
         result.append(VARIABLE_KEY + ",moment,value\n");
-        for (Cell<ContinuouslyEvolving, String, IntegrateTrajectory> cell : summarizedTrajectories.cellSet())
+        for (Cell<PositionVelocity, String, IntegrateTrajectory> cell : summarizedTrajectories.cellSet())
           result.append("" + cell.getRowKey().key + "," + cell.getColumnKey() + "," + cell.getValue().integrate() + "\n");
         BriefIO.write(results.getFileInResultFolder(SUMMARY_STATS_FILE_NAME), result);
       }
@@ -209,7 +209,7 @@ public class BPSFactory extends Experiment
         StringBuilder result = new StringBuilder();
         result.append(VARIABLE_KEY + ",moment,value\n");
         for (int degree : summarizedMomentDegrees)
-          for (ContinuouslyEvolving variable : memorizedTrajectories.keySet())
+          for (PositionVelocity variable : memorizedTrajectories.keySet())
             result.append("" + variable.key + "," + degree + "," + memorizedTrajectories.get(variable).getTrajectory().momentEss(degree) + "\n");
         BriefIO.write(results.getFileInResultFolder(ESS_FILE_NAME), result);
       }
@@ -224,7 +224,7 @@ public class BPSFactory extends Experiment
     {
       Writer out = results.getAutoClosedBufferedWriter(FINAL_SAMPLES);
       BriefIO.println(out, VARIABLE_KEY + ",value");
-      for (ContinuouslyEvolving state : continuouslyEvolvingStates())
+      for (PositionVelocity state : positionVelocityCoordinates())
         BriefIO.println(out, state.key + "," + state.position.get());
     }
 
@@ -243,9 +243,9 @@ public class BPSFactory extends Experiment
       requested = type == MonitorType.SUMMARIZE ? summarize : requested;
       requested = type == MonitorType.WRITE     ? write     : requested;
 
-      Set<Integer> savedIndices = new LinkedHashSet<>(requested.getIndices(modelContext.continuouslyEvolvingStates.size()));
+      Set<Integer> savedIndices = new LinkedHashSet<>(requested.getIndices(modelContext.positionVelocityCoordinates.size()));
       
-      loop : for (ContinuouslyEvolving variable : modelContext.continuouslyEvolvingStates)
+      loop : for (PositionVelocity variable : modelContext.positionVelocityCoordinates)
       {
         final int index = (int) variable.key;
         if (!savedIndices.contains(index))
@@ -299,7 +299,7 @@ public class BPSFactory extends Experiment
       if (modelContext.jumpProcesses.isEmpty() &&
           !(dynamics instanceof IsotropicHamiltonian)) // with HMC it is possible to have no bounce in full Gaussian case
         throw new RuntimeException("No bounce added by the model.");
-      if (modelContext.continuouslyEvolvingStates.isEmpty() && modelContext.piecewiseConstantStates.isEmpty())
+      if (modelContext.positionVelocityCoordinates.isEmpty() && modelContext.piecewiseConstantStates.isEmpty())
         throw new RuntimeException("No variables added by the model.");
     }
   }

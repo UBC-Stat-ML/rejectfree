@@ -3,12 +3,12 @@ package ca.ubc.bps.refresh;
 import java.util.Collection;
 import java.util.Random;
 
-import ca.ubc.bps.state.ContinuousStateDependent;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocityDependent;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.JumpKernel;
 
-public class IndependentRefreshment extends ContinuousStateDependent implements JumpKernel
+public class IndependentRefreshment extends PositionVelocityDependent implements JumpKernel
 {
   private final boolean normalized;
   
@@ -26,11 +26,11 @@ public class IndependentRefreshment extends ContinuousStateDependent implements 
   
   public static void simulate(
       Random random, 
-      Collection<ContinuouslyEvolving> continuousCoordinates, 
+      Collection<PositionVelocity> continuousCoordinates, 
       boolean normalized)
   {
     double norm = 0.0;
-    for (ContinuouslyEvolving coordinate : continuousCoordinates)
+    for (PositionVelocity coordinate : continuousCoordinates)
     {
       final double current = random.nextGaussian();
       coordinate.velocity.set(current);
@@ -39,7 +39,7 @@ public class IndependentRefreshment extends ContinuousStateDependent implements 
     if (normalized)
     {
       norm = Math.sqrt(norm);
-      for (ContinuouslyEvolving coordinate : continuousCoordinates)
+      for (PositionVelocity coordinate : continuousCoordinates)
         coordinate.velocity.set(coordinate.velocity.get() / norm);
     }
   }

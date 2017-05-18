@@ -17,7 +17,7 @@ import bayonet.opt.DifferentiableFunction;
 import bayonet.opt.LBFGSMinimizer;
 import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.energies.Energy;
-import ca.ubc.bps.state.ContinuousStateDependent;
+import ca.ubc.bps.state.PositionVelocityDependent;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
@@ -32,7 +32,7 @@ import ca.ubc.pdmp.DeltaTime;
  * @author bouchard
  *
  */
-public class QuasiConvexTimer extends ContinuousStateDependent implements Clock
+public class QuasiConvexTimer extends PositionVelocityDependent implements Clock
 {
   private final PegasusSolver solver = new PegasusSolver();
   private final Energy energy;

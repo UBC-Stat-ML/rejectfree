@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
 
-import ca.ubc.bps.state.ContinuousStateDependent;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocityDependent;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.pdmp.Processor;
 
-public class WriteTrajectory extends ContinuousStateDependent implements Processor
+public class WriteTrajectory extends PositionVelocityDependent implements Processor
 {
-  final ContinuouslyEvolving variable;
+  final PositionVelocity variable;
   final Writer writer;
   
-  public WriteTrajectory(ContinuouslyEvolving variable, Writer writer)
+  public WriteTrajectory(PositionVelocity variable, Writer writer)
   {
     super(Collections.singletonList(variable));
     this.variable = variable;

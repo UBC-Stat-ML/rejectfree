@@ -7,13 +7,13 @@ import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.StateDependentBase;
 
-public abstract class ContinuousStateDependent extends StateDependentBase
+public abstract class PositionVelocityDependent extends StateDependentBase
 {
   // we use a list here to fix an ordering for the vector representation
-  protected final List<ContinuouslyEvolving> continuousCoordinates;
+  protected final List<PositionVelocity> continuousCoordinates;
   protected final boolean isPiecewiseLinear;
   
-  public ContinuousStateDependent(Collection<? extends Coordinate> requiredVariables)
+  public PositionVelocityDependent(Collection<? extends Coordinate> requiredVariables)
   {
     // maintain all the dependencies (some of which may not be continuously evolving)
     super(requiredVariables);
@@ -31,9 +31,9 @@ public abstract class ContinuousStateDependent extends StateDependentBase
       continuousCoordinates.get(i).extrapolateInPlace(deltaTime);
   }
   
-  private static boolean _isPiecewiseLinear(Collection<ContinuouslyEvolving> continuousCoordinates)
+  private static boolean _isPiecewiseLinear(Collection<PositionVelocity> continuousCoordinates)
   {
-    for (ContinuouslyEvolving coordinate : continuousCoordinates)
+    for (PositionVelocity coordinate : continuousCoordinates)
       if (!BPSStaticUtils.isPiecewiseLinear(coordinate))
         return false;
     return true;
@@ -42,7 +42,7 @@ public abstract class ContinuousStateDependent extends StateDependentBase
   private double [] extrapolateVector(double deltaTime, boolean forPosition)
   {
     extrapolate(deltaTime);
-    double [] result = ContinuouslyEvolving.toArray(continuousCoordinates, forPosition);
+    double [] result = PositionVelocity.toArray(continuousCoordinates, forPosition);
     extrapolate( - deltaTime);
     return result;
   }
@@ -69,11 +69,11 @@ public abstract class ContinuousStateDependent extends StateDependentBase
   
   public void setPosition(double [] position)
   {
-    ContinuouslyEvolving.set(continuousCoordinates, position, true);
+    PositionVelocity.set(continuousCoordinates, position, true);
   }
   
   public void setVelocity(double [] velocity)
   {
-    ContinuouslyEvolving.set(continuousCoordinates, velocity, false);
+    PositionVelocity.set(continuousCoordinates, velocity, false);
   }
 }

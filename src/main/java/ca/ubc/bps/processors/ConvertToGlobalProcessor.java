@@ -6,12 +6,12 @@ import java.util.List;
 import com.google.common.collect.TreeMultimap;
 
 import bayonet.math.NumericalUtils;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 
 public class ConvertToGlobalProcessor
 {
   final TreeMultimap<Double, LabeledSegment> sortedSegments = TreeMultimap.create();
-  final List<ContinuouslyEvolving> allVariables = new ArrayList<>();
+  final List<PositionVelocity> allVariables = new ArrayList<>();
   final GlobalProcessor processor;
   
   public ConvertToGlobalProcessor(GlobalProcessor processor)
@@ -26,7 +26,7 @@ public class ConvertToGlobalProcessor
 
   public void addTrajectory(Object key, Trajectory trajectory)
   {
-    ContinuouslyEvolving variable = new ContinuouslyEvolving(trajectory.dynamics, key);
+    PositionVelocity variable = new PositionVelocity(trajectory.dynamics, key);
     allVariables.add(variable);
     double globalTime = 0.0;
     for (int i = 0; i < trajectory.segments.size(); i++)
@@ -55,7 +55,7 @@ public class ConvertToGlobalProcessor
     {
       return globalDelta;
     }
-    public List<ContinuouslyEvolving> allVariables()
+    public List<PositionVelocity> allVariables()
     {
       return allVariables;
     }
@@ -64,7 +64,7 @@ public class ConvertToGlobalProcessor
       interpolatedDelta += delta;
       if (interpolatedDelta < -tolerance || interpolatedDelta > globalDelta + tolerance)
         throw new RuntimeException("Invalid interpolation: " + delta + "");
-      for (ContinuouslyEvolving var : allVariables)
+      for (PositionVelocity var : allVariables)
         var.extrapolateInPlace(delta);
     }
     private GlobalProcessorContext() {}
@@ -85,7 +85,7 @@ public class ConvertToGlobalProcessor
       processor.process(context);
       
       // move all the variables 
-      for (ContinuouslyEvolving var : allVariables)
+      for (PositionVelocity var : allVariables)
         var.extrapolateInPlace(context.globalDelta - context.interpolatedDelta);
       context.interpolatedDelta = 0.0;
       
@@ -122,9 +122,9 @@ public class ConvertToGlobalProcessor
   private static class LabeledSegment implements Comparable<LabeledSegment>
   {
     final TrajectorySegment next; // could be null
-    final ContinuouslyEvolving variable;
+    final PositionVelocity variable;
     
-    public LabeledSegment(ContinuouslyEvolving variable, TrajectorySegment next)
+    public LabeledSegment(PositionVelocity variable, TrajectorySegment next)
     {
       this.next = next;
       this.variable = variable;

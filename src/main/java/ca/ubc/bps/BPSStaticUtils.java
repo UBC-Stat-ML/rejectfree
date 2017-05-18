@@ -7,7 +7,7 @@ import java.util.Random;
 
 import com.google.common.collect.FluentIterable;
 
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.bps.state.Dynamics;
 import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.pdmp.Coordinate;
@@ -19,7 +19,7 @@ public class BPSStaticUtils
     return dynamics.getClass() == PiecewiseLinear.class;
   }
   
-  public static boolean isPiecewiseLinear(ContinuouslyEvolving coordinate)
+  public static boolean isPiecewiseLinear(PositionVelocity coordinate)
   {
     return isPiecewiseLinear(coordinate.dynamics);
   }
@@ -44,11 +44,11 @@ public class BPSStaticUtils
     return sum;
   }
   
-  public static List<ContinuouslyEvolving> continuousCoordinates(Collection<? extends Coordinate> coordinates)
+  public static List<PositionVelocity> continuousCoordinates(Collection<? extends Coordinate> coordinates)
   {
     if (!isSet(coordinates))
       throw new RuntimeException();
-    return FluentIterable.from(coordinates).filter(ContinuouslyEvolving.class).toList();
+    return FluentIterable.from(coordinates).filter(PositionVelocity.class).toList();
   }
   
   public static boolean isSet(Collection<?> collection)

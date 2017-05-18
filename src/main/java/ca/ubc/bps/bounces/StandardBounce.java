@@ -6,15 +6,15 @@ import java.util.Random;
 import org.jblas.DoubleMatrix;
 
 import ca.ubc.bps.energies.Energy;
-import ca.ubc.bps.state.ContinuousStateDependent;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocityDependent;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.pdmp.JumpKernel;
 
-public class StandardBounce extends ContinuousStateDependent implements JumpKernel
+public class StandardBounce extends PositionVelocityDependent implements JumpKernel
 {
   private final Energy energy;
 
-  public StandardBounce(List<ContinuouslyEvolving> requiredVariables, Energy energy)
+  public StandardBounce(List<PositionVelocity> requiredVariables, Energy energy)
   {
     super(requiredVariables);
     this.energy = energy;

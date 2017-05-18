@@ -11,8 +11,8 @@ import ca.ubc.bps.refresh.RefreshmentFactory.NoRefreshment;
 import ca.ubc.bps.refresh.RefreshmentFactory.NormDependent;
 import ca.ubc.bps.refresh.RefreshmentFactory.Standard;
 import ca.ubc.bps.refresh.RefreshmentFactory.Local;
-import ca.ubc.bps.state.ContinuousStateDependent;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocityDependent;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.bps.timers.HomogeneousPP;
 import ca.ubc.bps.timers.Intensity;
 import ca.ubc.bps.timers.ConstantIntensityAdaptiveThinning;
@@ -57,7 +57,7 @@ public interface RefreshmentFactory
     @Override
     public void addRefreshment(final PDMP pdmp) 
     {
-      List<ContinuouslyEvolving> _continuousCoordinates = BPSStaticUtils.continuousCoordinates(pdmp.coordinates);
+      List<PositionVelocity> _continuousCoordinates = BPSStaticUtils.continuousCoordinates(pdmp.coordinates);
       int _size = _continuousCoordinates.size();
       double _divide = (this.rate / ((double) _size));
       addLocal(pdmp, _divide);
@@ -83,7 +83,7 @@ public interface RefreshmentFactory
     @Override
     public void addRefreshment(final PDMP pdmp) 
     {
-      final List<ContinuouslyEvolving> continuousCoordinates = BPSStaticUtils.continuousCoordinates(pdmp.coordinates);
+      final List<PositionVelocity> continuousCoordinates = BPSStaticUtils.continuousCoordinates(pdmp.coordinates);
           
       pdmp.jumpProcesses.add(
           new JumpProcess(
@@ -93,7 +93,7 @@ public interface RefreshmentFactory
               new IndependentRefreshment(continuousCoordinates, normalized)));
     }
     
-    private class NormPotential extends ContinuousStateDependent implements Intensity
+    private class NormPotential extends PositionVelocityDependent implements Intensity
     {
       private NormPotential(Collection<? extends Coordinate> requiredVariables)
       {
@@ -115,14 +115,14 @@ public interface RefreshmentFactory
   
   public static void addLocal(PDMP pdmp, double rate)
   {
-    for (ContinuouslyEvolving coordinate : continuousCoordinates(pdmp.coordinates))
+    for (PositionVelocity coordinate : continuousCoordinates(pdmp.coordinates))
       add(pdmp, rate, singleton(coordinate), false);
   }
   
   public static void add(
       PDMP pdmp, 
       double rate, 
-      Collection<ContinuouslyEvolving> continuousCoordinates, 
+      Collection<PositionVelocity> continuousCoordinates, 
       boolean normalized)
   {
     pdmp.jumpProcesses.add(

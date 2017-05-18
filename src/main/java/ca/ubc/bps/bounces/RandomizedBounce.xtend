@@ -1,9 +1,7 @@
 package ca.ubc.bps.bounces
 
 import java.util.List
-import ca.ubc.bps.state.ContinuouslyEvolving
 import java.util.Random
-import ca.ubc.bps.state.ContinuousStateDependent
 
 import static extension xlinear.MatrixExtensions.*
 import static xlinear.MatrixOperations.*
@@ -11,13 +9,15 @@ import static xlinear.MatrixOperations.*
 import static java.lang.Math.*
 import ca.ubc.pdmp.JumpKernel
 import ca.ubc.bps.energies.Energy
+import ca.ubc.bps.state.PositionVelocity
+import ca.ubc.bps.state.PositionVelocityDependent
 
-public class RandomizedBounce extends ContinuousStateDependent implements JumpKernel  {
+public class RandomizedBounce extends PositionVelocityDependent implements JumpKernel  {
   
   val Energy energy
   val boolean completelyIgnoreIncomingAngle
 
-  new (List<ContinuouslyEvolving> requiredVariables, Energy energy, boolean completelyIgnoreIncomingAngle)
+  new (List<PositionVelocity> requiredVariables, Energy energy, boolean completelyIgnoreIncomingAngle)
   {
     super(requiredVariables)
     this.energy = energy

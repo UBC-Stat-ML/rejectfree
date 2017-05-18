@@ -5,12 +5,12 @@ import java.util.Random;
 
 import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.energies.Energy;
-import ca.ubc.bps.state.ContinuousStateDependent;
+import ca.ubc.bps.state.PositionVelocityDependent;
 import ca.ubc.pdmp.Clock;
 import ca.ubc.pdmp.Coordinate;
 import ca.ubc.pdmp.DeltaTime;
 
-public class ThinningTimer extends ContinuousStateDependent implements Clock
+public class ThinningTimer extends PositionVelocityDependent implements Clock
 {
   public final Energy energy;
   public final PoissonProcess intensityUpperBound;

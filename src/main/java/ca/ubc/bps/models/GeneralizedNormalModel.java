@@ -9,7 +9,7 @@ import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.energies.EnergyComposedWithHyperbolic;
 import ca.ubc.bps.energies.GeneralizedNormalEnergy;
 import ca.ubc.bps.factory.ModelBuildingContext;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.bps.state.Hyperbolic;
 import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.bps.timers.QuasiConvexTimer;
@@ -51,7 +51,7 @@ public class GeneralizedNormalModel implements Model
       throw new RuntimeException("Current implementation not irreducible in 1d for very fat tails");
     if (initializeStatesFromStationary)
       throw new RuntimeException("Not yet supported");
-    List<ContinuouslyEvolving> vars = context.buildAndRegisterContinuouslyEvolvingStates(size);
+    List<PositionVelocity> vars = context.buildAndRegisterPositionVelocityCoordinates(size);
     likelihood.setup(context, vars);
     GeneralizedNormalEnergy energy = new GeneralizedNormalEnergy(alpha);
     if (context.dynamics() instanceof PiecewiseLinear)

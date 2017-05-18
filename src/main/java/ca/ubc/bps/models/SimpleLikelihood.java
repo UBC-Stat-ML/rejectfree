@@ -11,7 +11,7 @@ import blang.inits.experiments.ExperimentResults;
 import briefj.BriefIO;
 import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.factory.ModelBuildingContext;
-import ca.ubc.bps.state.ContinuouslyEvolving;
+import ca.ubc.bps.state.PositionVelocity;
 
 /**
  * Used to cover simple cases where all continuously evolving variables in the model are points of 
@@ -36,12 +36,12 @@ public abstract class SimpleLikelihood<T> implements Likelihood
   public int generatedDataSparsity = 1;
 
   @Override
-  public void setup(ModelBuildingContext context, List<ContinuouslyEvolving> vars)
+  public void setup(ModelBuildingContext context, List<PositionVelocity> vars)
   {
     Writer writer = results.getAutoClosedBufferedWriter("observations.csv");
     BriefIO.println(writer, "index,observation");
     int i = 0;
-    for (ContinuouslyEvolving latent : vars)
+    for (PositionVelocity latent : vars)
     {
       if (i % generatedDataSparsity == 0)
       {
@@ -54,5 +54,5 @@ public abstract class SimpleLikelihood<T> implements Likelihood
   }
   
   public abstract T sampleDatapoint(double latentVariable, Random random);
-  public abstract BPSPotential createLikelihoodPotential(ContinuouslyEvolving latentVariable, T observation);
+  public abstract BPSPotential createLikelihoodPotential(PositionVelocity latentVariable, T observation);
 }
