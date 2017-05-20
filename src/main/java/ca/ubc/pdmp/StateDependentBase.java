@@ -12,7 +12,7 @@ public abstract class StateDependentBase implements StateDependent
   }
 
   @Override
-  public final Collection<? extends Coordinate> requiredVariables()
+  public Collection<? extends Coordinate> requiredVariables()
   {
     return requiredVariables;
   }

@@ -9,8 +9,6 @@ import ca.ubc.pdmp.Coordinate;
 public class PositionVelocity implements Coordinate
 {
   public final MutableDouble position;
-  
-  // since it is continuously evolving, it necessarily has a velocity
   public final MutableDouble velocity;
   
   public final Dynamics dynamics;
