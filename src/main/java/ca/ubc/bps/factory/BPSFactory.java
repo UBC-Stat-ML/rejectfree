@@ -1,7 +1,6 @@
 package ca.ubc.bps.factory;
 
 
-import static ca.ubc.bps.factory.BPSFactoryHelpers.all;
 import static ca.ubc.bps.factory.BPSFactoryHelpers.none;
 import static ca.ubc.bps.factory.BPSFactoryHelpers.isotropicGlobal;
 import static ca.ubc.bps.factory.BPSFactoryHelpers.linear;
@@ -69,8 +68,8 @@ public class BPSFactory extends Experiment
   @Arg @DefaultValue("none")
   public MonitoredIndices memorize = none;
   
-  @Arg @DefaultValue("all")
-  public MonitoredIndices summarize = all;
+  @Arg @DefaultValue("none")
+  public MonitoredIndices summarize = none;
   
   @Arg @DefaultValue({"1", "2", "3", "4"})
   public List<Integer> summarizedMomentDegrees = Arrays.asList(1, 2, 3, 4);
