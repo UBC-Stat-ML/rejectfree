@@ -3,6 +3,7 @@ package ca.ubc.bps.timers;
 import java.util.Collection;
 import java.util.Random;
 
+import bayonet.math.NumericalUtils;
 import ca.ubc.bps.BPSStaticUtils;
 import ca.ubc.bps.energies.Energy;
 import ca.ubc.bps.state.PositionVelocityDependent;
@@ -45,7 +46,7 @@ public class ThinningTimer extends PositionVelocityDependent implements Clock
     double [] position = extrapolatePosition(deltaT);
     double num = StandardIntensity.canonicalRate(velocity, energy.gradient(position));
     double denom = intensityUpperBound.evaluate(deltaT);
-    if (denom < num)
+    if (denom < num - NumericalUtils.THRESHOLD)
       throw new RuntimeException();
     return num / denom;
   }
