@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import blang.inits.Arg;
+import blang.inits.DefaultValue;
 import briefj.BriefIO;
 import ca.ubc.bps.bounces.FlipBounce;
 import ca.ubc.bps.bounces.StandardBounce;
@@ -25,17 +26,17 @@ public class SparseNetworkModel implements Model
   @Arg
   public File degreeFile;
   
-  @Arg
-  public double wStar;
+  @Arg   @DefaultValue("6.5427") 
+  public double wStar = 6.5427;
   
-  @Arg
-  public double tau;
+  @Arg @DefaultValue("1.0")
+  public double tau = 1.0;
 
-  @Arg
-  public double sigma;
+  @Arg   @DefaultValue("0.5")
+  public double sigma = 0.5;
   
   RefreshmentFactory refreshment = null; // Will be set by SparseNetMain
-  protected boolean allowNullRef = false;
+  //protected boolean allowNullRef = false;
   
   List<PositionVelocity> variables;
   PositionVelocity sum;
@@ -55,10 +56,11 @@ public class SparseNetworkModel implements Model
     variables = augmentedVars.subList(0, nNodes);
     sum = augmentedVars.get(nNodes);
     
-    if (refreshment != null && allowNullRef) // hack: needed by the stan superclass
+    if (refreshment != null) // && allowNullRef) // hack: needed by the stan superclass
       setupRefresh(context);
     
     register(context, new QuadraticTimer(sum, wStar), new StandardBounce(variables, ones));
+    //register(context, new NaiveQuadraticTimer(variables, sum, wStar), new StandardBounce(variables, ones)); 
     
     for (int i = 0; i < variables.size(); i++)
     {
