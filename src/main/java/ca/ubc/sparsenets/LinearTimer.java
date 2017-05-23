@@ -13,33 +13,24 @@ import ca.ubc.pdmp.DeltaTime;
 public class LinearTimer implements Clock
 {
   private final PositionVelocity w; 
-  private final double tau;
+  private final double constant;
   
-  public LinearTimer(PositionVelocity w, double tau)
+  public LinearTimer(PositionVelocity w, double constant)
   {
     this.w = w;
-    this.tau = tau;
+    this.constant = constant;
   }
 
   @Override
   public Collection<? extends Coordinate> requiredVariables()
   {
-   // TODO: add tau once resampled
     return Collections.singleton(w); 
-  }
-  
-  private double tau()
-  {
-    // TODO: change once sigma resampled
-    return tau;  
   }
 
   @Override
   public DeltaTime next(Random random)
   {
-    double tau = tau();
-    
-    if (tau == 0.0)
+    if (constant == 0.0)
       return DeltaTime.infinity();
     
     double v = w.velocity.get();
@@ -48,7 +39,7 @@ public class LinearTimer implements Clock
       return DeltaTime.infinity();
     
     double e = BPSStaticUtils.sampleUnitRateExponential(random);
-    double time = e / v / tau;
+    double time = e / v / constant;
     return DeltaTime.isEqualTo(time);
   }
 }
