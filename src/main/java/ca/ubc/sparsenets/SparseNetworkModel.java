@@ -2,24 +2,20 @@ package ca.ubc.sparsenets;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import blang.inits.Arg;
 import blang.inits.DefaultValue;
 import briefj.BriefIO;
-import ca.ubc.bps.bounces.FlipBounce;
-import ca.ubc.bps.bounces.StandardBounce;
-import ca.ubc.bps.energies.Energy;
+import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.factory.ModelBuildingContext;
 import ca.ubc.bps.models.Model;
-import ca.ubc.bps.refresh.RefreshmentFactory;
 import ca.ubc.bps.state.PiecewiseLinear;
 import ca.ubc.bps.state.PositionVelocity;
-import ca.ubc.pdmp.Clock;
-import ca.ubc.pdmp.JumpKernel;
-import ca.ubc.pdmp.JumpProcess;
-import ca.ubc.pdmp.PDMP;
+import ca.ubc.bps.timers.ConstantIntensityAdaptiveThinning;
+import ca.ubc.bps.timers.StandardIntensity;
+import ca.ubc.bps.timers.Superposition;
 
 public class SparseNetworkModel implements Model
 {
@@ -34,12 +30,6 @@ public class SparseNetworkModel implements Model
 
   @Arg   @DefaultValue("0.5")
   public double sigma = 0.5;
-  
-  RefreshmentFactory refreshment = null; // Will be set by SparseNetMain
-  //protected boolean allowNullRef = false;
-  
-  List<PositionVelocity> variables;
-  PositionVelocity sum;
 
   @Override
   public void setup(ModelBuildingContext context, boolean initializeStatesFromStationary)
@@ -52,64 +42,24 @@ public class SparseNetworkModel implements Model
     List<Integer> degrees = readDegrees();
     int nNodes = degrees.size();
     
-    List<PositionVelocity> augmentedVars = context.buildAndRegisterPositionVelocityCoordinates(nNodes + 1); // use # node + 1 for the sum
-    variables = augmentedVars.subList(0, nNodes);
-    sum = augmentedVars.get(nNodes);
+    List<PositionVelocity> variables = context.buildAndRegisterPositionVelocityCoordinates(nNodes);
     
-    if (refreshment != null) // && allowNullRef) // hack: needed by the stan superclass
-      setupRefresh(context);
+    // quadratic term
+    QuadraticEnergy quadEnergy = new QuadraticEnergy(wStar, tau);
+    StandardIntensity quadIntensity = new StandardIntensity(variables, quadEnergy);
+    ConstantIntensityAdaptiveThinning quadTimer = new ConstantIntensityAdaptiveThinning(variables, quadIntensity);
+    BPSPotential quadPotential = new BPSPotential(quadEnergy, quadTimer);
     
-    register(context, new QuadraticTimer(sum, wStar), new StandardBounce(variables, ones));
-    //register(context, new NaiveQuadraticTimer(variables, sum, wStar), new StandardBounce(variables, ones)); 
+    // linear term
+    LinearEnergy linEnergy = new LinearEnergy(degrees, sigma);
+    LinearTimer linTimer = new LinearTimer(variables, degrees, sigma);
+    BPSPotential linPotential = new BPSPotential(linEnergy, linTimer);
     
-    for (int i = 0; i < variables.size(); i++)
-    {
-      PositionVelocity w = variables.get(i);
-      register(context, new LinearTimer(w, tau), new FlipBounce(Collections.singletonList(w)));
-      register(context, new LogTimer(w, degrees.get(i), sigma), new FlipBounce(Collections.singletonList(w)));
-    }
-    
-    // TODO: add sampling of discrete variables [LATER; this will make it harder to compare to Stan]
-    // TODO: add sampling of global parameters  [LATER; this will make it harder to compare to Stan]
-  }
-
-  private void register(ModelBuildingContext context, Clock timer, JumpKernel kernel)
-  {
-    context.registerJumpProcess(
-        new JumpProcess(
-            timer, 
-            new UpdateSumJumpKernel(
-                sum, 
-                kernel))); 
-  }
-
-  private Energy ones = new Energy() 
-  {
-    double [] ones = null;
-    @Override
-    public double[] gradient(double[] point)
-    {
-      if (ones == null)
-      {
-        ones = new double[point.length];
-        for (int i = 0; i < point.length; i++)
-          ones[i] = 1.0;
-      }
-      return ones;
-    }
-    @Override
-    public double valueAt(double[] point)
-    {
-      throw new RuntimeException();
-    }
-  };
-
-  private void setupRefresh(ModelBuildingContext context)
-  {
-    PDMP dummy = new PDMP(variables);
-    refreshment.addRefreshment(dummy);
-    for (JumpProcess p : dummy.jumpProcesses)
-      register(context, p.clock, p.kernel);
+    List<BPSPotential> potentials = Arrays.asList(quadPotential, linPotential);
+    context.registerBPSPotential(Superposition.createSuperpositionBPSPotential(potentials));
+   
+//    // TODO: add sampling of discrete variables [LATER; this will make it harder to compare to Stan]
+//    // TODO: add sampling of global parameters  [LATER; this will make it harder to compare to Stan]
   }
 
   protected List<Integer> readDegrees()
@@ -121,9 +71,4 @@ public class SparseNetworkModel implements Model
     return result;
   }
 
-  public void initSum()
-  {
-    UpdateSumJumpKernel.recompute(true,  sum.position, variables);
-    UpdateSumJumpKernel.recompute(false, sum.velocity, variables);
-  }
 }
