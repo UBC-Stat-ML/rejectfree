@@ -18,6 +18,8 @@ public class QuadraticTimer implements Clock
   public QuadraticTimer(PositionVelocity sum, double wStar)
   {
     this.sum = sum;
+    if (wStar < 0)
+      throw new RuntimeException();
     this.wStar = wStar;
   }
 
@@ -45,7 +47,7 @@ public class QuadraticTimer implements Clock
     double v = sum.velocity.get();
     
     if (v < 0)
-      return DeltaTime.isEqualTo(- (wStar + x) / v);
+      return DeltaTime.infinity(); // positivity constraints will hit first
     
     double xPlusW = x + wStar;
     double e = BPSStaticUtils.sampleUnitRateExponential(random);

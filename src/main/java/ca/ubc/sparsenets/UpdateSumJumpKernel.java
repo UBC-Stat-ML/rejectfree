@@ -65,9 +65,9 @@ public class UpdateSumJumpKernel implements JumpKernel
     sumCoord.set(sum); 
   }
 
-  private void updateByDelta(MutableDouble position, double xBU, MutableDouble sum)
+  private void updateByDelta(MutableDouble coord, double BU, MutableDouble sum)
   {
-    double delta = position.get() - xBU;
+    double delta = coord.get() - BU;
     sum.set(sum.get() + delta); 
   }
 }

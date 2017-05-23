@@ -35,6 +35,7 @@ public class SparseNetworkModel implements Model
   public double sigma;
   
   RefreshmentFactory refreshment = null; // Will be set by SparseNetMain
+  protected boolean allowNullRef = false;
   
   List<PositionVelocity> variables;
   PositionVelocity sum;
@@ -54,7 +55,7 @@ public class SparseNetworkModel implements Model
     variables = augmentedVars.subList(0, nNodes);
     sum = augmentedVars.get(nNodes);
     
-    if (refreshment != null) // hack: needed by the stan superclass
+    if (refreshment != null && allowNullRef) // hack: needed by the stan superclass
       setupRefresh(context);
     
     register(context, new QuadraticTimer(sum, wStar), new StandardBounce(variables, ones));
@@ -106,10 +107,7 @@ public class SparseNetworkModel implements Model
     PDMP dummy = new PDMP(variables);
     refreshment.addRefreshment(dummy);
     for (JumpProcess p : dummy.jumpProcesses)
-    {
-      UpdateSumJumpKernel kernelWithUpdate = new UpdateSumJumpKernel(sum, p.kernel);
-      context.registerJumpProcess(new JumpProcess(p.clock, kernelWithUpdate));
-    }
+      register(context, p.clock, p.kernel);
   }
 
   protected List<Integer> readDegrees()
