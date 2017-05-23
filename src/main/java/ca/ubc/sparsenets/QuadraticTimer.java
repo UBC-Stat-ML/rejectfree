@@ -52,6 +52,9 @@ public class QuadraticTimer implements Clock
     double xPlusW = x + wStar;
     double e = BPSStaticUtils.sampleUnitRateExponential(random);
     double time = (-xPlusW + Math.sqrt(xPlusW * xPlusW + e)) / v;
+    
+    //NumericalUtils.checkIsClose(e, Math.pow(x + time * v + wStar, 2) - Math.pow(x + wStar, 2));
+    
     return DeltaTime.isEqualTo(time);
   }
 
