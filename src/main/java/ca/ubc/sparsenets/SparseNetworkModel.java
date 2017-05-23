@@ -58,7 +58,8 @@ public class SparseNetworkModel implements Model
     if (refreshment != null && allowNullRef) // hack: needed by the stan superclass
       setupRefresh(context);
     
-    register(context, new QuadraticTimer(sum, wStar), new StandardBounce(variables, ones));
+    //register(context, new QuadraticTimer(sum, wStar), new StandardBounce(variables, ones));
+    register(context, new NaiveQuadraticTimer(variables, sum, wStar), new StandardBounce(variables, ones));
     
     for (int i = 0; i < variables.size(); i++)
     {
