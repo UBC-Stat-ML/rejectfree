@@ -19,6 +19,7 @@ class PDMPSimulatorTest {
     val BPSFactory factory = new BPSFactory => [
       model = isotropicLocal(10)
       forbidOutputFiles = true
+      memorize = subset(#[0]) 
       stoppingRule = StoppingCriterion.byStochasticProcessTime(1_000_000)
     ]
     println("Running sparse")
