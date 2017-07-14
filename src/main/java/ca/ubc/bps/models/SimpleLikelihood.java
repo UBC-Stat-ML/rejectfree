@@ -31,7 +31,7 @@ public abstract class SimpleLikelihood<T> implements Likelihood
   @GlobalArg
   public ExperimentResults results = new ExperimentResults();
   
-  @Arg(description = "If 1, generate one data point per latent, otherwise, skip ever n")
+  @Arg(description = "If 1, generate one data point per latent, otherwise, skip every n")
                       @DefaultValue("1")
   public int generatedDataSparsity = 1;
 
