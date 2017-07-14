@@ -45,7 +45,7 @@ public class RandomizedBounce extends PositionVelocityDependent implements JumpK
       }
       oldVelocity = oldVelocity / oldVelocity.norm
       if (oldVelocity.dot(gradient) < 0) {
-        oldVelocity = oldVelocity * 1.0
+        oldVelocity = oldVelocity * -1.0
       }
     }
       
