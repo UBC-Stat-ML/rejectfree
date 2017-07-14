@@ -95,7 +95,7 @@ public class PDMPSimulator
   private long                 numberOfQueuePolls, 
                                numberOfJumps;  
 
-  private long                 startTimeMilliSeconds;
+  private long                 timeMilliSeconds;
   private double               totalProcessTime;
   
   private double               maxTrajectoryLengthPerChunk = DEFAULT_CHUNK_LENGTH;
@@ -115,7 +115,7 @@ public class PDMPSimulator
     this.totalProcessTime = 0.0;
     this.numberOfQueuePolls = 0;
     this.numberOfJumps = 0;
-    this.startTimeMilliSeconds = System.currentTimeMillis();
+    this.timeMilliSeconds = System.currentTimeMillis();
     this.random = random;
     
     loop:while (inputStoppingRule.stochasticProcessTime - totalProcessTime > 0)
@@ -135,7 +135,7 @@ public class PDMPSimulator
       if (!computeBudgetPositive())
         break loop;
     }
-    
+    this.timeMilliSeconds = System.currentTimeMillis() - timeMilliSeconds;
     printSummaryStatistics();
   }
   
@@ -190,7 +190,7 @@ public class PDMPSimulator
   
   private boolean computeBudgetPositive()
   {
-    if (System.currentTimeMillis() - startTimeMilliSeconds 
+    if (System.currentTimeMillis() - timeMilliSeconds 
         > stoppingRule.wallClockTimeMilliseconds)
       return false;
     
@@ -465,7 +465,7 @@ public class PDMPSimulator
   public String summaryStatistics() 
   {
     return 
-        "wallClockTimeMillis\t" + (System.currentTimeMillis() - startTimeMilliSeconds) + "\n" +
+        "wallClockTimeMillis\t" + timeMilliSeconds + "\n" +
         "trajectoryLength\t" + totalProcessTime + "\n" +
         "nJumps\t" + getNumberOfJumps() + "\n" + 
         "nQueuePolls\t" + getNumberOfQueuePolls() + "\n";
