@@ -14,13 +14,11 @@ import ca.ubc.bps.refresh.RefreshmentFactory.NormDependent
 import ca.ubc.bps.refresh.RefreshmentFactory.Local
 import ca.ubc.bps.factory.InitializationStrategy.Zero
 import ca.ubc.bps.factory.InitializationStrategy.Stationary
+import ca.ubc.bps.factory.InitializationStrategy.NoInit
 
 class BPSFactoryHelpers { 
   
-  
   // Refreshments
-  
-  
   def static Standard global(double globalRate) {
     return new Standard => [
       rate = globalRate
@@ -37,7 +35,6 @@ class BPSFactoryHelpers {
     return new NormDependent
   }
 
-  
   // Bounces
   public static BounceFactory standard = new BounceFactory.Standard
   public static final BounceFactory flip = new BounceFactory.Flip
@@ -89,8 +86,7 @@ class BPSFactoryHelpers {
   }
   
   // Initializations
-  
   public static final Zero zero = new Zero
   public static final Stationary stationary = new Stationary
-  
+  public static final NoInit noInit = new NoInit
 }

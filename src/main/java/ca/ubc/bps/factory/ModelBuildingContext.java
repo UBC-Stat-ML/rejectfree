@@ -28,7 +28,7 @@ public class ModelBuildingContext
   LinkedHashSet<PiecewiseConstant<?>> piecewiseConstantStates = new LinkedHashSet<>();
   public ModCount modCount = new ModCount();
   
-  private final Dynamics dynamics;
+  public final Dynamics dynamics;
   private final BounceFactory bounce;
   
   public ModelBuildingContext(Random initializationRandom, Dynamics dynamics, BounceFactory bounce)
@@ -43,12 +43,18 @@ public class ModelBuildingContext
   }
   public List<PositionVelocity> buildAndRegisterPositionVelocityCoordinates(int dim) 
   {
-    if (positionVelocityCoordinates != null)
-      throw new RuntimeException();
-    positionVelocityCoordinates = PositionVelocity.buildArray(dim, dynamics, modCount);
-    setOfVariables = new HashSet<>(positionVelocityCoordinates);
-    return positionVelocityCoordinates;
+    List<PositionVelocity> result = PositionVelocity.buildArray(dim, dynamics, modCount);
+    registerPositionVelocityCoordinates(result);
+    return result;
   }
+  public void registerPositionVelocityCoordinates(List<PositionVelocity> positionVelocityCoordinates)
+  {
+    if (this.positionVelocityCoordinates != null)
+      throw new RuntimeException();
+    this.positionVelocityCoordinates = positionVelocityCoordinates;
+    setOfVariables = new HashSet<>(positionVelocityCoordinates);
+  }
+  
   public void registerBPSPotential(BPSPotential potential)
   {
     // find which variables bounce: those that are continuously evolving

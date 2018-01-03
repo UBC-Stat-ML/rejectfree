@@ -60,7 +60,6 @@ public class QuasiConvexTimer extends PositionVelocityDependent implements Clock
   @Override
   public DeltaTime next(Random random)
   {
-    // go to minimum energy for free
     final double minTime = lineMinimize();
     if (minTime < 0.0)
       throw new RuntimeException();
@@ -87,7 +86,6 @@ public class QuasiConvexTimer extends PositionVelocityDependent implements Clock
         if (delta < - NumericalUtils.THRESHOLD)
         {
           System.err.println(
-//          throw new RuntimeException(
             "Did not expect negative delta. If the following values are small this could be just a numerical issue: " +
               "Delta=" + delta + ", " + 
               "time=" + time);
@@ -98,7 +96,6 @@ public class QuasiConvexTimer extends PositionVelocityDependent implements Clock
     double upperBound = findUpperBound2(lineSolvingFunction);
     if (Double.isInfinite(lineSolvingFunction.value(upperBound)))
       upperBound = shrinkUpperBound2(upperBound, lineSolvingFunction);
-    
     double time2 = solver.solve(10_000, lineSolvingFunction, 0.0, upperBound);
     return DeltaTime.isEqualTo(minTime + time2);
   }
@@ -136,6 +133,7 @@ public class QuasiConvexTimer extends PositionVelocityDependent implements Clock
     }
   }
 
+  public static double FAR_POINT_FOR_LINE_SEARCH_TO_CALL_INF = 100;
   private double lineMinimize()
   {
     LineMinimizationObjective lineRestricted = new LineMinimizationObjective();
@@ -177,6 +175,12 @@ public class QuasiConvexTimer extends PositionVelocityDependent implements Clock
       if (lineRestricted.value(1e-5) > lineRestricted.value(0.0))
         return 0.0;
       
+      if (lineRestricted.value(FAR_POINT_FOR_LINE_SEARCH_TO_CALL_INF) == lineRestricted.value(0.0))
+        return Double.POSITIVE_INFINITY;
+
+      if (lineRestricted.value(FAR_POINT_FOR_LINE_SEARCH_TO_CALL_INF) > lineRestricted.value(2 * FAR_POINT_FOR_LINE_SEARCH_TO_CALL_INF))
+        return Double.POSITIVE_INFINITY;
+      
       double upperBound = findUpperBound1(lineRestricted);
       if (Double.isNaN(upperBound))
         return Double.POSITIVE_INFINITY;
@@ -191,14 +195,14 @@ public class QuasiConvexTimer extends PositionVelocityDependent implements Clock
   private static final double DELTA = 1.0;
   private static final int maxNIterations = Double.MAX_EXPONENT - 1;
 
-  private static double findUpperBound1(UnivariateFunction lineSolvingFunction)
+  private double findUpperBound1(UnivariateFunction lineSolvingFunction)
   {
     double result = 2.0e-4;
     for (int i = 0; i < maxNIterations; i++)
     {
       double value = lineSolvingFunction.value(result);
       if (value == Double.POSITIVE_INFINITY || 
-          lineSolvingFunction.value(result + 1e-5) > value) // Not using derivative here to handle not linear dynamics
+          lineSolvingFunction.value(result + 1e-5) >= value) // Not using derivative here to handle not linear dynamics
         return result;
       else
         result *= 2.0;
@@ -217,7 +221,7 @@ public class QuasiConvexTimer extends PositionVelocityDependent implements Clock
     for (int i = 0; i < maxNIterations; i++)
     {
       double value = lineSolvingFunction.value(result) ;
-      if (value < 0.0)
+      if (value <= 0.0)
         return result;
       else
         result *= 2.0;

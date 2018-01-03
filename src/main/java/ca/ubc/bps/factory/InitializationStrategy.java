@@ -15,8 +15,9 @@ import ca.ubc.bps.factory.InitializationStrategy.Zero;
 import ca.ubc.bps.factory.InitializationStrategy.Stationary;
 import ca.ubc.bps.factory.InitializationStrategy.Far;
 import ca.ubc.bps.factory.InitializationStrategy.FromCSVFile;
+import ca.ubc.bps.factory.InitializationStrategy.NoInit;
 
-@Implementations({Zero.class, Stationary.class, Far.class, FromCSVFile.class})
+@Implementations({Zero.class, Stationary.class, Far.class, FromCSVFile.class, NoInit.class})
 public interface InitializationStrategy
 {
   public boolean requestStationarySampling();
@@ -40,6 +41,20 @@ public interface InitializationStrategy
         coordinate.position.set(valueForEachPositionCoordinate);
     }
     
+  }
+  
+  public static class NoInit implements InitializationStrategy
+  {
+    @Override
+    public boolean requestStationarySampling() 
+    {
+      return false;
+    }
+
+    @Override
+    public void initializePositions(Collection<PositionVelocity> positionVelocityCoordinates) 
+    {
+    }
   }
   
   public static class FromCSVFile implements InitializationStrategy

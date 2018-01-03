@@ -42,7 +42,6 @@ public class PDMPSimulator
     buildCaches();
   }
   
-  
   ///// Permanent caches : 
 
   private final int numberOfJumpProcesses;
@@ -429,7 +428,6 @@ public class PDMPSimulator
       return result;
     }
   }
-  
   
   //// Setters and getters
   

@@ -15,7 +15,7 @@ public class PositionVelocity implements Coordinate
   
   public final Object key;
   
-  private PositionVelocity(MutableDouble position, MutableDouble velocity, Dynamics dynamics, Object key)
+  public PositionVelocity(MutableDouble position, MutableDouble velocity, Dynamics dynamics, Object key)
   {
     this.position = position;
     this.velocity = velocity;

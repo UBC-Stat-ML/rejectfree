@@ -64,7 +64,7 @@ public class FixedPrecisionNormalModel implements Model
       vars.get(i).position.set(vector.get(i));  
   }
   
-  public class SparseDecomposition
+  public static class SparseDecomposition
   {
     public List<Integer> 
       edgeEndPoints1 = new ArrayList<>(),
@@ -98,7 +98,7 @@ public class FixedPrecisionNormalModel implements Model
     }
   }
   
-  protected SparseDecomposition sparseDecomposition(Matrix precision)
+  public static SparseDecomposition sparseDecomposition(Matrix precision)
   {
     final SparseDecomposition result = new SparseDecomposition();
     final SparseMatrix counts = MatrixOperations.sparse(precision.nRows());
@@ -122,7 +122,7 @@ public class FixedPrecisionNormalModel implements Model
     return result;
   }
   
-  public void setupLocal(ModelBuildingContext context, Matrix precision, List<PositionVelocity> variables)
+  public static void setupLocal(ModelBuildingContext context, Matrix precision, List<PositionVelocity> variables)
   {
     SparseDecomposition decomp = sparseDecomposition(precision);
     for (int i = 0; i < decomp.subMatrices_2by2.size(); i++)

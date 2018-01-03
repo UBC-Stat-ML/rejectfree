@@ -11,7 +11,7 @@ import ca.ubc.pdmp.DeltaTime;
 
 /**
  * An adaptive thinning timer **assuming that for a bounded time interval, the max of the 
- * two end-points bounds the function**. This holds for example when the intensity function is 
+ * two end-points bounds the function**. This holds for example when the intensity function  
  * has a single global connected region of minimum intensity. 
  * 
  * These cases could often (always?) be solved using the more general NumericalUnimodalInversionTimer but 
