@@ -59,9 +59,16 @@ public class NormalClock extends PositionVelocityDependent implements Clock
       xv = dotProd(x, v);
       vv = dotProd(v, v);
     }
+    
+    if (Double.isNaN(xv) || Double.isNaN(vv))
+      throw new RuntimeException();
+    
     final double e = generateUnitRateExponential(random);
     
     final double delta = normalCollisionTime(e, xv, vv);
+    
+    if (Double.isNaN(delta))
+      return DeltaTime.infinity(); // This arises when the factor is part of a local decomposition where the energy is decreasing on (0, infty), e.g. pseudo-precision (0, -1; -1, 0)
     
     return DeltaTime.isEqualTo(delta);
   }

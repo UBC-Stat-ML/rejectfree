@@ -28,5 +28,4 @@ public class BrownianMotion implements PrecisionBuilder
     }
     return result;
   }
-
 }
