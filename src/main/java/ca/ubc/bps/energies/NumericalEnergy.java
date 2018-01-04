@@ -11,7 +11,7 @@ package ca.ubc.bps.energies;
  */
 public interface NumericalEnergy extends Energy 
 {
-  public static double ACCURACY = 1e-5;
+  public static double REL_ACCURACY = 0.01;
   public static double STARTING_DELTA = 1.0;
   public static int MAX_ITERS = 100;
   
@@ -28,7 +28,7 @@ public interface NumericalEnergy extends Energy
   {
     double lastEstimate = Double.NaN;
     double delta = STARTING_DELTA;
-    double curAcc = Double.NaN;
+    double curRelAcc = Double.NaN;
     for (int iteration = 0; iteration < MAX_ITERS; iteration++)
     {
       final double eval0 = energy.valueAt(point);
@@ -39,12 +39,12 @@ public interface NumericalEnergy extends Energy
       final double eval1 = energy.valueAt(point);
       point[i] = x0;
       final double estimate = (eval1 - eval0) / (x1 - x0);
-      curAcc = Math.abs(lastEstimate - estimate);
-      if (curAcc < ACCURACY)
+      curRelAcc = Math.abs((lastEstimate - estimate)/estimate);
+      if (curRelAcc < REL_ACCURACY)
         return estimate;
       delta /= 2.0;
       lastEstimate = estimate;
     }
-    throw new RuntimeException("Req accuracy not obtained. Cur accuracy is " + curAcc);
+    throw new RuntimeException("Req accuracy not obtained. Cur accuracy is " + curRelAcc);
   }
 }
