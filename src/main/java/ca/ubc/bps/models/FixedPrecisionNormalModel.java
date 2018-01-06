@@ -8,6 +8,7 @@ import blang.inits.Arg;
 import blang.inits.DefaultValue;
 import ca.ubc.bps.energies.NormalEnergy;
 import ca.ubc.bps.factory.ModelBuildingContext;
+import ca.ubc.bps.models.Likelihood.None;
 import ca.ubc.bps.BPSPotential;
 import ca.ubc.bps.state.PositionVelocity;
 import ca.ubc.bps.state.IsotropicHamiltonian;
@@ -39,7 +40,8 @@ public class FixedPrecisionNormalModel implements Model
       throw new RuntimeException();
     Matrix precisionMatrix = precision.build();
     List<PositionVelocity> vars = context.buildAndRegisterPositionVelocityCoordinates(precisionMatrix.nCols());
-    if (initializeToStationary)
+    if (initializeToStationary || 
+        !(likelihood instanceof None)) // the likelihood may require having the prior setup, in case data needs to be generated
       initializeToStationary(vars, precisionMatrix, context.initializationRandom);
     
     if (context.dynamics() instanceof PiecewiseLinear)

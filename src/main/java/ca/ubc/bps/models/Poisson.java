@@ -26,13 +26,19 @@ import ca.ubc.pdmp.DeltaTime;
 public class Poisson extends SimpleLikelihood<Integer>
 {
   @Override
-  public Integer sampleDatapoint(double latentVariable, Random random)
+  protected Integer sampleDatapoint(double latentVariable, Random random)
   {
     final PoissonDistribution pd = new PoissonDistribution(new Random2RandomGenerator(random), 
         Math.exp(latentVariable), 
         PoissonDistribution.DEFAULT_EPSILON, 
         PoissonDistribution.DEFAULT_MAX_ITERATIONS);
     return pd.sample(); 
+  } 
+  
+  @Override
+  protected Integer parse(String string)
+  {
+    return Integer.parseInt(string);
   }
 
   @Override

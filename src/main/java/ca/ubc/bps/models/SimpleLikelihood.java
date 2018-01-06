@@ -1,7 +1,9 @@
 package ca.ubc.bps.models;
 
+import java.io.File;
 import java.io.Writer;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import blang.inits.Arg;
@@ -26,7 +28,8 @@ import ca.ubc.bps.state.PositionVelocity;
  */
 public abstract class SimpleLikelihood<T> implements Likelihood
 {
-  // TODO: offer option to load data instead of generating it
+  @Arg
+  public Optional<File> dataFile = Optional.empty();
   
   @GlobalArg
   public ExperimentResults results = new ExperimentResults();
@@ -37,6 +40,31 @@ public abstract class SimpleLikelihood<T> implements Likelihood
 
   @Override
   public void setup(ModelBuildingContext context, List<PositionVelocity> vars)
+  {
+    if (dataFile.isPresent())
+      setupWithLoadedData(context, vars);
+    else
+      setupWithGeneratedData(context, vars);
+  }
+  
+  private void setupWithLoadedData(ModelBuildingContext context, List<PositionVelocity> vars) 
+  {
+    int lineIndex = 0;
+    for (String line : BriefIO.readLines(dataFile.get()))
+      if (!line.trim().isEmpty())
+      {
+        PositionVelocity latent = vars.get(lineIndex++);
+        if (!line.trim().toLowerCase().equals("na"))
+        {
+          T loaded = parse(line.trim());
+          context.registerBPSPotential(createLikelihoodPotential(latent, loaded));
+        }
+      }
+    if (lineIndex != vars.size())
+      throw new RuntimeException("Expected exactly " + lineIndex + " non empty lines in " + dataFile.get());
+  }
+
+  private void setupWithGeneratedData(ModelBuildingContext context, List<PositionVelocity> vars)
   {
     Writer writer = results.getAutoClosedBufferedWriter("observations.csv");
     BriefIO.println(writer, "index,observation");
@@ -53,6 +81,15 @@ public abstract class SimpleLikelihood<T> implements Likelihood
     }
   }
   
-  public abstract T sampleDatapoint(double latentVariable, Random random);
+  protected T sampleDatapoint(double latentVariable, Random random)
+  {
+    throw new RuntimeException("Not implemented");
+  }
+  
+  protected T parse(String string)
+  {
+    throw new RuntimeException("Not implemented");
+  }
+  
   public abstract BPSPotential createLikelihoodPotential(PositionVelocity latentVariable, T observation);
 }

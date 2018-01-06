@@ -154,14 +154,20 @@ public class QuasiConvexTimer extends PositionVelocityDependent implements Clock
     }
     else if (optimizer == Optimizer.BRENT)
     {
-      if (lineRestricted.value(1e-8) > lineRestricted.value(0.0) + 1e-14)
+      if (lineRestricted.value(1e-5) > lineRestricted.value(0.0))
         return 0.0;
+      
+      if (lineRestricted.value(FAR_POINT_FOR_LINE_SEARCH_TO_CALL_INF) == lineRestricted.value(0.0))
+        return Double.POSITIVE_INFINITY;
+
+      if (lineRestricted.value(FAR_POINT_FOR_LINE_SEARCH_TO_CALL_INF) > lineRestricted.value(2 * FAR_POINT_FOR_LINE_SEARCH_TO_CALL_INF))
+        return Double.POSITIVE_INFINITY;
       
       double upperBound = findUpperBound1(lineRestricted);
       if (upperBound == Double.POSITIVE_INFINITY)
         return Double.POSITIVE_INFINITY;
       
-      BrentOptimizer optimizer = new BrentOptimizer(1e-10, 1e-10);
+      BrentOptimizer optimizer = new BrentOptimizer(1e-5, 1e-5); // tol = |value| * 1e-5 + 1e-5
       SearchInterval interval = new SearchInterval(0.0, upperBound, 0.0);
       final double result = optimizer.optimize(
           GoalType.MINIMIZE, 
