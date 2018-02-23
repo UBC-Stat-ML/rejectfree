@@ -35,7 +35,7 @@ public class TestNumericalEnergy
       double [] expected = ne.gradient(point);
       double [] actual = test.gradient(point);
       for (int j = 0; j < 2; j++)
-        Assert.assertEquals(expected[j], actual[j], 1e-3);
+        Assert.assertEquals(expected[j], actual[j], 1e-1);
     }
     
   }
